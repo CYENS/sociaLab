@@ -1,6 +1,4 @@
-#!/bin/sh  
-while true  
-do  
-  git pull  
-  sleep 300  
-done
+#!/bin/sh
+
+# 1. Fetch the latest code from remote
+git pull -f origin main
