@@ -8,5 +8,5 @@ def index(request):
 
 
 def autodeploy(request):
-    result = subprocess.run(["sudo","-u","christosmichael","sh", "autodeploy.sh"], stderr=subprocess.PIPE)
+    result = subprocess.run(["sh", "autodeploy.sh"], stderr=subprocess.PIPE)
     return HttpResponse(result.stderr)
