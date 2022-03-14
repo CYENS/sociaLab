@@ -14,6 +14,7 @@ services:
     command: python socialbot/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
+      - .:/root/.ssh:ro
     ports:
       - "443:8000"
     environment:
