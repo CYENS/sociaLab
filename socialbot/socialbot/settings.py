@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ['cognition-srv2.ouc.ac.cy', '127.0.0.1','localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    'wenet_webhooks.apps.WenetWebhooksConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
