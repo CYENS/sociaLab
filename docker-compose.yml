@@ -11,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=postgres
   web:
     build: .
-    command: python socialbot/manage.py runserver_plus 0.0.0.0:8000 -cert cogition-srv2a.key -key cogition-srv2a.key
+    command: python socialbot/manage.py runserver_plus 0.0.0.0:8000 --cert-file cogition-srv2a.key --key-file cogition-srv2a.key
     volumes:
       - .:/code
       - .:/root/.ssh:rw
