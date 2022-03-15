@@ -4,7 +4,7 @@ import subprocess
 
 
 def index(request):
-    return HttpResponse("Hello, world3.2")
+    return HttpResponse("Hello, world3.3")
 
 
 def autodeploy(request):
