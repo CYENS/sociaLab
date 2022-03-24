@@ -14,14 +14,20 @@ class User(models.Model):
     # class Meta:
     #     unique_together = ['id', 'telegram_id']
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'ID: {self.id}, Telegram ID: {self.telegram_id}, Name: {self.name}.'
 
 class Question(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question_text = models.JSONField('question')
 
+    def __str__(self) -> str:
+        return f'{self.question_text} by {self.user}'
+
 class Answer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer_text = models.JSONField('answer')
+
+    def __str__(self) -> str:
+        return f'{self.answer_text} by {self.user} on {self.question}'

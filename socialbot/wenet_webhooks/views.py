@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, JsonResponse
 
-from .models import User
+from .models import User, Question, Answer
 
 WENET_TOKEN_GENERATOR = 'https://wenet.u-hopper.com/dev/api/oauth2/token'
 WENET_AUTHENTICATION_COMPLETE = 'http://wenet.u-hopper.com/dev/hub/frontend/oauth/complete?app_id=mH7Tbcd0W5'
@@ -12,6 +12,11 @@ WENET_SERVICES = 'https://wenet.u-hopper.com/dev/api/service'
 TELEGRAM_URI = 'https://t.me/sociaLabGRCYTRCYBot?start='
 APPLICATION_JSON = 'application/json'
 
+def check_oauth2_tokens(dict: dict):
+    if (dict.keys().__contains__('error')):
+        return HttpResponseBadRequest()
+    return None
+ 
 
 # Create your views here.
 
@@ -37,8 +42,6 @@ def update_user_token(user: User):
 
 @csrf_exempt
 def create_user(request: HttpRequest):
-    # print(request.content_params['code'])
-    print(request.method)
     oauth2_request = requests.post(WENET_TOKEN_GENERATOR, data={
         'grant_type': 'authorization_code',
         'client_id' : 'mH7Tbcd0W5',
@@ -68,7 +71,30 @@ def create_user(request: HttpRequest):
     
     return JsonResponse({'message' : 'user_created'})
 
-def check_oauth2_tokens(dict: dict):
-    if (dict.keys().__contains__('error')):
-        return HttpResponseBadRequest()
-    return None
+@csrf_exempt
+def ask_question(request: HttpRequest):
+    user_id = request.POST['user_id']
+    message = request.POST['question']
+
+    user: User = User.objects.get(telegram_id=user_id)
+
+    question = Question(user=user, question_text={user.language : message})
+
+    question.save()
+
+    return HttpResponse()
+
+@csrf_exempt
+def send_answer(request: HttpRequest):
+    user_id = request.POST['user_id']
+    question_id = request.POST['question_id']
+    message = request.POST['answer']
+
+    user: User = User.objects.get(telegram_id=user_id)
+    question: Question = Question.objects.get(id=question_id)
+
+    answer = Answer(user=user, question=question, answer_text={user.language : message})
+
+    answer.save()
+
+    return HttpResponse()
