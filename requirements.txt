@@ -3,3 +3,4 @@ psycopg2>=2.8
 django-extensions==3.1.2
 Werkzeug==2.0.2
 pyOpenSSL==22.0.0
+requests>=2.27.1

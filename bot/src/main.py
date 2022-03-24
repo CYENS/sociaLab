@@ -1,13 +1,25 @@
 import logging
+import requests
+import webbrowser
+
 from telegram import BotCommand, Message, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
+APP_ID = 'mH7Tbcd0W5'
+
+TESTING_SERVER = 'https://localhost/wenet'
+SOCIALAB_SERVER = 'https://cognition-srv2.ouc.ac.cy/wenet'
+SERVER = TESTING_SERVER
+WENET_WEBSITE = 'https://wenet.u-hopper.com/dev/hub/frontend'
+WENET_AUTHENTICATION = f'https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}'
+
+LOGIN_INFORMATION = "login to your WeNet account and establish a connection with your Telegram account"
 ASK_QUESTION_INFORMATION = "ask the community a question"
 AVAILABLE_QUESTIONS_INFORMATION = "show the available questions by the community to you"
 ANSWER_INFORMATION = r"answer a question \- requires question number and then the answer"
 ASKED_QUESTIONS_INFORMATION = "show all the questions that you asked"
 QUESTION_ANSWERS_INFORMATION = r"get the answers of a question you made \- requires question number"
-HELP_INFORMATION = "provides this help message"
+HELP_INFORMATION = "provides a help message"
 MARK_QUESTION_AS_SOLVED = "marks the question as solved so other won't have to answer it"
 
 logging.basicConfig(
@@ -22,9 +34,23 @@ def start(update: Update, context: CallbackContext):
     Used when the user invites the bot to start chatting.
     """
     user = update.effective_user
+    passed_arguments = context.args
 
-    update.message.reply_text(f"Hi {user.first_name}!")
-
+    if (len(passed_arguments) == 0):
+        update.message.reply_text(f"Hi {user.first_name}!")
+    else:
+        # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
+        request = requests.post(f'{SERVER}/create_user', params={
+            'code' : passed_arguments[0],
+            'user_id' : user.id
+        }, verify=False)
+        # TODO Handle both the 'user_created' and 'code_error' to give user feedback.
+        if (request.status_code == 400):
+            update.message.reply_text('Could not establish a connection.\nPlease try again.')
+        else:
+            update.message.reply_text('Connection created!')
+        update.message.delete()
+        
 def help(update: Update, context: CallbackContext):
     """
     Can be used by the user to print (text) them the available actions.
@@ -33,6 +59,7 @@ def help(update: Update, context: CallbackContext):
 
     update.message.reply_markdown_v2(rf"Hi {user.first_name}\!""\nThese are the "
     r"available commands\:""\n"
+    rf"/login \- {LOGIN_INFORMATION}""\n"
     # r"/start Used when a user logins in for the first time\.""\n"
     rf"/askquestion \- {ASK_QUESTION_INFORMATION} E\.g\.\:""\n"
     "\t\t"r" _/askquestion Are there any good restaurants in Kyreneia\?_""\n"
@@ -141,11 +168,23 @@ def mark_as_solved(update: Update, context: CallbackContext):
     if (message is not None):
         # TODO The following line shoule be removed and replaced with the implementation
         message.reply_text("Not implemented yet.")
+        
+def create_account(update: Update, context: CallbackContext):
+    message = update.message
+    if (message is not None):
+        # TODO Show the user a link where the can create a profile
+        message.reply_text("Not implemented yet.")
+
+def login(update: Update, context: CallbackContext):
+    message = update.message
+    if (message is not None):
+        webbrowser.open('https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id=mH7Tbcd0W5')
 
 def main() -> None:
     bot = Bot('5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw')
     bot.set_my_commands(commands=[
         BotCommand('help', HELP_INFORMATION),
+        BotCommand('login', LOGIN_INFORMATION),
         BotCommand('askquestion', ASK_QUESTION_INFORMATION),
         BotCommand('availablequestions', AVAILABLE_QUESTIONS_INFORMATION),
         BotCommand('answer', ANSWER_INFORMATION),
@@ -164,6 +203,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler('askedquestions', asked_questions))
     dispatcher.add_handler(CommandHandler('questionanswers', question_answers))
     dispatcher.add_handler(CommandHandler('markassolved', mark_as_solved))
+    dispatcher.add_handler(CommandHandler('login', login))
 
     updater.start_polling()
     updater.idle()
