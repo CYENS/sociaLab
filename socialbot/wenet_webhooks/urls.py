@@ -10,4 +10,5 @@ urlpatterns = [
     path('ask_question', views.ask_question, name='ask_question'),
     path('send_answer', views.send_answer, name='send_answer'),
     path('asked_questions', views.asked_questions, name='asked_questions'),
+    path('mark_as_solved', views.mark_as_solved, name='mark_as_solved'),
 ]

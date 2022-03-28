@@ -40,11 +40,10 @@ def start(update: Update, context: CallbackContext):
         update.message.reply_text(f"Hi {user.first_name}!")
     else:
         # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
-        request = requests.post(f'{SERVER}/create_user', params={
+        request = requests.post(f'{SERVER}/create_user', data={
             'code' : passed_arguments[0],
             'user_id' : user.id,
         }, verify=False)
-        # TODO Handle both the 'user_created' and 'code_error' to give user feedback.
         if (request.status_code == 400):
             update.message.reply_text('Could not establish a connection.\nPlease try again.')
         else:
@@ -80,30 +79,14 @@ def askquestion(update: Update, context: CallbackContext):
     """
     message = update.message
     if (message != None):
-        # TODO The following two lines will have to be removed and replaced with the code bellow,
-        # or new code
-        # message.reply_text("Not implemented yet.")
-        # return
         user = update.effective_user
         passed_arguments = context.args
         PASSED_ARGUMENTS_LENGTH = len(passed_arguments)
-        # print(PASSED_ARGUMENTS_LENGTH, passed_arguments)
-        # arguments = message.text.replace('/askquestion', '')
-        # FIRST_QUOTATION_MARK = arguments.find('"')
-        # LAST_QUOTATION_MARK = arguments.find('"', 2)
-        # print(arguments, FIRST_QUOTATION_MARK,LAST_QUOTATION_MARK)
-        # for argument in arguments:
-        #     print(passed_arguments[0])
-        #     passed_arguments.remove(argument)
-        # print(passed_arguments)
 
         if (PASSED_ARGUMENTS_LENGTH == 0):
             message.reply_text("Remember, you need to write the question you are looking for an "
             "answer!")
-        # elif (PASSED_ARGUMENTS_LENGTH > 1):
-        #     message.reply_text("Too many arguments.")
         else:
-            # message.reply_text(f"Your question: {' '.join(passed_arguments)}")
             request = requests.post(f'{SERVER}/ask_question', data={
                 'user_id' : user.id,
                 'question' : ' '.join(passed_arguments),
@@ -114,7 +97,7 @@ def askquestion(update: Update, context: CallbackContext):
 
 def available_questions(update: Update, context: CallbackContext):
     """
-    Texts the user with the available (unanswered) questions that they have according to the WeNet 
+    Texts the user with the available (unsolved) questions that they have according to the WeNet 
     platform.
     """
     message = update.message
@@ -128,26 +111,15 @@ def answer(update: Update, context: CallbackContext):
     """
     message = update.message
     if (message is not None):
-    # else:
-    #     message = update.edited_message
-
-        # TODO The following two lines will have to be removed and replaced with the code bellow,
-        # or new code
-        # message.reply_text("Not implemented yet.")
-        # return
 
         user = update.effective_user
         passed_arguments = context.args
         PASSED_ARGUMENTS_LENGTH = len(passed_arguments)
         
         if (PASSED_ARGUMENTS_LENGTH == 0):
-            # message.reply_text(f"You need to give the number of the question you would like to answer!")
             message.reply_text("You need to give the question id followed by the answer.")
-        # elif (PASSED_ARGUMENTS_LENGTH > 2):
-        #     message.reply_text(f"You gave me more that two arguments!")
         elif (not passed_arguments[0].isdigit()):
             message.reply_text("You need to give the number of the question first.")
-            # message.reply_text(f"I can only understand numbers!")
         else:
             request = requests.post(f'{SERVER}/send_answer', data={
                 'user_id' : user.id,
@@ -157,9 +129,6 @@ def answer(update: Update, context: CallbackContext):
 
             if (request.status_code == 200):
                 message.reply_text("Answer was submitted successfully!")
-            # passed_argument = int(passed_arguments[0])
-            # message.reply_text(f"Argument passed: {passed_argument}")
-
 
 def asked_questions(update: Update, context: CallbackContext):
     """
@@ -172,7 +141,6 @@ def asked_questions(update: Update, context: CallbackContext):
             'user_id' : user.id
         }, verify=False)
         questions: list = request.json()['questions']
-        # TODO The following line shoule be removed and replaced with the implementation
         result = "ID - Question\n"
         
         for question in questions:
@@ -195,8 +163,24 @@ def mark_as_solved(update: Update, context: CallbackContext):
     """
     message = update.message
     if (message is not None):
-        # TODO The following line shoule be removed and replaced with the implementation
-        message.reply_text("Not implemented yet.")
+        user = update.effective_user
+        passed_arguments = context.args
+        PASSED_ARGUMENTS_LENGTH = len(passed_arguments)
+
+        if (PASSED_ARGUMENTS_LENGTH == 0):
+            message.reply_text("You need to give me the question id too!")
+        elif (not passed_arguments[0].isdigit()):
+            message.reply_text("You need to give the if od the question!")
+        else:
+            request = requests.post(f'{SERVER}/mark_as_solved', data={'user_id' : user.id,
+            'question_id' : passed_arguments[0]}, verify=False)
+
+            if (request.status_code == 404):
+                message.reply_text("I can only mark questions as sovled if they exist!")
+            elif (request.status_code == 403):
+                message.reply_text("Unfortunately I cannot mark that question as solved as it is not yours...")
+            else:
+                message.reply_text(f"Question {passed_arguments[0]} was successfully marked a solved!")
         
 def create_account(update: Update, context: CallbackContext):
     message = update.message

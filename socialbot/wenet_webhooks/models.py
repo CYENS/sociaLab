@@ -20,9 +20,10 @@ class User(models.Model):
 class Question(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question_text = models.JSONField('question')
+    solved = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return f'{self.question_text} by {self.user}'
+        return f'{self.question_text}, was solved: {self.solved}, by {self.user}'
 
 class Answer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

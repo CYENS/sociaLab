@@ -2,7 +2,7 @@ import requests
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, get_object_or_404
-from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
+from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 
 from .models import User, Question, Answer
 
@@ -46,7 +46,7 @@ def create_user(request: HttpRequest):
         'grant_type': 'authorization_code',
         'client_id' : 'mH7Tbcd0W5',
         'client_secret' : 'RkBcc8L7iRoj9iSTAQKj',
-        'code' : request.GET['code']
+        'code' : request.POST['code']
         })
     user_tokens = oauth2_request.json()
     check_result = check_oauth2_tokens(user_tokens)
@@ -63,7 +63,7 @@ def create_user(request: HttpRequest):
     user_details_request = requests.get(f'{WENET_SERVICES}/user/profile/{user_profile_id}', headers=HEADERS)
     user_details = user_details_request.json()
     user_name = user_details['name']
-    u = User(id = user_details['id'], telegram_id=request.GET['user_id'],
+    u = User(id = user_details['id'], telegram_id=request.POST['user_id'],
         name= f"{user_name['first']} {user_name['last']}", language=user_details['locale'],
         access_token=user_access_token, refresh_token=user_refresh_token)
     u.save()
@@ -109,4 +109,19 @@ def asked_questions(request: HttpRequest):
     for question in questions:
         result.append(f"{question.id} - {question.question_text[user.language]}")
 
-    return JsonResponse({'questions' : result})    
+    return JsonResponse({'questions' : result})
+
+@csrf_exempt
+def mark_as_solved(request: HttpRequest):
+    user: User = User.objects.get(telegram_id=request.POST['user_id'])
+    try:
+        question: Question = Question.objects.get(id=request.POST['question_id'])
+    except Question.DoesNotExist:
+        return HttpResponseNotFound()
+
+    if (question.user == user):
+        question.answered = True
+        question.save()
+        return HttpResponse()
+    else:
+        return HttpResponseNotAllowed()
