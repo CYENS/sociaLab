@@ -144,7 +144,7 @@ def asked_questions(update: Update, context: CallbackContext):
         result = "ID - Question\n"
         
         for question in questions:
-            result += f"{question}\n"
+            result += f"{question['id']} - {question['text']}\n"
         
         message.reply_text(result)
 
@@ -154,8 +154,27 @@ def question_answers(update: Update, context: CallbackContext):
     """
     message = update.message
     if (message is not None):
-        # TODO The following line shoule be removed and replaced with the implementation
-        message.reply_text("Not implemented yet.")
+        user = update.effective_user
+        passed_arguments = context.args
+        PASSED_ARGUMENTS_LENGTH = len(passed_arguments)
+
+        if (PASSED_ARGUMENTS_LENGTH == 0):
+            message.reply_text("You need to give the question id followed by the answer.")
+        elif (not passed_arguments[0].isdigit()):
+            message.reply_text("What you provided is not a number.")
+        else:
+            request = requests.get(f'{SERVER}/question_answers', params={
+                'user_id' : user.id,
+                'question_id' : passed_arguments[0]
+            }, verify=False)
+            
+            answers: list = request.json()['answers']
+            result = "ID - Answer\n"
+
+            for answer in answers:
+                result += f"{answer['id']} - {answer['text']}\n"
+
+            message.reply_text(result)
 
 def mark_as_solved(update: Update, context: CallbackContext):
     """

@@ -12,11 +12,21 @@ WENET_SERVICES = 'https://wenet.u-hopper.com/dev/api/service'
 TELEGRAM_URI = 'https://t.me/sociaLabGRCYTRCYBot?start='
 APPLICATION_JSON = 'application/json'
 
-def check_oauth2_tokens(dict: dict):
+def _check_oauth2_tokens(dict: dict):
     if (dict.keys().__contains__('error')):
         return HttpResponseBadRequest()
     return None
- 
+
+def _question_checks(user: User, question_id_field):
+    try:
+        question: Question = Question.objects.get(id=question_id_field)
+    except Question.DoesNotExist:
+        return HttpResponseNotFound()
+
+    if (question.user == user):
+        return question
+    else:
+        return HttpResponseNotAllowed()
 
 # Create your views here.
 
@@ -49,7 +59,7 @@ def create_user(request: HttpRequest):
         'code' : request.POST['code']
         })
     user_tokens = oauth2_request.json()
-    check_result = check_oauth2_tokens(user_tokens)
+    check_result = _check_oauth2_tokens(user_tokens)
     if (check_result is not None):
         return check_result
 
@@ -107,21 +117,34 @@ def asked_questions(request: HttpRequest):
     result = []
 
     for question in questions:
-        result.append(f"{question.id} - {question.question_text[user.language]}")
+        result.append({
+            'id' : question.id,
+            'text' : question.question_text[user.language]})
 
     return JsonResponse({'questions' : result})
 
 @csrf_exempt
 def mark_as_solved(request: HttpRequest):
     user: User = User.objects.get(telegram_id=request.POST['user_id'])
-    try:
-        question: Question = Question.objects.get(id=request.POST['question_id'])
-    except Question.DoesNotExist:
-        return HttpResponseNotFound()
+    result = _question_checks(user, request.POST['question_id'])
 
-    if (question.user == user):
-        question.answered = True
-        question.save()
+    if (isinstance(result, Question)):
+        result.save()
         return HttpResponse()
     else:
-        return HttpResponseNotAllowed()
+        return result
+
+def question_answers(request: HttpRequest):
+    user: User = User.objects.get(telegram_id=request.GET['user_id'])
+    result = _question_checks(user, request.GET['question_id'])
+
+    if (isinstance(result, Question)):
+        answers = result.answer_set.all()
+        result = []
+        for answer in answers:
+            result.append({
+                'id' : answer.id,
+                'text' : answer.answer_text[user.language]})
+        return JsonResponse({'answers' : result})
+    else:
+        return result
