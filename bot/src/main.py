@@ -2,7 +2,7 @@ import logging
 import requests
 import webbrowser
 
-from telegram import BotCommand, Message, Update, Bot
+from telegram import BotCommand, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
 APP_ID = 'mH7Tbcd0W5'
@@ -201,12 +201,6 @@ def mark_as_solved(update: Update, context: CallbackContext):
             else:
                 message.reply_text(f"Question {passed_arguments[0]} was successfully marked a solved!")
         
-def create_account(update: Update, context: CallbackContext):
-    message = update.message
-    if (message is not None):
-        # TODO Show the user a link where the can create a profile
-        message.reply_text("Not implemented yet.")
-
 def login(update: Update, context: CallbackContext):
     message = update.message
     if (message is not None):
