@@ -1,8 +1,8 @@
 import requests
 
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import redirect
-from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, JsonResponse
+from django.shortcuts import redirect, get_object_or_404
+from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
 
 from .models import User, Question, Answer
 
@@ -98,3 +98,15 @@ def send_answer(request: HttpRequest):
     answer.save()
 
     return HttpResponse()
+
+def asked_questions(request: HttpRequest):
+    user_id = request.GET['user_id']
+    user: User = User.objects.get(telegram_id=user_id)
+    questions = Question.objects.filter(user=user)
+    
+    result = []
+
+    for question in questions:
+        result.append(f"{question.id} - {question.question_text[user.language]}")
+
+    return JsonResponse({'questions' : result})    

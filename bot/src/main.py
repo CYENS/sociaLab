@@ -167,8 +167,18 @@ def asked_questions(update: Update, context: CallbackContext):
     """
     message = update.message
     if (message is not None):
+        user = update.effective_user
+        request = requests.get(f'{SERVER}/asked_questions', params={
+            'user_id' : user.id
+        }, verify=False)
+        questions: list = request.json()['questions']
         # TODO The following line shoule be removed and replaced with the implementation
-        message.reply_text("Not implemented yet.")
+        result = "ID - Question\n"
+        
+        for question in questions:
+            result += f"{question}\n"
+        
+        message.reply_text(result)
 
 def question_answers(update: Update, context: CallbackContext):
     """
