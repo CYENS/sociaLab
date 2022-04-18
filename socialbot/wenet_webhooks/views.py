@@ -12,6 +12,7 @@ WENET_SERVICES = 'https://wenet.u-hopper.com/dev/api/service'
 TELEGRAM_URI = 'https://t.me/sociaLabGRCYTRCYBot?start='
 APPLICATION_JSON = 'application/json'
 
+@csrf_exempt
 def messages_callback_from_wenet(request: HttpRequest):
     if request.method == 'POST':
         print(request.POST)
