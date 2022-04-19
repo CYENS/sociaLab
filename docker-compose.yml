@@ -31,5 +31,6 @@ services:
       - APP_ID=sa0RgS4xDL
       - WENET_AUTHENTICATION=https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={sa0RgS4xDL}
       - WENET_TOKEN_GENERATOR=https://wenet.u-hopper.com/dev/api/oauth2/token
+      - WENET_WEBSITE=https://wenet.u-hopper.com/dev/hub/frontend
     depends_on:
       - web
