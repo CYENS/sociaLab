@@ -1,13 +1,16 @@
 import requests
 
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import redirect, get_object_or_404
-from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
+from django.shortcuts import redirect
+from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 
 from .models import User, Question, Answer
 
+APP_ID = 'mH7Tbcd0W5'
+APP_SECRET = 'RkBcc8L7iRoj9iSTAQKj'
+TASK_TYPE_ID = '625036454ff70359a68b8db8'
 WENET_TOKEN_GENERATOR = 'https://wenet.u-hopper.com/dev/api/oauth2/token'
-WENET_AUTHENTICATION_COMPLETE = 'http://wenet.u-hopper.com/dev/hub/frontend/oauth/complete?app_id=mH7Tbcd0W5'
+WENET_AUTHENTICATION_COMPLETE = f'http://wenet.u-hopper.com/dev/hub/frontend/oauth/complete?CLIENT_ID={APP_ID}'
 WENET_SERVICES = 'https://wenet.u-hopper.com/dev/api/service'
 TELEGRAM_URI = 'https://t.me/sociaLabGRCYTRCYBot?start='
 APPLICATION_JSON = 'application/json'
@@ -28,6 +31,27 @@ def _question_checks(user: User, question_id_field):
     else:
         return HttpResponseNotAllowed()
 
+def _update_user_token(user: User):
+    """
+    
+    Used to create a new access refresh token pair for the user to keep using the app."""
+    oauth2_request = requests.post(WENET_TOKEN_GENERATOR, data={
+        'grant_type' : 'refresh_token',
+        'client_id' : APP_ID,
+        'client_secret' : APP_SECRET,
+        'code' : user.refresh_token
+    }).json()
+    user.access_token = oauth2_request['access_token']
+    user.refresh_token = oauth2_request['refresh_token']
+    user.save()
+
+# def _translate(user: User, message: str):
+#     json = {
+#         user.language : message,
+#         'en' : english_translation,
+#         transtated_language : other_language_translation,
+#     }
+
 # Create your views here.
 
 def index(request: HttpRequest):
@@ -36,28 +60,14 @@ def index(request: HttpRequest):
 def authorise_user(request: HttpRequest):
     return redirect(f"{TELEGRAM_URI}{request.GET['code']}")
 
-def update_user_token(user: User):
-    """
-    
-    Used to create a new access refresh token pair for the user to keep using the app."""
-    oauth2_request = requests.post(WENET_TOKEN_GENERATOR, data={
-        'grant_type' : 'refresh_token',
-        'client_id' : 'mH7Tbcd0W5',
-        'client_secret' : 'RkBcc8L7iRoj9iSTAQKj',
-        'code' : user.refresh_token
-    }).json()
-    user.access_token = oauth2_request['access_token']
-    user.refresh_token = oauth2_request['refresh_token']
-    user.save()
-
 @csrf_exempt
 def create_user(request: HttpRequest):
     oauth2_request = requests.post(WENET_TOKEN_GENERATOR, data={
         'grant_type': 'authorization_code',
-        'client_id' : 'mH7Tbcd0W5',
-        'client_secret' : 'RkBcc8L7iRoj9iSTAQKj',
+        'client_id' : APP_ID,
+        'client_secret' : APP_SECRET,
         'code' : request.POST['code']
-        })
+    })
     user_tokens = oauth2_request.json()
     check_result = _check_oauth2_tokens(user_tokens)
     if (check_result is not None):
@@ -67,7 +77,7 @@ def create_user(request: HttpRequest):
     user_refresh_token = user_tokens['refresh_token']
     HEADERS = {
         'Authorization' : user_access_token,
-        'Accept' : 'application/json'
+        'Accept' : APPLICATION_JSON
     }
     user_profile_id = requests.get(f'{WENET_SERVICES}/token', headers=HEADERS).json()['profileId']
     user_details_request = requests.get(f'{WENET_SERVICES}/user/profile/{user_profile_id}', headers=HEADERS)
@@ -77,7 +87,6 @@ def create_user(request: HttpRequest):
         name= f"{user_name['first']} {user_name['last']}", language=user_details['locale'],
         access_token=user_access_token, refresh_token=user_refresh_token)
     u.save()
-
     
     return JsonResponse({'message' : 'user_created'})
 
@@ -93,6 +102,22 @@ def ask_question(request: HttpRequest):
     question.save()
 
     return HttpResponse()
+
+def create_wenet_question(user: User, question: Question):
+    HEADERS = {
+        'Authorization': user.access_token,
+        'Accept': APPLICATION_JSON
+    }
+    DATA = {
+        'appId': APP_ID,
+        'requesterId': user.id,
+        'goal': {
+            'name': question.question_text
+        },
+        'taskTypeId': TASK_TYPE_ID
+    }
+    wenet_question_id = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA).json().get('id')
+    return wenet_question_id
 
 @csrf_exempt
 def send_answer(request: HttpRequest):
@@ -119,7 +144,8 @@ def asked_questions(request: HttpRequest):
     for question in questions:
         result.append({
             'id' : question.id,
-            'text' : question.question_text[user.language]})
+            'text' : question.question_text[user.language]
+        })
 
     return JsonResponse({'questions' : result})
 
@@ -144,7 +170,8 @@ def question_answers(request: HttpRequest):
         for answer in answers:
             result.append({
                 'id' : answer.id,
-                'text' : answer.answer_text[user.language]})
+                'text' : answer.answer_text[user.language]
+            })
         return JsonResponse({'answers' : result})
     else:
         return result
