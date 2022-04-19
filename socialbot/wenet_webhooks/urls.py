@@ -12,4 +12,6 @@ urlpatterns = [
     path('asked_questions', views.asked_questions, name='asked_questions'),
     path('mark_as_solved', views.mark_as_solved, name='mark_as_solved'),
     path('question_answers', views.question_answers, name='question_answers'),
+    path('messages_callback_from_wenet', views.messages_callback_from_wenet, name='messages_callback_from_wenet'),
+
 ]
