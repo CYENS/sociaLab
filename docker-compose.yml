@@ -25,7 +25,7 @@ services:
       - db
   bot:
     build: .
-    command: python bot/source/main.py
+    command: python bot/src/main.py
     environment:
       - SERVER = 'https://web:443/wenet'
       - APP_ID = 'sa0RgS4xDL'
