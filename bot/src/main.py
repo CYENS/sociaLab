@@ -1,17 +1,15 @@
 import logging
 import requests
 import webbrowser
+import os
 
 from telegram import BotCommand, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
-APP_ID = 'mH7Tbcd0W5'
-
-TESTING_SERVER = 'https://localhost/wenet'
-SOCIALAB_SERVER = 'https://cognition-srv2.ouc.ac.cy/wenet'
-SERVER = TESTING_SERVER
-WENET_WEBSITE = 'https://wenet.u-hopper.com/dev/hub/frontend'
-WENET_AUTHENTICATION = f'https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}'
+APP_ID = os.environ['APP_ID']
+SERVER = os.environ['SERVER']
+WENET_WEBSITE = os.environ['WENET_WEBSITE']
+WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
 
 LOGIN_INFORMATION = "login to your WeNet account and establish a connection with your Telegram account"
 ASK_QUESTION_INFORMATION = "ask the community a question"

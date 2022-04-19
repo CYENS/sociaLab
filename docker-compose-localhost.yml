@@ -27,9 +27,9 @@ services:
     build: .
     command: python bot/source/main.py
     environment:
-      - SERVER = 'https://web:443/wenet'
-      - APP_ID = 'sa0RgS4xDL'
-      - WENET_AUTHENTICATION = 'https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={sa0RgS4xDL}'
+      - SERVER = 'https://localhost/wenet'
+      - APP_ID = 'mH7Tbcd0W5'
+      - WENET_AUTHENTICATION = 'https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={mH7Tbcd0W5}'
       - WENET_TOKEN_GENERATOR = 'https://wenet.u-hopper.com/dev/api/oauth2/token'
     depends_on:
       - web
