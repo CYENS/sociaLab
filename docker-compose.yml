@@ -27,6 +27,7 @@ services:
       - WENET_AUTHENTICATION_COMPLETE=https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={sa0RgS4xDL}
       - WENET_TOKEN_GENERATOR=https://wenet.u-hopper.com/dev/api/oauth2/token
       - WENET_WEBSITE=https://wenet.u-hopper.com/dev/hub/frontend
+      - WENET_SERVICES=https://wenet.u-hopper.com/dev/api/service'
       - TELEGRAM_URI=https://t.me/sociaLabGRCYTRCYBot?start=
     depends_on:
       - db
