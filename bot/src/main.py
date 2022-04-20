@@ -7,7 +7,7 @@ from telegram import BotCommand, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
 APP_ID = os.environ['APP_ID']
-SERVER = os.environ['SERVER']
+SERVER = f"{os.environ['SERVER']}/wenet"
 WENET_WEBSITE = os.environ['WENET_WEBSITE']
 WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
 

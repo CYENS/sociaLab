@@ -21,7 +21,6 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - SERVER=https://web:443/wenet
       - APP_ID=sa0RgS4xDL
       - APP_SECRET=0F5yOXGyDodqP9f1Cznr
       - WENET_AUTHENTICATION_COMPLETE=https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id=sa0RgS4xDL
@@ -35,7 +34,7 @@ services:
     build: .
     command: python bot/src/main.py
     environment:
-      - SERVER=https://web:443/wenet
+      - SERVER=web
       - APP_ID=sa0RgS4xDL
       - WENET_AUTHENTICATION=https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id=sa0RgS4xDL
       - WENET_TOKEN_GENERATOR=https://wenet.u-hopper.com/dev/api/oauth2/token
