@@ -21,6 +21,13 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - SERVER=https://web:443/wenet
+      - APP_ID=sa0RgS4xDL
+      - APP_SECRET=RkBcc8L7iRoj9iSTAQKj
+      - WENET_AUTHENTICATION_COMPLETE=https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={sa0RgS4xDL}
+      - WENET_TOKEN_GENERATOR=https://wenet.u-hopper.com/dev/api/oauth2/token
+      - WENET_WEBSITE=https://wenet.u-hopper.com/dev/hub/frontend
+      - TELEGRAM_URI=https://t.me/sociaLabGRCYTRCYBot?start=
     depends_on:
       - db
   bot:

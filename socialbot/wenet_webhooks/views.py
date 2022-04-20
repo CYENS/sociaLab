@@ -1,18 +1,18 @@
 import requests
-
+import os
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 
 from .models import User, Question, Answer
 
-APP_ID = 'mH7Tbcd0W5'
-APP_SECRET = 'RkBcc8L7iRoj9iSTAQKj'
+APP_ID = os.environ['APP_ID']
+APP_SECRET = os.environ['APP_SECRET']
 TASK_TYPE_ID = '625036454ff70359a68b8db8'
-WENET_TOKEN_GENERATOR = 'https://wenet.u-hopper.com/dev/api/oauth2/token'
-WENET_AUTHENTICATION_COMPLETE = f'http://wenet.u-hopper.com/dev/hub/frontend/oauth/complete?CLIENT_ID={APP_ID}'
-WENET_SERVICES = 'https://wenet.u-hopper.com/dev/api/service'
-TELEGRAM_URI = 'https://t.me/sociaLabGRCYTRCYBot?start='
+WENET_TOKEN_GENERATOR = os.environ['WENET_TOKEN_GENERATOR']
+WENET_AUTHENTICATION_COMPLETE = os.environ['WENET_AUTHENTICATION_COMPLETE']
+WENET_SERVICES = os.environ['WENET_SERVICES']
+TELEGRAM_URI = os.environ['TELEGRAM_URI']
 APPLICATION_JSON = 'application/json'
 
 @csrf_exempt
