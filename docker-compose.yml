@@ -34,7 +34,7 @@ services:
     build: .
     command: python bot/src/main.py
     environment:
-      - SERVER=web
+      - SERVER=https://cognition-srv2.ouc.ac.cy:443/wenet
       - APP_ID=sa0RgS4xDL
       - WENET_AUTHENTICATION=https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id=sa0RgS4xDL
       - WENET_TOKEN_GENERATOR=https://wenet.u-hopper.com/dev/api/oauth2/token
