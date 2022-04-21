@@ -35,7 +35,7 @@ def start(update: Update, context: CallbackContext):
     passed_arguments = context.args
 
     if (len(passed_arguments) == 0):
-        update.message.reply_text(f"Hi {user.first_name}!")
+        update.message.reply_text(f"Hi {user.first_name}! welcome to Socialab")
     else:
         # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
         request = requests.post(f'{SERVER}/create_user', data={
@@ -202,7 +202,9 @@ def mark_as_solved(update: Update, context: CallbackContext):
 def login(update: Update, context: CallbackContext):
     message = update.message
     if (message is not None):
-        webbrowser.open('https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id=mH7Tbcd0W5')
+        update.message.reply_html(
+            f'<a href="http://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}">Login to Wenet</a>')
+        #webbrowser.open(f'https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}')
 
 def main() -> None:
     bot = Bot('5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw')
