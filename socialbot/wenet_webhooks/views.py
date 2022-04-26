@@ -1,5 +1,6 @@
 import requests
 import os
+import time
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
@@ -124,6 +125,25 @@ def create_wenet_question(user: User, question: Question):
     }
     wenet_question_id = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA).json().get('id')
     return wenet_question_id
+
+def create_wenet_answer(user: User, question: Question):
+    HEADERS = {
+        'Authorization': user.access_token,
+        'Accept': 'application/json'
+    }
+    DATA = {
+        'taskId': '62540bf64ff70359a68b8dbc', #add the question task id to the question model
+        'label': 'AnswerQuestion',
+        'attributes': {
+            'message': question.question_text
+        },
+        'actioneerId': str(user.id),
+        "_creationTs": int(time.time()*1000.0),
+        "_lastUpdateTs": int(time.time()*1000.0),
+
+    }
+    responce = requests.post(f'{WENET_SERVICES}/task/transaction', headers=HEADERS, json=DATA).status_code
+    return responce
 
 @csrf_exempt
 def send_answer(request: HttpRequest):

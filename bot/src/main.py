@@ -2,7 +2,6 @@ import logging
 import requests
 import webbrowser
 import os
-
 from telegram import BotCommand, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
