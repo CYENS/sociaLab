@@ -10,7 +10,7 @@ from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpR
 
 from .models import User, Question, Answer
 
-BOT_TOKEN = '5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw'
+BOT_TOKEN = os.environ['BOT_TOKEN']
 
 APP_ID = os.environ['APP_ID']
 APP_SECRET = os.environ['APP_SECRET']

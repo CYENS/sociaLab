@@ -28,6 +28,7 @@ services:
       - WENET_WEBSITE=https://wenet.u-hopper.com/dev/hub/frontend
       - WENET_SERVICES=https://wenet.u-hopper.com/dev/api/service
       - TELEGRAM_URI=https://t.me/sociaLabGRCYTRCYBot?start=
+      - BOT_TOKEN=5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw
     depends_on:
       - db
   bot:
@@ -39,5 +40,6 @@ services:
       - WENET_AUTHENTICATION=https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id=sa0RgS4xDL
       - WENET_TOKEN_GENERATOR=https://wenet.u-hopper.com/dev/api/oauth2/token
       - WENET_WEBSITE=https://wenet.u-hopper.com/dev/hub/frontend
+      - BOT_TOKEN=5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw
     depends_on:
       - web

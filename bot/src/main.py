@@ -2,8 +2,11 @@ import logging
 import requests
 import webbrowser
 import os
+
 from telegram import BotCommand, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext
+
+BOT_TOKEN = os.environ['BOT_TOKEN']
 
 APP_ID = os.environ['APP_ID']
 SERVER = os.environ['SERVER']
@@ -34,7 +37,7 @@ def start(update: Update, context: CallbackContext):
     passed_arguments = context.args
 
     if (len(passed_arguments) == 0):
-        update.message.reply_text(f"Hi {user.first_name}! welcome to Socialab")
+        update.message.reply_text(f"Hi {user.first_name}! Welcome to Socialab")
     else:
         # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
         request = requests.post(f'{SERVER}/create_user', data={
@@ -206,7 +209,7 @@ def login(update: Update, context: CallbackContext):
         #webbrowser.open(f'https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}')
 
 def main() -> None:
-    bot = Bot('5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw')
+    bot = Bot(BOT_TOKEN)
     bot.set_my_commands(commands=[
         BotCommand('help', HELP_INFORMATION),
         BotCommand('login', LOGIN_INFORMATION),
@@ -216,7 +219,7 @@ def main() -> None:
         BotCommand('askedquestions', ASKED_QUESTIONS_INFORMATION),
         BotCommand('questionanswers', QUESTION_ANSWERS_INFORMATION),
         BotCommand('markassolved', MARK_QUESTION_AS_SOLVED)])
-    updater = Updater('5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw')
+    updater = Updater(BOT_TOKEN)
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler('start', start))
