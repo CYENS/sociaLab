@@ -24,7 +24,7 @@ APPLICATION_JSON = 'application/json'
 @csrf_exempt
 def messages_callback_from_wenet(request: HttpRequest):
     if request.method == 'POST':
-        print(request.POST)
+        print(request.body)
     return HttpResponse()
 
 def _check_oauth2_tokens(dict: dict):
