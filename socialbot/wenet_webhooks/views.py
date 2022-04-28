@@ -1,11 +1,16 @@
 import requests
 import os
 import time
+
+from telegram import Bot, Update
+
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 
 from .models import User, Question, Answer
+
+BOT_TOKEN = '5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw'
 
 APP_ID = os.environ['APP_ID']
 APP_SECRET = os.environ['APP_SECRET']
@@ -110,6 +115,11 @@ def ask_question(request: HttpRequest):
 
     return HttpResponse()
 
+def test(request: HttpRequest):
+    bot = Bot(BOT_TOKEN)
+    bot.send_message(chat_id=5096066075, text= 'Test')
+    return HttpResponse()
+
 def create_wenet_question(user: User, question: Question):
     HEADERS = {
         'Authorization': user.access_token,
@@ -123,7 +133,15 @@ def create_wenet_question(user: User, question: Question):
         },
         'taskTypeId': TASK_TYPE_ID
     }
-    wenet_question_id = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA).json().get('id')
+    
+    request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
+
+    if (request.status_code != 200):
+        _update_user_token(user)
+        HEADERS['Authorization'] = user.access_token
+        request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
+
+    wenet_question_id = request.json().get('id')
     return wenet_question_id
 
 def create_wenet_answer(user: User, question: Question):
