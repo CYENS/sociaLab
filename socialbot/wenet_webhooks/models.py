@@ -20,6 +20,7 @@ class User(models.Model):
 class Question(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question_text = models.JSONField('question')
+    task_id = models.CharField(max_length=128, default="", unique=True)
     solved = models.BooleanField(default=False)
 
     def __str__(self) -> str:

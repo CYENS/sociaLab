@@ -25,7 +25,7 @@ APPLICATION_JSON = 'application/json'
 def messages_callback_from_wenet(request: HttpRequest):
     if request.method == 'POST':
         print(request.POST.get('attributes').get('message'))
-    return HttpResponse("")
+    return HttpResponse()
 
 def _check_oauth2_tokens(dict: dict):
     if (dict.keys().__contains__('error')):
@@ -51,8 +51,9 @@ def _update_user_token(user: User):
         'grant_type' : 'refresh_token',
         'client_id' : APP_ID,
         'client_secret' : APP_SECRET,
-        'code' : user.refresh_token
+        'refresh_token' : user.refresh_token
     }).json()
+
     user.access_token = oauth2_request['access_token']
     user.refresh_token = oauth2_request['refresh_token']
     user.save()
@@ -109,59 +110,38 @@ def ask_question(request: HttpRequest):
 
     user: User = User.objects.get(telegram_id=user_id)
 
-    question = Question(user=user, question_text={user.language : message})
+    # TODO Need to translate the answer and reformat the question_test in a way that it can support
+    # all three languages, or at least the user's language and english.
+    question = Question(user=user, question_text={'en' : message})
+
+    question.task_id=create_wenet_question(question)
 
     question.save()
 
     return HttpResponse()
 
-def test(request: HttpRequest):
-    bot = Bot(BOT_TOKEN)
-    bot.send_message(chat_id=5096066075, text= 'Test')
-    return HttpResponse()
-
-def create_wenet_question(user: User, question: Question):
+def create_wenet_question(question: Question):
     HEADERS = {
-        'Authorization': user.access_token,
-        'Accept': APPLICATION_JSON
+        'Authorization' : question.user.access_token,
+        'Accept' : APPLICATION_JSON
     }
     DATA = {
-        'appId': APP_ID,
-        'requesterId': user.id,
-        'goal': {
-            'name': question.question_text
+        'appId' : APP_ID,
+        'requesterId' : str(question.user.id),
+        'goal' : {
+            'name' : question.question_text['en']
         },
-        'taskTypeId': TASK_TYPE_ID
+        'taskTypeId' : TASK_TYPE_ID
     }
     
     request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
 
-    if (request.status_code != 200):
-        _update_user_token(user)
-        HEADERS['Authorization'] = user.access_token
+    if (request.status_code != 201):
+        _update_user_token(question.user)
+        HEADERS['Authorization'] = question.user.access_token
         request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
 
-    wenet_question_id = request.json().get('id')
-    return wenet_question_id
-
-def create_wenet_answer(user: User, question: Question):
-    HEADERS = {
-        'Authorization': user.access_token,
-        'Accept': 'application/json'
-    }
-    DATA = {
-        'taskId': '62540bf64ff70359a68b8dbc', #add the question task id to the question model
-        'label': 'AnswerQuestion',
-        'attributes': {
-            'message': question.question_text
-        },
-        'actioneerId': str(user.id),
-        "_creationTs": int(time.time()*1000.0),
-        "_lastUpdateTs": int(time.time()*1000.0),
-
-    }
-    responce = requests.post(f'{WENET_SERVICES}/task/transaction', headers=HEADERS, json=DATA).status_code
-    return responce
+    return request.json().get('id')
 
 @csrf_exempt
 def send_answer(request: HttpRequest):
@@ -172,10 +152,38 @@ def send_answer(request: HttpRequest):
     user: User = User.objects.get(telegram_id=user_id)
     question: Question = Question.objects.get(id=question_id)
 
-    answer = Answer(user=user, question=question, answer_text={user.language : message})
+    # TODO Need to translate the answer and reformat the question_test in a way that it can support
+    # all three languages, or at least the user's language and english.
+    answer = Answer(user=user, question=question, answer_text={'en' : message})
+
+    create_wenet_answer(answer)
+
     answer.save()
 
     return HttpResponse()
+
+def create_wenet_answer(answer: Answer):
+    HEADERS = {
+        'Authorization' : answer.user.access_token,
+        'Accept' : APPLICATION_JSON
+    }
+    DATA = {
+        'taskId' : answer.question.task_id,
+        'label' : 'AnswerQuestion',
+        'attributes' : {
+            'message' : answer.answer_text['en']
+        },
+        'actioneerId' : str(answer.user.id),
+        '_creationTs' : int(time.time()*1000.0),
+        '_lastUpdateTs' : int(time.time()*1000.0),
+
+    }
+    response = requests.post(f'{WENET_SERVICES}/task/transaction', headers=HEADERS, json=DATA)
+    
+    if (response.status_code != 201):
+        _update_user_token(answer.user)
+        HEADERS['Authorization'] = answer.user.access_token
+        response = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
 
 def asked_questions(request: HttpRequest):
     user_id = request.GET['user_id']
@@ -213,7 +221,9 @@ def question_answers(request: HttpRequest):
         for answer in answers:
             result.append({
                 'id' : answer.id,
-                'text' : answer.answer_text[user.language]
+                # TODO Need to translate the answer and reformat the question_test in a way that it can support
+                # all three languages, or at least the user's language and english.
+                'text' : answer.answer_text['en']
             })
         return JsonResponse({'answers' : result})
     else:
