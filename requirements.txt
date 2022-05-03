@@ -5,3 +5,4 @@ Werkzeug==2.0.2
 pyOpenSSL==22.0.0
 requests
 python-telegram-bot>=13.11
+googletrans==4.0.0-rc1
