@@ -19,17 +19,17 @@ class User(models.Model):
 
 class Question(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    question_text = models.JSONField('question')
+    content = models.JSONField('question')
     task_id = models.CharField(max_length=128, default="", unique=True)
     solved = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return f'{self.question_text}, was solved: {self.solved}, by {self.user}'
+        return f'{self.content}, was solved: {self.solved}, by {self.user}'
 
 class Answer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer_text = models.JSONField('answer')
+    content = models.JSONField('answer')
 
     def __str__(self) -> str:
-        return f'{self.answer_text} by {self.user} on {self.question}'
+        return f'{self.content} by {self.user} on {self.question}'

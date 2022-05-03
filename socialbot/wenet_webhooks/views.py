@@ -1,7 +1,9 @@
 import requests
 import os
 import time
+from threading import Thread
 
+from googletrans import Translator
 from telegram import Bot, Update
 
 from django.views.decorators.csrf import csrf_exempt
@@ -58,12 +60,28 @@ def _update_user_token(user: User):
     user.refresh_token = oauth2_request['refresh_token']
     user.save()
 
-# def _translate(user: User, message: str):
-#     json = {
-#         user.language : message,
-#         'en' : english_translation,
-#         transtated_language : other_language_translation,
-#     }
+def _translate(user: User, message: Question | Answer):
+    translator = Translator()
+
+    thread = Thread(target=_translate_to_english, args=(user, message))
+    thread.start()
+    thread.join()
+
+    if (user.language == 'el'):
+        message.content['tr'] = translator.translate(message.content['en'], dest='tr').text
+    else:
+        message.content['el'] = translator.translate(message.content['en'], dest='el').text
+    
+    message.save()
+
+def _translate_to_english(user: User, message: Question | Answer):
+    translator = Translator()
+
+    message.content['en'] = translator.translate(message.content[user.language], src=user.language).text
+
+    message.task_id = create_wenet_question(message)
+
+    message.save()
 
 # Create your views here.
 
@@ -110,13 +128,12 @@ def ask_question(request: HttpRequest):
 
     user: User = User.objects.get(telegram_id=user_id)
 
-    # TODO Need to translate the answer and reformat the question_test in a way that it can support
-    # all three languages, or at least the user's language and english.
-    question = Question(user=user, question_text={'en' : message})
-
-    question.task_id=create_wenet_question(question)
+    question = Question(user=user, content={user.language : message})
 
     question.save()
+
+    thread = Thread(target=_translate, args=(user, question))
+    thread.start()
 
     return HttpResponse()
 
@@ -129,7 +146,7 @@ def create_wenet_question(question: Question):
         'appId' : APP_ID,
         'requesterId' : str(question.user.id),
         'goal' : {
-            'name' : question.question_text['en']
+            'name' : question.content['en']
         },
         'taskTypeId' : TASK_TYPE_ID
     }
@@ -152,13 +169,12 @@ def send_answer(request: HttpRequest):
     user: User = User.objects.get(telegram_id=user_id)
     question: Question = Question.objects.get(id=question_id)
 
-    # TODO Need to translate the answer and reformat the question_test in a way that it can support
-    # all three languages, or at least the user's language and english.
-    answer = Answer(user=user, question=question, answer_text={'en' : message})
-
-    create_wenet_answer(answer)
+    answer = Answer(user=user, question=question, content={user.language : message})
 
     answer.save()
+    
+    thread = Thread(target=_translate, args=(user, answer))
+    thread.start()
 
     return HttpResponse()
 
@@ -171,7 +187,7 @@ def create_wenet_answer(answer: Answer):
         'taskId' : answer.question.task_id,
         'label' : 'AnswerQuestion',
         'attributes' : {
-            'message' : answer.answer_text['en']
+            'message' : answer.content['en']
         },
         'actioneerId' : str(answer.user.id),
         '_creationTs' : int(time.time()*1000.0),
@@ -195,7 +211,7 @@ def asked_questions(request: HttpRequest):
     for question in questions:
         result.append({
             'id' : question.id,
-            'text' : question.question_text[user.language]
+            'text' : question.content[user.language]
         })
 
     return JsonResponse({'questions' : result})
@@ -206,6 +222,7 @@ def mark_as_solved(request: HttpRequest):
     result = _question_checks(user, request.POST['question_id'])
 
     if (isinstance(result, Question)):
+        result.solved = True
         result.save()
         return HttpResponse()
     else:
@@ -221,9 +238,7 @@ def question_answers(request: HttpRequest):
         for answer in answers:
             result.append({
                 'id' : answer.id,
-                # TODO Need to translate the answer and reformat the question_test in a way that it can support
-                # all three languages, or at least the user's language and english.
-                'text' : answer.answer_text['en']
+                'text' : answer.content[user.language]
             })
         return JsonResponse({'answers' : result})
     else:
