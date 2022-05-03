@@ -36,7 +36,8 @@ def messages_callback_from_wenet(request: HttpRequest):
         print(request.json())
     return HttpResponse()
 
-def telegram_bot_answer_question(user: User,message):
+
+def telegram_bot_answer_question(user: User, message):
     bot_token = user.access_token
     bot_chatID = '1595070759'
     send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + message
@@ -81,7 +82,8 @@ def _update_user_token(user: User):
     user.refresh_token = oauth2_request['refresh_token']
     user.save()
 
-def _translate(user: User, message: Question | Answer):
+
+def _translate(user: User, message: Question or Answer):
     translator = Translator()
 
     thread = Thread(target=_translate_to_english, args=(user, message))
@@ -95,7 +97,8 @@ def _translate(user: User, message: Question | Answer):
     
     message.save()
 
-def _translate_to_english(user: User, message: Question | Answer):
+
+def _translate_to_english(user: User, message: Question or Answer):
     translator = Translator()
 
     message.content['en'] = translator.translate(message.content[user.language], src=user.language).text
