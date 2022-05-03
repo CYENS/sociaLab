@@ -2,10 +2,9 @@ import requests
 import os
 import time
 from threading import Thread
-
 from googletrans import Translator
 from telegram import Bot, Update
-
+import json
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
@@ -26,10 +25,11 @@ APPLICATION_JSON = 'application/json'
 @csrf_exempt
 def messages_callback_from_wenet(request: HttpRequest):
     if request.method == 'POST':
-        message_type = request.json().get('label')
-        user_id = request.json().get('receiverId')
-        app_id = request.json().get('appId')
-        message = request.json().get('attributes').get('message')
+        data = json.loads(request.body)
+        message_type = data.get('label')
+        user_id = data.get('receiverId')
+        app_id = data.get('appId')
+        message = data.get('attributes').get('message')
         if message_type == "AnswerQuestion":
             telegram_bot_answer_question(get_user(user_id), message)
 
