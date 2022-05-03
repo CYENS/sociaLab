@@ -26,8 +26,29 @@ APPLICATION_JSON = 'application/json'
 @csrf_exempt
 def messages_callback_from_wenet(request: HttpRequest):
     if request.method == 'POST':
-        print(request.body)
+        message_type = request.json().get('label')
+        user_id = request.json().get('receiverId')
+        app_id = request.json().get('appId')
+        message = request.json().get('attributes').get('message')
+        if message_type == "AnswerQuestion":
+            telegram_bot_answer_question(get_user(user_id), message)
+
+        print(request.json())
     return HttpResponse()
+
+def telegram_bot_answer_question(user: User,message):
+    bot_token = user.access_token
+    bot_chatID = '1595070759'
+    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + message
+
+    response = requests.get(send_text)
+    print(response.json())
+    return response.json()
+
+def get_user(user_id):
+    user: User = User.objects.get(id=user_id)
+    return user
+
 
 def _check_oauth2_tokens(dict: dict):
     if (dict.keys().__contains__('error')):
