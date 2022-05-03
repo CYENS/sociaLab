@@ -1,10 +1,11 @@
+import json
 import logging
+import string
 import requests
-import webbrowser
 import os
 
-from telegram import BotCommand, Update, Bot
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram import BotCommand, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, Bot
+from telegram.ext import Updater, CommandHandler, CallbackContext, ConversationHandler, MessageHandler, Filters, CallbackQueryHandler
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
 
@@ -72,28 +73,31 @@ def help(update: Update, context: CallbackContext):
     "\t\t"r"_/markassolved 4578_""\n"
     rf"/help \- {HELP_INFORMATION}""\n")
 
-def askquestion(update: Update, context: CallbackContext):
+def ask_question(update: Update, context: CallbackContext):    
     """
     It can be used by the user to make a question, which will be send to the appropriate users 
     according to the WeNet platform.
     """
-    message = update.message
-    if (message != None):
-        user = update.effective_user
-        passed_arguments = context.args
-        PASSED_ARGUMENTS_LENGTH = len(passed_arguments)
 
-        if (PASSED_ARGUMENTS_LENGTH == 0):
-            message.reply_text("Remember, you need to write the question you are looking for an "
-            "answer!")
-        else:
-            request = requests.post(f'{SERVER}/ask_question', data={
+    update.message.reply_text("Type the question that you want to ask")
+    return 0
+
+def ask_question_handler(update: Update, context: CallbackContext):
+    message = update.message
+    user = update.effective_user
+
+    if (message is not None):
+        request = requests.post(f'{SERVER}/ask_question', data={
                 'user_id' : user.id,
-                'question' : ' '.join(passed_arguments),
+                'question' : message.text,
             }, verify=False)
 
-            if (request.status_code == 200):
-                message.reply_text("Question was submitted successfully!")
+        if (request.status_code == 200):
+            message.reply_text("Question was submitted successfully!")
+        else:
+            message.reply_text("Question could not be sumbitted. Please try again.")
+    # message.reply_text(f"You asked: \"{message.text}\".")
+    return ConversationHandler.END
 
 def available_questions(update: Update, context: CallbackContext):
     """
@@ -143,63 +147,92 @@ def asked_questions(update: Update, context: CallbackContext):
         questions: list = request.json()['questions']
         result = "ID - Question\n"
         
+        markup_list = []
+        
         for question in questions:
+            markup_list.append([InlineKeyboardButton(question['text'], callback_data={
+                "id" : question['id'],
+                "type" : 'answers'
+            }.__str__())])
             result += f"{question['id']} - {question['text']}\n"
         
-        message.reply_text(result)
+        message.reply_markdown_v2(r"_*__These are all the questions that you have asked__\:*""\n"
+            r"\(by pressing a question, you can see it's answers\)_""\n",
+            reply_markup=InlineKeyboardMarkup(markup_list))
+        return 0
 
-def question_answers(update: Update, context: CallbackContext):
+def selected_question_choice(update: Update, context: CallbackContext):
     """
-    It can be used by the user to see all the answers that their selected question received.
+    Depending on the question that the user (submitter) selected, it shows the possible actions:
+        - to see the answers
+        - to mark the question as solved
+        - or nothing 
     """
-    message = update.message
+    query = update.callback_query
+    data = json.loads(query.data.replace("'",'"'))
+    message = query.message
+    user = query.from_user
+    chat = update.effective_chat
+
     if (message is not None):
-        user = update.effective_user
-        passed_arguments = context.args
-        PASSED_ARGUMENTS_LENGTH = len(passed_arguments)
-
-        if (PASSED_ARGUMENTS_LENGTH == 0):
-            message.reply_text("You need to give the question id followed by the answer.")
-        elif (not passed_arguments[0].isdigit()):
-            message.reply_text("What you provided is not a number.")
-        else:
-            request = requests.get(f'{SERVER}/question_answers', params={
-                'user_id' : user.id,
-                'question_id' : passed_arguments[0]
-            }, verify=False)
+        if (data['type'] == 'answers'):
+            markup_list = [
+                [KeyboardButton("See answers")],
+                [KeyboardButton("Mark as solved")],
+                [KeyboardButton("Cancel")]
+            ]            
             
+            context.user_data['question'] = data
+            message.reply_text(text= "What you would you like to know about that question?",
+                reply_markup=ReplyKeyboardMarkup(markup_list, one_time_keyboard=True))
+    return 1
+
+def question_manipulation(update: Update, context: CallbackContext):
+    """
+    This does handles the action that the user has selected from `selected_question_choice`. It either
+    finds the answers or marks the question as solved.
+    """
+    DATA = context.user_data['question']
+    MESSAGE = update.message
+    MESSAGE_CONTENT = MESSAGE.text.lower()
+    USER = update.effective_user
+
+    if (MESSAGE is not None):
+        if ('see answers' in MESSAGE_CONTENT) :
+            request = requests.get(f'{SERVER}/question_answers', params={
+                    'user_id' : USER.id,
+                    'question_id' : DATA['id']
+                }, verify=False)
+                
             answers: list = request.json()['answers']
-            result = "ID - Answer\n"
+            result = ""
 
             for answer in answers:
                 result += f"{answer['id']} - {answer['text']}\n"
-
-            message.reply_text(result)
-
-def mark_as_solved(update: Update, context: CallbackContext):
-    """
-    It should be used by a user to mark when a question has been solved.
-    """
-    message = update.message
-    if (message is not None):
-        user = update.effective_user
-        passed_arguments = context.args
-        PASSED_ARGUMENTS_LENGTH = len(passed_arguments)
-
-        if (PASSED_ARGUMENTS_LENGTH == 0):
-            message.reply_text("You need to give me the question id too!")
-        elif (not passed_arguments[0].isdigit()):
-            message.reply_text("You need to give the if od the question!")
-        else:
-            request = requests.post(f'{SERVER}/mark_as_solved', data={'user_id' : user.id,
-            'question_id' : passed_arguments[0]}, verify=False)
-
-            if (request.status_code == 404):
-                message.reply_text("I can only mark questions as sovled if they exist!")
-            elif (request.status_code == 403):
-                message.reply_text("Unfortunately I cannot mark that question as solved as it is not yours...")
+            
+            new_result = ""
+            for character in result:
+                if (character in string.punctuation):
+                    new_result += f"\{character}"
+                else:
+                    new_result += character
+            if (new_result == ""):
+                MESSAGE.reply_text("No one answered yet.")
             else:
-                message.reply_text(f"Question {passed_arguments[0]} was successfully marked a solved!")
+                MESSAGE.reply_markdown_v2(f'_{new_result}_')
+        elif ('mark as solved' in MESSAGE_CONTENT):
+            request = requests.post(f'{SERVER}/mark_as_solved', data={
+                'user_id' : USER.id,
+                'question_id' : DATA['id']
+            }, verify=False)
+            
+            if (request.status_code == 200):
+                MESSAGE.reply_text(f"The question was successfully marked a solved!")
+            else:
+                MESSAGE.reply_text("Error")
+        else:
+            MESSAGE.reply_text("I'm sorry I couldn't understand what you typed.")
+    return ConversationHandler.END
         
 def login(update: Update, context: CallbackContext):
     message = update.message
@@ -208,29 +241,60 @@ def login(update: Update, context: CallbackContext):
             f'<a href="http://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}">Login to Wenet</a>')
         #webbrowser.open(f'https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}')
 
+def stop(update: Update, context: CallbackContext):
+    update.message.reply_text("Process stopped.", reply_markup=ReplyKeyboardRemove())
+    return ConversationHandler.END
+
+def nothing(update: Update, context: CallbackContext):
+    return ConversationHandler.END
+
 def main() -> None:
     bot = Bot(BOT_TOKEN)
     bot.set_my_commands(commands=[
         BotCommand('help', HELP_INFORMATION),
         BotCommand('login', LOGIN_INFORMATION),
-        BotCommand('askquestion', ASK_QUESTION_INFORMATION),
+        BotCommand('ask_question', ASK_QUESTION_INFORMATION),
         BotCommand('availablequestions', AVAILABLE_QUESTIONS_INFORMATION),
         BotCommand('answer', ANSWER_INFORMATION),
-        BotCommand('askedquestions', ASKED_QUESTIONS_INFORMATION),
+        BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION),
         BotCommand('questionanswers', QUESTION_ANSWERS_INFORMATION),
         BotCommand('markassolved', MARK_QUESTION_AS_SOLVED)])
     updater = Updater(BOT_TOKEN)
     dispatcher = updater.dispatcher
 
+    stop_handlers = [
+        CommandHandler('stop', stop),
+        MessageHandler(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$'), stop),
+    ]
+
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('help', help))
-    dispatcher.add_handler(CommandHandler('askquestion', askquestion))
+    # dispatcher.add_handler(CommandHandler('askquestion', askquestion))
+    dispatcher.add_handler(ConversationHandler(
+        entry_points=[CommandHandler('ask_question', ask_question)],
+        states={
+            0 : [MessageHandler(
+                Filters.text &  ~(Filters.command | Filters.regex('^[D|d]one[.|$]')),
+                ask_question_handler
+            )]
+        },
+        fallbacks=stop_handlers,
+    ))
+    
+    dispatcher.add_handler(ConversationHandler(
+        entry_points=[CommandHandler('asked_questions', asked_questions)],
+        states={
+            0 : [CallbackQueryHandler(selected_question_choice)],
+            1 : [MessageHandler(
+                Filters.text & ~(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$') | 
+                Filters.command), question_manipulation)]
+        },
+        fallbacks=stop_handlers,
+    ))
+    
     dispatcher.add_handler(CommandHandler('availablequestions',
     available_questions))
     dispatcher.add_handler(CommandHandler('answer', answer))
-    dispatcher.add_handler(CommandHandler('askedquestions', asked_questions))
-    dispatcher.add_handler(CommandHandler('questionanswers', question_answers))
-    dispatcher.add_handler(CommandHandler('markassolved', mark_as_solved))
     dispatcher.add_handler(CommandHandler('login', login))
 
     updater.start_polling()
