@@ -7,7 +7,7 @@ class User(models.Model):
     id = models.PositiveBigIntegerField('ID', primary_key=True)
     telegram_id = models.PositiveBigIntegerField('telegram ID', unique=True, default=0)
     name = models.CharField(max_length=50)
-    language = models.CharField(max_length=2) # GR, TR
+    language = models.CharField(max_length=5) # GR, TR
     access_token = models.CharField(max_length=128, default="")
     refresh_token = models.CharField(max_length=128, default="")
 
