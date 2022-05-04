@@ -169,7 +169,7 @@ def create_wenet_question(question: Question):
         'appId' : APP_ID,
         'requesterId' : str(question.user.id),
         'goal' : {
-            'name' : question.content['en']
+            'name' : question.content[question.user.language]
         },
         'taskTypeId' : TASK_TYPE_ID
     }
