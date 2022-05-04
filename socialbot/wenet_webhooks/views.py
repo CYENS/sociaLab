@@ -212,7 +212,7 @@ def create_wenet_answer(answer: Answer):
         'taskId' : answer.question.task_id,
         'label' : 'AnswerQuestion',
         'attributes' : {
-            'message' : answer.content['en']
+            'message' : answer.content[answer.user.language]
         },
         'actioneerId' : str(answer.user.id),
         '_creationTs' : int(time.time()*1000.0),
