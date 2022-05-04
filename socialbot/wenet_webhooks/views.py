@@ -32,14 +32,15 @@ def messages_callback_from_wenet(request: HttpRequest):
         user_id = data.get('receiverId')
         app_id = data.get('appId')
         message = data.get('attributes').get('message')
+        taskId = data.get('attributes').get('taskId')
         if message_type == "AnswerQuestion":
             print(data)
-            telegram_bot_answer_question(get_user(user_id), message)
+            telegram_bot_answer_question(get_user(user_id), message, get_question(taskId))
     return HttpResponse()
 
 
-def telegram_bot_answer_question(user: User, message):
-    bot_chatID = user.telegram_id
+def telegram_bot_answer_question(user: User, message, question: Question):
+    bot_chatID = question.user.telegram_id
     send_text = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + message
     response = requests.get(send_text)
     print(response.json())
@@ -49,7 +50,9 @@ def get_user(user_id):
     user: User = User.objects.get(id=user_id)
     return user
 
-
+def get_question(question_id):
+    question: Question = Question.objects.get(id=question_id)
+    return question
 def _check_oauth2_tokens(dict: dict):
     if (dict.keys().__contains__('error')):
         return HttpResponseBadRequest()
