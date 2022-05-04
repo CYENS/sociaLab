@@ -4,7 +4,7 @@ import string
 import requests
 import os
 
-from telegram import BotCommand, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, Bot
+from telegram import BotCommand, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ParseMode, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext, ConversationHandler, MessageHandler, Filters, CallbackQueryHandler
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
@@ -78,11 +78,13 @@ def ask_question(update: Update, context: CallbackContext):
     It can be used by the user to make a question, which will be send to the appropriate users 
     according to the WeNet platform.
     """
-
     update.message.reply_text("Type the question that you want to ask")
     return 0
 
 def ask_question_handler(update: Update, context: CallbackContext):
+    """
+    Handles the question typed by the user by sending it to the server.
+    """
     message = update.message
     user = update.effective_user
 
@@ -95,7 +97,7 @@ def ask_question_handler(update: Update, context: CallbackContext):
         if (request.status_code == 200):
             message.reply_text("Question was submitted successfully!")
         else:
-            message.reply_text("Question could not be sumbitted. Please try again.")
+            message.reply_text("Question could not be submitted. Please try again.")
     # message.reply_text(f"You asked: \"{message.text}\".")
     return ConversationHandler.END
 
@@ -105,34 +107,66 @@ def available_questions(update: Update, context: CallbackContext):
     platform.
     """
     message = update.message
+    USER = update.effective_user
+
     if (message != None):
-        # TODO The following line shoule be removed and replaced with the implementation
-        message.reply_text("Not implemented yet.")
+        request = requests.get(f'{SERVER}/available_questions', params= {'user_id' : USER.id}, verify=False)
 
-def answer(update: Update, context: CallbackContext):
-    """
-    It can be used by a user to answer a question that they are given.
-    """
-    message = update.message
-    if (message is not None):
+        if (request.status_code == 200):
+            markup_list = []
+            for (index, question) in enumerate(request.json()['questions']):
+                markup_list.append(InlineKeyboardButton(question['content'], callback_data={
+                    'button_id' : index,
+                    'question_id' : question['id'],
+                    'type' : 'available'
+                }.__str__()))
+            result = ""
+            for question in request.json()['questions']:
+                result += f"{question['id']} - {question['content']}\n"
+            
+            if (result == ""):
+                message.reply_text("Currently there are no questions for you.")
+            else:
+                message.reply_markdown_v2("Test",
+                    reply_markup=InlineKeyboardMarkup.from_column(markup_list))
+        return 0
 
-        user = update.effective_user
-        passed_arguments = context.args
-        PASSED_ARGUMENTS_LENGTH = len(passed_arguments)
-        
-        if (PASSED_ARGUMENTS_LENGTH == 0):
-            message.reply_text("You need to give the question id followed by the answer.")
-        elif (not passed_arguments[0].isdigit()):
-            message.reply_text("You need to give the number of the question first.")
+def available_question_manipulation(update: Update, context: CallbackContext):
+    """
+    Handles the response of the user given their choice from the questions listed.
+    """
+    MESSAGE = update.message
+    MESSAGE_CONTENT = MESSAGE.text.lower()
+
+    if (MESSAGE is not None):
+        if ('yes' in MESSAGE_CONTENT):
+            MESSAGE.reply_text("Please type your answer:", reply_markup=ReplyKeyboardRemove())
+            return 1
         else:
-            request = requests.post(f'{SERVER}/send_answer', data={
-                'user_id' : user.id,
-                'question_id' : passed_arguments[0],
-                'answer' : ' '.join(passed_arguments[1:]),
+            MESSAGE.reply_text("I'm sorry, I couldn't understand what you typed.",
+                reply_markup=ReplyKeyboardRemove())
+
+def answer_handler(update: Update, context: CallbackContext):
+    """
+    Handles the answer typed by the user by sending it to the server.
+    """
+    DATA = context.user_data['question']
+    MESSAGE = update.message
+    USER = update.effective_user
+
+    if (MESSAGE is not None):
+        request = requests.post(f'{SERVER}/send_answer', data={
+                'user_id' : USER.id,
+                'question_id' : DATA['question_id'],
+                'answer' : MESSAGE.text,
             }, verify=False)
 
-            if (request.status_code == 200):
-                message.reply_text("Answer was submitted successfully!")
+        if (request.status_code == 200):
+            MESSAGE.reply_text("Answer was submitted successfully!")
+        else:
+            MESSAGE.reply_text("Answer could not be submitted. Please try again.")
+
+    return ConversationHandler.END
 
 def asked_questions(update: Update, context: CallbackContext):
     """
@@ -149,45 +183,20 @@ def asked_questions(update: Update, context: CallbackContext):
         
         markup_list = []
         
-        for question in questions:
-            markup_list.append([InlineKeyboardButton(question['text'], callback_data={
-                "id" : question['id'],
-                "type" : 'answers'
-            }.__str__())])
+        for (index, question) in enumerate(questions):
+            markup_list.append(InlineKeyboardButton(question['text'], callback_data={
+                'button_id' : index,
+                'question_id' : question['id'],
+                'type' : 'asked'
+            }.__str__()))
             result += f"{question['id']} - {question['text']}\n"
         
         message.reply_markdown_v2(r"_*__These are all the questions that you have asked__\:*""\n"
             r"\(by pressing a question, you can see it's answers\)_""\n",
-            reply_markup=InlineKeyboardMarkup(markup_list))
+            reply_markup=InlineKeyboardMarkup.from_column(markup_list))
         return 0
 
-def selected_question_choice(update: Update, context: CallbackContext):
-    """
-    Depending on the question that the user (submitter) selected, it shows the possible actions:
-        - to see the answers
-        - to mark the question as solved
-        - or nothing 
-    """
-    query = update.callback_query
-    data = json.loads(query.data.replace("'",'"'))
-    message = query.message
-    user = query.from_user
-    chat = update.effective_chat
-
-    if (message is not None):
-        if (data['type'] == 'answers'):
-            markup_list = [
-                [KeyboardButton("See answers")],
-                [KeyboardButton("Mark as solved")],
-                [KeyboardButton("Cancel")]
-            ]            
-            
-            context.user_data['question'] = data
-            message.reply_text(text= "What you would you like to know about that question?",
-                reply_markup=ReplyKeyboardMarkup(markup_list, one_time_keyboard=True))
-    return 1
-
-def question_manipulation(update: Update, context: CallbackContext):
+def asked_question_manipulation(update: Update, context: CallbackContext):
     """
     This does handles the action that the user has selected from `selected_question_choice`. It either
     finds the answers or marks the question as solved.
@@ -197,11 +206,11 @@ def question_manipulation(update: Update, context: CallbackContext):
     MESSAGE_CONTENT = MESSAGE.text.lower()
     USER = update.effective_user
 
-    if (MESSAGE is not None):
-        if ('see answers' in MESSAGE_CONTENT) :
+    if (MESSAGE is not None):   
+        if (all(el in MESSAGE_CONTENT for el in ['see', 'answers'])) :
             request = requests.get(f'{SERVER}/question_answers', params={
                     'user_id' : USER.id,
-                    'question_id' : DATA['id']
+                    'question_id' : DATA['question_id']
                 }, verify=False)
                 
             answers: list = request.json()['answers']
@@ -217,36 +226,84 @@ def question_manipulation(update: Update, context: CallbackContext):
                 else:
                     new_result += character
             if (new_result == ""):
-                MESSAGE.reply_text("No one answered yet.")
+                MESSAGE.reply_text("No one answered yet.", reply_markup=ReplyKeyboardRemove())
             else:
-                MESSAGE.reply_markdown_v2(f'_{new_result}_')
+                MESSAGE.reply_markdown_v2(f'_{new_result}_', reply_markup=ReplyKeyboardRemove())
         elif ('mark as solved' in MESSAGE_CONTENT):
             request = requests.post(f'{SERVER}/mark_as_solved', data={
                 'user_id' : USER.id,
-                'question_id' : DATA['id']
+                'question_id' : DATA['question_id']
             }, verify=False)
             
             if (request.status_code == 200):
-                MESSAGE.reply_text(f"The question was successfully marked a solved!")
+                MESSAGE.reply_text("The question was successfully marked a solved!",
+                reply_markup=ReplyKeyboardRemove())
             else:
-                MESSAGE.reply_text("Error")
+                MESSAGE.reply_text("Error", reply_markup=ReplyKeyboardRemove())
         else:
-            MESSAGE.reply_text("I'm sorry I couldn't understand what you typed.")
+            MESSAGE.reply_text("I'm sorry, I couldn't understand what you typed.",
+            reply_markup=ReplyKeyboardRemove())
+    context.user_data
     return ConversationHandler.END
-        
+
 def login(update: Update, context: CallbackContext):
     message = update.message
     if (message is not None):
         update.message.reply_html(
             f'<a href="http://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}">Login to Wenet</a>')
-        #webbrowser.open(f'https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}')
 
 def stop(update: Update, context: CallbackContext):
     update.message.reply_text("Process stopped.", reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
 
-def nothing(update: Update, context: CallbackContext):
-    return ConversationHandler.END
+def selected_question_choice(update: Update, context: CallbackContext):
+    """
+    Depending on the question that the user (submitter) selected, it shows the possible actions:
+        - to see the answers
+        - to mark the question as solved
+        - or nothing 
+    """
+    QUERY = update.callback_query
+    DATA = json.loads(QUERY.data.replace("'",'"'))
+    MESSAGE = QUERY.message
+
+    if (MESSAGE is not None):
+        TYPE = DATA['type']
+        SELECTED_BUTTON = MESSAGE.reply_markup.inline_keyboard[DATA['button_id']][0].text
+        if (TYPE == 'asked'):
+            markup_list = [
+                KeyboardButton("See the answers"),
+                KeyboardButton("Mark as solved"),
+                KeyboardButton("Nothing")
+            ]
+
+            if (any(x in SELECTED_BUTTON for x in string.punctuation)):
+                new_string = ""
+                for x in SELECTED_BUTTON:
+                    if (x in string.punctuation):
+                        new_string += f"\{x}"
+                    else:
+                        new_string += x
+                SELECTED_BUTTON = new_string
+
+            MESSAGE.edit_text(f"You selected: _*{SELECTED_BUTTON}*_",
+                reply_markup=None, parse_mode=ParseMode.MARKDOWN_V2)
+            
+            context.user_data['question'] = DATA
+            MESSAGE.reply_text("What would you like to know about this question?",
+                reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+        elif (TYPE == 'available'):
+            markup_list = [
+                KeyboardButton("Yes"),
+                KeyboardButton("No")
+            ]
+
+            MESSAGE.edit_text(f"You selected: _*{SELECTED_BUTTON}*_",
+                reply_markup=None, parse_mode=ParseMode.MARKDOWN_V2)
+
+            context.user_data['question'] = DATA
+            MESSAGE.reply_text("Would you like to answer this question?",
+                reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
 
 def main() -> None:
     bot = Bot(BOT_TOKEN)
@@ -254,11 +311,8 @@ def main() -> None:
         BotCommand('help', HELP_INFORMATION),
         BotCommand('login', LOGIN_INFORMATION),
         BotCommand('ask_question', ASK_QUESTION_INFORMATION),
-        BotCommand('availablequestions', AVAILABLE_QUESTIONS_INFORMATION),
-        BotCommand('answer', ANSWER_INFORMATION),
-        BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION),
-        BotCommand('questionanswers', QUESTION_ANSWERS_INFORMATION),
-        BotCommand('markassolved', MARK_QUESTION_AS_SOLVED)])
+        BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION),
+        BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION)])
     updater = Updater(BOT_TOKEN)
     dispatcher = updater.dispatcher
 
@@ -269,7 +323,7 @@ def main() -> None:
 
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('help', help))
-    # dispatcher.add_handler(CommandHandler('askquestion', askquestion))
+
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('ask_question', ask_question)],
         states={
@@ -278,23 +332,38 @@ def main() -> None:
                 ask_question_handler
             )]
         },
-        fallbacks=stop_handlers,
+        fallbacks=stop_handlers
     ))
-    
+    dispatcher.add_handler(CallbackQueryHandler(selected_question_choice))
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('asked_questions', asked_questions)],
         states={
-            0 : [CallbackQueryHandler(selected_question_choice)],
-            1 : [MessageHandler(
-                Filters.text & ~(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$') | 
-                Filters.command), question_manipulation)]
+            0 : [MessageHandler(
+                Filters.text & ~(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$') |
+                Filters.regex('^[N|n]othing.?$') | Filters.command), asked_question_manipulation)]
         },
-        fallbacks=stop_handlers,
+        fallbacks=[
+            CommandHandler('stop', stop),
+            MessageHandler(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$'), stop),
+            MessageHandler(Filters.regex('^[N|n]othing.?$'), stop)
+        ]
     ))
     
-    dispatcher.add_handler(CommandHandler('availablequestions',
-    available_questions))
-    dispatcher.add_handler(CommandHandler('answer', answer))
+    dispatcher.add_handler(ConversationHandler(
+        entry_points=[CommandHandler('available_questions', available_questions)],
+        states= {
+            0 : [MessageHandler(Filters.text & ~(Filters.command | Filters.regex('^[C|c]ancel.?$') |
+            Filters.regex('^[D|d]one.?$') | Filters.regex('^[N|n]o.?$')),
+            available_question_manipulation)],
+            1 : [MessageHandler(Filters.text & ~(Filters.command | Filters.regex('^[C|c]ancel.?$') |
+            Filters.regex('^[D|d]one.?$') | Filters.regex('^[N|n]o.?$')), answer_handler)],
+        },
+        fallbacks=[
+            CommandHandler('stop', stop),
+            MessageHandler(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$') |
+            Filters.regex('^[N|n]o.?$'), stop),
+        ]
+    ))
     dispatcher.add_handler(CommandHandler('login', login))
 
     updater.start_polling()

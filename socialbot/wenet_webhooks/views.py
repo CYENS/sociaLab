@@ -1,10 +1,12 @@
 import requests
 import os
 import time
+import json
+
 from threading import Thread
 from googletrans import Translator
 from telegram import Bot, Update
-import json
+
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
@@ -267,3 +269,16 @@ def question_answers(request: HttpRequest):
         return JsonResponse({'answers' : result})
     else:
         return result
+
+# FIXME This function should call the WeNet server and find the appopriate questions that the current
+# user should see.
+def available_questions(request: HttpRequest):
+    user: User = User.objects.get(telegram_id=request.GET['user_id'])
+    
+    result = []
+    for question in Question.objects.all():
+        result.append({
+            'id' : question.id,
+            'content' : question.content[user.language]
+        })
+    return JsonResponse({'questions' : result})
