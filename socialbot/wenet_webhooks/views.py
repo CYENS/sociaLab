@@ -152,12 +152,12 @@ def ask_question(request: HttpRequest):
     user: User = User.objects.get(telegram_id=user_id)
 
     question = Question(user=user, content={user.language : message})
-
-    question.save()
-
-    thread = Thread(target=_translate, args=(user, question))
-    thread.start()
-
+    task_id = create_wenet_question(question)
+    if task_id:
+        question.task_id = task_id
+        question.save()
+        thread = Thread(target=_translate, args=(user, question))
+        thread.start()
     return HttpResponse()
 
 def create_wenet_question(question: Question):
