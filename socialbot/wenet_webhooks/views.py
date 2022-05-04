@@ -34,8 +34,6 @@ def messages_callback_from_wenet(request: HttpRequest):
         message = data.get('attributes').get('message')
         if message_type == "AnswerQuestion":
             telegram_bot_answer_question(get_user(user_id), message)
-
-        print(request.json())
     return HttpResponse()
 
 
