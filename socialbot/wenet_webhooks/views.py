@@ -33,6 +33,7 @@ def messages_callback_from_wenet(request: HttpRequest):
         app_id = data.get('appId')
         message = data.get('attributes').get('message')
         if message_type == "AnswerQuestion":
+            print(data)
             telegram_bot_answer_question(get_user(user_id), message)
     return HttpResponse()
 
@@ -41,7 +42,7 @@ def telegram_bot_answer_question(user: User, message):
     bot_token = user.access_token
     bot_chatID = '1595070759'
     send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + message
-
+    print(send_text)
     response = requests.get(send_text)
     print(response.json())
     return response.json()
