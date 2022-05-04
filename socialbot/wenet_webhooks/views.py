@@ -193,11 +193,10 @@ def send_answer(request: HttpRequest):
     question: Question = Question.objects.get(id=question_id)
 
     answer = Answer(user=user, question=question, content={user.language : message})
-
-    answer.save()
-    
-    thread = Thread(target=_translate, args=(user, answer))
-    thread.start()
+    if create_wenet_question(answer):
+        answer.save()
+        thread = Thread(target=_translate, args=(user, answer))
+        thread.start()
 
     return HttpResponse()
 
@@ -223,6 +222,8 @@ def create_wenet_answer(answer: Answer):
         _update_user_token(answer.user)
         HEADERS['Authorization'] = answer.user.access_token
         response = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
+    return response.ok
+
 
 def asked_questions(request: HttpRequest):
     user_id = request.GET['user_id']
