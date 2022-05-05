@@ -196,7 +196,7 @@ def send_answer(request: HttpRequest):
     question: Question = Question.objects.get(id=question_id)
 
     answer = Answer(user=user, question=question, content={user.language : message})
-    if create_wenet_question(answer):
+    if create_wenet_answer(answer):
         answer.save()
         thread = Thread(target=_translate, args=(user, answer))
         thread.start()
