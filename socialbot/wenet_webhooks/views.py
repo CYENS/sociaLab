@@ -5,7 +5,7 @@ import json
 
 from threading import Thread
 from googletrans import Translator
-from telegram import Bot, Update
+from telegram import Bot
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
@@ -34,17 +34,16 @@ def messages_callback_from_wenet(request: HttpRequest):
         message = data.get('attributes').get('message')
         taskId = data.get('attributes').get('taskId')
         if message_type == "AnswerQuestion":
-            print(data)
             telegram_bot_answer_question(get_user(user_id), message, get_question(taskId))
     return HttpResponse()
 
-
+# TODO The translation should happen here if needed before sending it to the user. During this 
+# process the function should also save the translation where it is appropriate (corresponding 
+# answer entry in answer_table).
 def telegram_bot_answer_question(user: User, message, question: Question):
-    bot_chatID = question.user.telegram_id
-    send_text = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + message
-    response = requests.get(send_text)
-    print(response.json())
-    return response.json()
+    bot = Bot(BOT_TOKEN)
+    message = bot.send_message(user.telegram_id, f"You received an answer to the question \""
+    f"{question.content[user.language]}\". The asnwer is: {message}")
 
 def get_user(user_id):
     user: User = User.objects.get(id=user_id)
@@ -84,7 +83,6 @@ def _update_user_token(user: User):
     user.refresh_token = oauth2_request['refresh_token']
     user.save()
 
-
 def _translate(user: User, message: Question or Answer):
     translator = Translator()
 
@@ -99,13 +97,13 @@ def _translate(user: User, message: Question or Answer):
     
     message.save()
 
-
 def _translate_to_english(user: User, message: Question or Answer):
     translator = Translator()
 
     message.content['en'] = translator.translate(message.content[user.language], src=user.language).text
 
-    message.task_id = create_wenet_question(message)
+    if (isinstance(message, Question)):
+        message.task_id = create_wenet_question(message)
 
     message.save()
 
@@ -196,12 +194,14 @@ def send_answer(request: HttpRequest):
     question: Question = Question.objects.get(id=question_id)
 
     answer = Answer(user=user, question=question, content={user.language : message})
-    if create_wenet_answer(answer):
-        answer.save()
-        thread = Thread(target=_translate, args=(user, answer))
-        thread.start()
+    answer.save()
+    thread = Thread(target=_translate, args=(user, answer))
+    thread.start()
+    thread.join()
 
-    return HttpResponse()
+    if (create_wenet_answer(answer)):
+        return HttpResponse()
+    return HttpResponseBadRequest()
 
 def create_wenet_answer(answer: Answer):
     HEADERS = {
