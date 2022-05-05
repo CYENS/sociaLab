@@ -16,12 +16,11 @@ WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
 
 LOGIN_INFORMATION = "login to your WeNet account and establish a connection with your Telegram account"
 ASK_QUESTION_INFORMATION = "ask the community a question"
-AVAILABLE_QUESTIONS_INFORMATION = "show the available questions by the community to you"
-ANSWER_INFORMATION = r"answer a question \- requires question number and then the answer"
-ASKED_QUESTIONS_INFORMATION = "show all the questions that you asked"
-QUESTION_ANSWERS_INFORMATION = r"get the answers of a question you made \- requires question number"
+AVAILABLE_QUESTIONS_INFORMATION = "show the available questions for you to answer"
+ASKED_QUESTIONS_INFORMATION = "show all the questions that you asked and allows you to manipulate them"
+STOP_INFORMATION = r"allows you to stop/interrupt a process that you have started\. A process is "\
+r"started by using /ask\_question, /available\_questions, /asked\_questions and processes in them"
 HELP_INFORMATION = "provides a help message"
-MARK_QUESTION_AS_SOLVED = "marks the question as solved so other won't have to answer it"
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -56,22 +55,14 @@ def help(update: Update, context: CallbackContext):
     Can be used by the user to print (text) them the available actions.
     """
     user = update.effective_user
-
-    update.message.reply_markdown_v2(rf"Hi {user.first_name}\!""\nThese are the "
-    r"available commands\:""\n"
-    rf"/login \- {LOGIN_INFORMATION}""\n"
-    # r"/start Used when a user logins in for the first time\.""\n"
-    rf"/askquestion \- {ASK_QUESTION_INFORMATION} E\.g\.\:""\n"
-    "\t\t"r" _/askquestion Are there any good restaurants in Kyreneia\?_""\n"
-    rf"/availablequestions \- {AVAILABLE_QUESTIONS_INFORMATION}""\n"
-    rf"/answer \- {ANSWER_INFORMATION} E\.g\.\:""\n"
-    "\t\t"r"_/answer 4578 Yes\, there is one by the port\!_""\n"
-    rf"/askedquestions \- {ASKED_QUESTIONS_INFORMATION}""\n"
-    rf"/questionanswers \- {QUESTION_ANSWERS_INFORMATION} E\.g\.\:""\n"
-    "\t\t"r"_/questionanwers 4578_""\n"
-    rf"/markassolved \- {MARK_QUESTION_AS_SOLVED} E\.g\.\:""\n"
-    "\t\t"r"_/markassolved 4578_""\n"
-    rf"/help \- {HELP_INFORMATION}""\n")
+    update.message.reply_markdown_v2(rf"Hi _{user.first_name}_\!""\n"
+    r"*These are the available commands*\:""\n"
+    rf"• /login \- _{LOGIN_INFORMATION}_""\n"
+    rf"• /ask\_question \- _{ASK_QUESTION_INFORMATION}_""\n"
+    rf"• /available\_questions \- _{AVAILABLE_QUESTIONS_INFORMATION}_""\n"
+    rf"• /asked\_questions \- _{ASKED_QUESTIONS_INFORMATION}_""\n"
+    rf"• /stop \- _{STOP_INFORMATION}_""\n"
+    rf"• /help \- _{HELP_INFORMATION}_""\n")
 
 def ask_question(update: Update, context: CallbackContext):    
     """
@@ -312,7 +303,8 @@ def main() -> None:
         BotCommand('login', LOGIN_INFORMATION),
         BotCommand('ask_question', ASK_QUESTION_INFORMATION),
         BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION),
-        BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION)])
+        BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION),
+        BotCommand('stop', STOP_INFORMATION)])
     updater = Updater(BOT_TOKEN)
     dispatcher = updater.dispatcher
 
