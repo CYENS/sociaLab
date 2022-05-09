@@ -277,7 +277,7 @@ def available_questions(request: HttpRequest):
     user: User = User.objects.get(telegram_id=request.GET['user_id'])
     
     result = []
-    for question in Question.objects.all():
+    for question in Question.objects.filter(solved=False):
         result.append({
             'id' : question.id,
             'content' : question.content[user.language]
