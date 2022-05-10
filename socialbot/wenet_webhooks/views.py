@@ -43,7 +43,7 @@ def messages_callback_from_wenet(request: HttpRequest):
 def telegram_bot_answer_question(user: User, message, question: Question):
     bot = Bot(BOT_TOKEN)
     message = bot.send_message(user.telegram_id, f"You received an answer to the question \""
-    f"{question.content[user.language]}\". The asnwer is: {message}")
+    f"{question.content[user.language]}\". The answer is: {message}")
 
 def get_user(user_id):
     user: User = User.objects.get(id=user_id)
