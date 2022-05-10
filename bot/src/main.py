@@ -105,6 +105,7 @@ def available_questions(update: Update, context: CallbackContext):
 
         if (request.status_code == 200):
             markup_list = []
+            questions: list = request.json()['questions']
             for (index, question) in enumerate(request.json()['questions']):
                 markup_list.append(InlineKeyboardButton(question['content'], callback_data={
                     'button_id' : index,
@@ -112,13 +113,14 @@ def available_questions(update: Update, context: CallbackContext):
                     'type' : 'available'
                 }.__str__()))
             result = ""
-            for question in request.json()['questions']:
-                result += f"{question['id']} - {question['content']}\n"
+            for (index, question) in enumerate(question):
+                result += f"{index + 1} - {question['content']}\n"
             
             if (result == ""):
                 message.reply_text("Currently there are no questions for you.")
             else:
-                message.reply_markdown_v2("Test",
+                message.reply_markdown_v2(r"_*__These are all the questions available for you to "
+                    r"answer__\:*""\n"r"\(by pressing a question, you can answer it\)_""\n",
                     reply_markup=InlineKeyboardMarkup.from_column(markup_list))
         return 0
 
@@ -183,7 +185,7 @@ def asked_questions(update: Update, context: CallbackContext):
             result += f"{question['id']} - {question['text']}\n"
         
         message.reply_markdown_v2(r"_*__These are all the questions that you have asked__\:*""\n"
-            r"\(by pressing a question, you can see it's answers\)_""\n",
+            r"\(by pressing a question, you can manage that question\)_""\n",
             reply_markup=InlineKeyboardMarkup.from_column(markup_list))
         return 0
 
@@ -207,8 +209,8 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
             answers: list = request.json()['answers']
             result = ""
 
-            for answer in answers:
-                result += f"{answer['id']} - {answer['text']}\n"
+            for (index, answer) in enumerate(answers):
+                result += f"{index + 1} - {answer['text']}\n"
             
             new_result = ""
             for character in result:
@@ -261,6 +263,19 @@ def selected_question_choice(update: Update, context: CallbackContext):
     if (MESSAGE is not None):
         TYPE = DATA['type']
         SELECTED_BUTTON = MESSAGE.reply_markup.inline_keyboard[DATA['button_id']][0].text
+        if (any(x in SELECTED_BUTTON for x in string.punctuation)):
+            new_string = ""
+            for x in SELECTED_BUTTON:
+                if (x in string.punctuation):
+                    new_string += f"\{x}"
+                else:
+                    new_string += x
+            SELECTED_BUTTON = new_string
+
+        MESSAGE.edit_text(f"You selected: _*{SELECTED_BUTTON}*_",
+                        reply_markup=None, parse_mode=ParseMode.MARKDOWN_V2)
+        context.user_data['question'] = DATA
+
         if (TYPE == 'asked'):
             markup_list = [
                 KeyboardButton("See the answers"),
@@ -268,19 +283,6 @@ def selected_question_choice(update: Update, context: CallbackContext):
                 KeyboardButton("Nothing")
             ]
 
-            if (any(x in SELECTED_BUTTON for x in string.punctuation)):
-                new_string = ""
-                for x in SELECTED_BUTTON:
-                    if (x in string.punctuation):
-                        new_string += f"\{x}"
-                    else:
-                        new_string += x
-                SELECTED_BUTTON = new_string
-
-            MESSAGE.edit_text(f"You selected: _*{SELECTED_BUTTON}*_",
-                reply_markup=None, parse_mode=ParseMode.MARKDOWN_V2)
-            
-            context.user_data['question'] = DATA
             MESSAGE.reply_text("What would you like to know about this question?",
                 reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
         elif (TYPE == 'available'):
@@ -289,10 +291,6 @@ def selected_question_choice(update: Update, context: CallbackContext):
                 KeyboardButton("No")
             ]
 
-            MESSAGE.edit_text(f"You selected: _*{SELECTED_BUTTON}*_",
-                reply_markup=None, parse_mode=ParseMode.MARKDOWN_V2)
-
-            context.user_data['question'] = DATA
             MESSAGE.reply_text("Would you like to answer this question?",
                 reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
 
