@@ -5,7 +5,7 @@ import requests
 import os
 
 from telegram import BotCommand, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ParseMode, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, Bot
-from telegram.ext import Updater, CommandHandler, CallbackContext, ConversationHandler, MessageHandler, Filters, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, CallbackContext, ConversationHandler, MessageHandler, Filters, CallbackQueryHandler, PicklePersistence
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
 
@@ -14,13 +14,32 @@ SERVER = os.environ['SERVER']
 WENET_WEBSITE = os.environ['WENET_WEBSITE']
 WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
 
-LOGIN_INFORMATION = "login to your WeNet account and establish a connection with your Telegram account"
-ASK_QUESTION_INFORMATION = "ask the community a question"
-AVAILABLE_QUESTIONS_INFORMATION = "show the available questions for you to answer"
-ASKED_QUESTIONS_INFORMATION = "show all the questions that you asked and allows you to manipulate them"
-STOP_INFORMATION = r"allows you to stop/interrupt a process that you have started\. A process is "\
-r"started by using /ask\_question, /available\_questions, /asked\_questions and processes in them"
-HELP_INFORMATION = "provides a help message"
+LOGIN_INFORMATION = {
+    'en' : "login to your WeNet account and establish a connection with your Telegram account",
+    'gr' : "συνδεθήτε στο λογαριασμό σας στο WeNet για να δημιουργήσετε μια σύνδεση με το λογαριασμό σας στο Telegram"
+}
+ASK_QUESTION_INFORMATION = {
+    'en' : "ask the community a question",
+    'gr' : "κάντε μια ερώτηση στην κοινότητά μας"
+}
+AVAILABLE_QUESTIONS_INFORMATION = {
+    'en' : "shows the available questions for you to answer",
+    'gr' : "σας δείχνει τις διαθέσιμες ερωτήσεις που έχετε"
+}
+ASKED_QUESTIONS_INFORMATION = {
+    'en' : "shows all the questions that you asked and allows you to manipulate them",
+    'gr' : "σας δείχνει όλες τις ερωτήσεις που έχετε υποβάλει όπου μπορείτε να τις διαχειριστείτε"
+}
+STOP_INFORMATION = {
+    'en' : r"allows you to stop/interrupt a process that you have started\. A process is started "\
+        r"by using /ask\_question, /available\_questions, /asked\_questions and processes in them",
+    'gr' : r"σας επιτρέπει να σταματήσετε τη διαδικασία που έχετε αρχίσει με μια από τις "\
+        r"εντολές\: /ask\_question, /available\_questions και /asked\_questions"
+}
+HELP_INFORMATION = {
+    'en' : "provides a help message",
+    'gr' : "σας παρέχει βοήθημα"
+}
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -28,6 +47,15 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
+CONNECTION_FAILED = {
+    'en' : "Could not establish a connection.\nPlease try again.",
+    'gr' : "Δεν μπορέσαμε σας συνδέσουμε. Παρακαλώ δοκιμάστε ξανά.",
+}
+CONNECTION_SUCCEDED = {
+    'en' : "Connection created!",
+    'gr' : "Η σύνδεση έχει δημιουργηθεί!",
+}
 
 def start(update: Update, context: CallbackContext):
     """
@@ -37,17 +65,21 @@ def start(update: Update, context: CallbackContext):
     passed_arguments = context.args
 
     if (len(passed_arguments) == 0):
-        update.message.reply_text(f"Hi {user.first_name}! Welcome to Socialab")
+        context.chat_data['language'] = 'en'
+        update.message.reply_text(f"Welcome to sociaLab. The default language is English. For Greek"
+        "send /gr and for Turkish /tr .\nΚαλως ορίσατε στο sociaLab. Η καθορισμένη γλώσσα είναι τα "
+        "Αγγλικά. Για Ελληνικά στείλτε /gr και για Τουρκικά /tr.")
     else:
         # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
         request = requests.post(f'{SERVER}/create_user', data={
             'code' : passed_arguments[0],
             'user_id' : user.id,
         }, verify=False)
+        LANGUAGE = context.chat_data['language']
         if (request.status_code == 400):
-            update.message.reply_text('Could not establish a connection.\nPlease try again.')
+            update.message.reply_text(CONNECTION_FAILED[LANGUAGE])
         else:
-            update.message.reply_text('Connection created!')
+            update.message.reply_text(CONNECTION_SUCCEDED[LANGUAGE])
         update.message.delete()
         
 def help(update: Update, context: CallbackContext):
@@ -55,23 +87,37 @@ def help(update: Update, context: CallbackContext):
     Can be used by the user to print (text) them the available actions.
     """
     user = update.effective_user
+    LANGUAGE = context.chat_data['language']
     update.message.reply_markdown_v2(rf"Hi _{user.first_name}_\!""\n"
     r"*These are the available commands*\:""\n"
-    rf"• /login \- _{LOGIN_INFORMATION}_""\n"
-    rf"• /ask\_question \- _{ASK_QUESTION_INFORMATION}_""\n"
-    rf"• /available\_questions \- _{AVAILABLE_QUESTIONS_INFORMATION}_""\n"
-    rf"• /asked\_questions \- _{ASKED_QUESTIONS_INFORMATION}_""\n"
-    rf"• /stop \- _{STOP_INFORMATION}_""\n"
-    rf"• /help \- _{HELP_INFORMATION}_""\n")
+    rf"• /login \- _{LOGIN_INFORMATION[LANGUAGE]}_""\n"
+    rf"• /ask\_question \- _{ASK_QUESTION_INFORMATION[LANGUAGE]}_""\n"
+    rf"• /available\_questions \- _{AVAILABLE_QUESTIONS_INFORMATION[LANGUAGE]}_""\n"
+    rf"• /asked\_questions \- _{ASKED_QUESTIONS_INFORMATION[LANGUAGE]}_""\n"
+    rf"• /stop \- _{STOP_INFORMATION[LANGUAGE]}_""\n"
+    rf"• /help \- _{HELP_INFORMATION[LANGUAGE]}_""\n")
+
+ASK_QUESTION = {
+    'en' : "Type your question ",
+    'gr' : "Πληκτρολογήστε την ερώτηση που έχετε"
+}
 
 def ask_question(update: Update, context: CallbackContext):    
     """
     It can be used by the user to make a question, which will be send to the appropriate users 
     according to the WeNet platform.
     """
-    update.message.reply_text("Type the question that you want to ask")
+    update.message.reply_text(ASK_QUESTION[context.chat_data['language']])
     return 0
 
+QUESTION_SUCCEDED = {
+    'en' : "Your question was submitted successfully!",
+    'gr' : "Η ερώτηση σας καταχωρήθηκε επιτυχώς!"
+}
+QUESTION_FAILED = {
+    'en' : "Your question could not be submitted. Please try again.",
+    'gr' : "Η ερώτηση σας δεν μπόρεσε να καταχωρηθεί. Παρακαλώ δοκιμάστε ξανά."
+}
 def ask_question_handler(update: Update, context: CallbackContext):
     """
     Handles the question typed by the user by sending it to the server.
@@ -86,11 +132,22 @@ def ask_question_handler(update: Update, context: CallbackContext):
             }, verify=False)
 
         if (request.status_code == 200):
-            message.reply_text("Question was submitted successfully!")
+            message.reply_text(QUESTION_SUCCEDED[context.chat_data['language']])
         else:
-            message.reply_text("Question could not be submitted. Please try again.")
-    # message.reply_text(f"You asked: \"{message.text}\".")
+            message.reply_text(QUESTION_FAILED[context.chat_data['language']])
     return ConversationHandler.END
+
+NO_AVAILABLE_QUESTIONS = {
+    'en' : "Currently there are no questions for you.",
+    'gr' : "Προς το παρόν δεν υπάρχουν ερωτήσεις για εσάς.",
+}
+
+AVAILABLE_QUESTIONS = {
+    'en' : r"_*__These are all the questions available for you to answer__\:*""\n"
+        r"\(by pressing a question, you can answer it\)_""\n",
+    'gr' : r"_*__Αυτές είναι όλες οι ερωτήσεις που έχετε στη διάθεση σας για να απαντήσετε__\:*""\n"
+        r"\(πατώντας μια ερώτηση, μπορείτε να την απαντήσετε\)_""\n"
+}
 
 def available_questions(update: Update, context: CallbackContext):
     """
@@ -113,16 +170,25 @@ def available_questions(update: Update, context: CallbackContext):
                     'type' : 'available'
                 }.__str__()))
             result = ""
-            for (index, question) in enumerate(question):
+            for (index, question) in enumerate(questions):
                 result += f"{index + 1} - {question['content']}\n"
             
             if (result == ""):
-                message.reply_text("Currently there are no questions for you.")
+                message.reply_text(NO_AVAILABLE_QUESTIONS[context.chat_data['language']])
             else:
-                message.reply_markdown_v2(r"_*__These are all the questions available for you to "
-                    r"answer__\:*""\n"r"\(by pressing a question, you can answer it\)_""\n",
+                message.reply_markdown_v2(AVAILABLE_QUESTIONS[context.chat_data['language']],
                     reply_markup=InlineKeyboardMarkup.from_column(markup_list))
         return 0
+
+TYPE_ANSWER = {
+    'en' : "Please type your answer:",
+    'gr' : "Παρακαλώ πληκτρολογήστε την απάντηση σας:"
+}
+
+NO_SUCH_ANSWER = {
+    'en' : "I'm sorry, I couldn't understand what you typed.",
+    'gr' : "Λυπάμαι, δεν μπόρεσα να καταλάβω τι πληκτρολογήσατε."
+}
 
 def available_question_manipulation(update: Update, context: CallbackContext):
     """
@@ -130,14 +196,26 @@ def available_question_manipulation(update: Update, context: CallbackContext):
     """
     MESSAGE = update.message
     MESSAGE_CONTENT = MESSAGE.text.lower()
+    LANGUAGE = context.chat_data['language']
 
     if (MESSAGE is not None):
-        if ('yes' in MESSAGE_CONTENT):
-            MESSAGE.reply_text("Please type your answer:", reply_markup=ReplyKeyboardRemove())
+        if (YES[LANGUAGE].lower() in MESSAGE_CONTENT):
+            MESSAGE.reply_text(TYPE_ANSWER[LANGUAGE],
+                reply_markup=ReplyKeyboardRemove())
             return 1
         else:
-            MESSAGE.reply_text("I'm sorry, I couldn't understand what you typed.",
+            MESSAGE.reply_text(NO_SUCH_ANSWER[LANGUAGE],
                 reply_markup=ReplyKeyboardRemove())
+
+ANSWER_SUCCEDED = {
+    'en' : "Your answer was submitted successfully!",
+    'gr' : "Η απάντηση σας καταχωρήθηκε επιτυχώς!"
+}
+
+ANSWER_FAILED = {
+    'en' : "Your answer could not be submitted. Please try again.",
+    'gr' : "Η απάντηση σας δεν μπόρεσε να καταχωρηθεί. Παρακαλώ δοκιμάστε ξανά."
+}
 
 def answer_handler(update: Update, context: CallbackContext):
     """
@@ -155,12 +233,26 @@ def answer_handler(update: Update, context: CallbackContext):
             }, verify=False)
 
         if (request.status_code == 200):
-            MESSAGE.reply_text("Answer was submitted successfully!")
+            MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
         else:
-            MESSAGE.reply_text("Answer could not be submitted. Please try again.")
+            MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
 
     return ConversationHandler.END
 
+NO_ASKED_QUESTIONS = {
+    'en' : "Currently you do not have any active questions. You can ask using /ask_question",
+    'gr' : "Προς το παρόν δεν έχετε ενεργές ερωτήσεις. Μπορείτε να ρωτήσετε χρησιμοποιώντας "
+        "/ask_question"
+}
+
+ASKED_QUESTIONS = {
+    'en' : r"_*__These are all the questions that you have asked__\:*""\n"
+        r"\(by pressing a question, you can manage that question\)_""\n",
+    'gr' : r"_*__Αυτές είναι όλες οι ερωτήσεις που έχετε κάνει__\:*""\n"
+        r"\(πατώντας το μια ερώτηση, μπορείτε να τη διαχειριστείτε\)_""\n"
+}
+
+# FIXME Does not check if the user has submitted questions previously.
 def asked_questions(update: Update, context: CallbackContext):
     """
     It can be used by a user to see their asked questions.
@@ -184,10 +276,24 @@ def asked_questions(update: Update, context: CallbackContext):
             }.__str__()))
             result += f"{question['id']} - {question['text']}\n"
         
-        message.reply_markdown_v2(r"_*__These are all the questions that you have asked__\:*""\n"
-            r"\(by pressing a question, you can manage that question\)_""\n",
+        message.reply_markdown_v2(ASKED_QUESTIONS[context.chat_data['language']],
             reply_markup=InlineKeyboardMarkup.from_column(markup_list))
         return 0
+
+NO_ANSWER = {
+    'en' : "No one has yet to answer",
+    'gr' : "Κανείς δεν έχει απαντήσει ακόμη"
+}
+
+SOLVED_SUCCEDED = {
+    'en' : "The question was successfully marked as solved!",
+    'gr' : "Η ερώτηση έχει επισημανθεί επιτυχώς ως λυμένη!"
+}
+
+ERROR = {
+    'en' : "An error occurred.",
+    'gr' : "Παρουσιάστηκε κάποιο σφάλμα."
+}
 
 def asked_question_manipulation(update: Update, context: CallbackContext):
     """
@@ -219,7 +325,7 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
                 else:
                     new_result += character
             if (new_result == ""):
-                MESSAGE.reply_text("No one answered yet.", reply_markup=ReplyKeyboardRemove())
+                MESSAGE.reply_text(NO_ANSWER[context.chat_data['language']], reply_markup=ReplyKeyboardRemove())
             else:
                 MESSAGE.reply_markdown_v2(f'_{new_result}_', reply_markup=ReplyKeyboardRemove())
         elif ('mark as solved' in MESSAGE_CONTENT):
@@ -229,12 +335,12 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
             }, verify=False)
             
             if (request.status_code == 200):
-                MESSAGE.reply_text("The question was successfully marked a solved!",
+                MESSAGE.reply_text(SOLVED_SUCCEDED[context.chat_data['language']],
                 reply_markup=ReplyKeyboardRemove())
             else:
-                MESSAGE.reply_text("Error", reply_markup=ReplyKeyboardRemove())
+                MESSAGE.reply_text(ERROR[context.chat_data['language']], reply_markup=ReplyKeyboardRemove())
         else:
-            MESSAGE.reply_text("I'm sorry, I couldn't understand what you typed.",
+            MESSAGE.reply_text(NO_SUCH_ANSWER[context.chat_data['language']],
             reply_markup=ReplyKeyboardRemove())
     context.user_data
     return ConversationHandler.END
@@ -245,8 +351,52 @@ def login(update: Update, context: CallbackContext):
         update.message.reply_html(
             f'<a href="http://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}">Login to Wenet</a>')
 
+PROCESS_STOPPED = {
+    'en' : "The process was stopped.",
+    'gr' : "Η διαδικασία σταμάτησε."
+}
+
+SELECTED = {
+    'en' : "You selected:",
+    'gr' : "Επιλέξατε:",
+}
+
+SEE_ANSWERS = {
+    'en' : "See the answers",
+    'gr' : "Δείτε τις απαντήσεις"
+}
+
+MARK_SOLVED = {
+    'en' : "Mark as solved",
+    'gr' : "Επισημάνετε ως λυμένο"
+}
+NOTHING = {
+    'en' : "Nothing",
+    'gr' : "Τίποτα"
+}
+
+QUESTION_ABOUT_QUESTION = {
+    'en' : "What would you like to know about this question?",
+    'gr' : "Τι θα θέλατε να μάθετε για αυτή την ερώτηση;"
+}
+
+ANSWER_ABOUT_QUESTION = {
+    'en' : "Would you like to answer this question?",
+    'gr' : "Θα θέλατε να απαντήσετε αυτή την ερώτηση;"
+}
+
+YES = {
+    'en' : "Yes",
+    'gr' : "Ναι"
+}
+
+NO = {
+    'en' : "No",
+    'gr' : "Όχι"
+}
+
 def stop(update: Update, context: CallbackContext):
-    update.message.reply_text("Process stopped.", reply_markup=ReplyKeyboardRemove())
+    update.message.reply_text(PROCESS_STOPPED[context.chat_data['language']], reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
 
 def selected_question_choice(update: Update, context: CallbackContext):
@@ -261,6 +411,7 @@ def selected_question_choice(update: Update, context: CallbackContext):
     MESSAGE = QUERY.message
 
     if (MESSAGE is not None):
+        LANGUAGE = context.chat_data['language']
         TYPE = DATA['type']
         SELECTED_BUTTON = MESSAGE.reply_markup.inline_keyboard[DATA['button_id']][0].text
         if (any(x in SELECTED_BUTTON for x in string.punctuation)):
@@ -272,38 +423,82 @@ def selected_question_choice(update: Update, context: CallbackContext):
                     new_string += x
             SELECTED_BUTTON = new_string
 
-        MESSAGE.edit_text(f"You selected: _*{SELECTED_BUTTON}*_",
+        MESSAGE.edit_text(f"{SELECTED[LANGUAGE]} _*{SELECTED_BUTTON}*_",
                         reply_markup=None, parse_mode=ParseMode.MARKDOWN_V2)
         context.user_data['question'] = DATA
 
         if (TYPE == 'asked'):
             markup_list = [
-                KeyboardButton("See the answers"),
-                KeyboardButton("Mark as solved"),
-                KeyboardButton("Nothing")
+                KeyboardButton(SEE_ANSWERS[LANGUAGE]),
+                KeyboardButton(SEE_ANSWERS[LANGUAGE]),
+                KeyboardButton(NOTHING[LANGUAGE])
             ]
 
-            MESSAGE.reply_text("What would you like to know about this question?",
+            MESSAGE.reply_text(QUESTION_ABOUT_QUESTION[LANGUAGE],
                 reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
         elif (TYPE == 'available'):
             markup_list = [
-                KeyboardButton("Yes"),
-                KeyboardButton("No")
+                KeyboardButton(YES[LANGUAGE]),
+                KeyboardButton(NO[LANGUAGE])
             ]
 
-            MESSAGE.reply_text("Would you like to answer this question?",
+            MESSAGE.reply_text(ANSWER_ABOUT_QUESTION[LANGUAGE],
                 reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+
+def change_to_greek(update: Update, context: CallbackContext):
+    MESSAGE = update.message
+
+    if (MESSAGE is not None):
+        context.chat_data['language'] = 'gr'
+        context.bot.set_my_commands(commands=[
+            BotCommand('help', HELP_INFORMATION['gr']),
+            BotCommand('login', LOGIN_INFORMATION['gr']),
+            BotCommand('ask_question', ASK_QUESTION_INFORMATION['gr']),
+            BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['gr']),
+            BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['gr']),
+            BotCommand('stop', STOP_INFORMATION['gr'])])
+
+        MESSAGE.reply_text("Η γλώσσα του συστήματος έχει αλλάξει σε Ελληνικά.")
+
+def change_to_turkish(update: Update, context: CallbackContext):
+    MESSAGE = update.message
+
+    if (MESSAGE is not None):
+        context.chat_data['language'] = 'tr'
+        context.bot.set_my_commands(commands=[
+            BotCommand('help', HELP_INFORMATION['tr']),
+            BotCommand('login', LOGIN_INFORMATION['tr']),
+            BotCommand('ask_question', ASK_QUESTION_INFORMATION['tr']),
+            BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['tr']),
+            BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['tr']),
+            BotCommand('stop', STOP_INFORMATION['tr'])])
+
+        MESSAGE.reply_text("")
+
+def change_to_english(update: Update, context: CallbackContext):
+    MESSAGE = update.message
+
+    if (MESSAGE is not None):
+        context.chat_data['language'] = 'en'
+        context.bot.set_my_commands(commands=[
+            BotCommand('help', HELP_INFORMATION['en']),
+            BotCommand('login', LOGIN_INFORMATION['en']),
+            BotCommand('ask_question', ASK_QUESTION_INFORMATION['en']),
+            BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['en']),
+            BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['en']),
+            BotCommand('stop', STOP_INFORMATION['en'])])
+        MESSAGE.reply_text("The system's language has changed to English.")
 
 def main() -> None:
     bot = Bot(BOT_TOKEN)
     bot.set_my_commands(commands=[
-        BotCommand('help', HELP_INFORMATION),
-        BotCommand('login', LOGIN_INFORMATION),
-        BotCommand('ask_question', ASK_QUESTION_INFORMATION),
-        BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION),
-        BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION),
-        BotCommand('stop', STOP_INFORMATION)])
-    updater = Updater(BOT_TOKEN)
+        BotCommand('help', HELP_INFORMATION['en']),
+        BotCommand('login', LOGIN_INFORMATION['en']),
+        BotCommand('ask_question', ASK_QUESTION_INFORMATION['en']),
+        BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['en']),
+        BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['en']),
+        BotCommand('stop', STOP_INFORMATION['en'])])
+    updater = Updater(BOT_TOKEN, persistence=PicklePersistence('bot/data/bot_data'))
     dispatcher = updater.dispatcher
 
     stop_handlers = [
@@ -313,6 +508,10 @@ def main() -> None:
 
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('help', help))
+
+    dispatcher.add_handler(CommandHandler('gr', change_to_greek))
+    dispatcher.add_handler(CommandHandler('tr', change_to_turkish))
+    dispatcher.add_handler(CommandHandler('en', change_to_english))
 
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('ask_question', ask_question)],
@@ -330,7 +529,9 @@ def main() -> None:
         states={
             0 : [MessageHandler(
                 Filters.text & ~(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$') |
-                Filters.regex('^[N|n]othing.?$') | Filters.command), asked_question_manipulation)]
+                Filters.regex('^[N|n]othing.?$') | Filters.regex('^[Α|α]κύρωση.?$') |
+                Filters.regex('^[Τ|τ]έλος.?$') | Filters.regex('^[Τ|τ]ίποτα.?$')| Filters.command),
+                asked_question_manipulation)]
         },
         fallbacks=[
             CommandHandler('stop', stop),
@@ -338,20 +539,21 @@ def main() -> None:
             MessageHandler(Filters.regex('^[N|n]othing.?$'), stop)
         ]
     ))
+
+    AVAILABLE_QUESTIONS_TEXT_FILTERS = (Filters.command | Filters.regex('^[C|c]ancel.?$') |
+        Filters.regex('^[D|d]one.?$') | Filters.regex('^[Α|α]κύρωση.?$') |
+        Filters.regex('^[N|n]o.?$') | Filters.regex('^[Τ|τ]έλος.?$') | Filters.regex('"[Ό|ό]χι.?$'))
     
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('available_questions', available_questions)],
         states= {
-            0 : [MessageHandler(Filters.text & ~(Filters.command | Filters.regex('^[C|c]ancel.?$') |
-            Filters.regex('^[D|d]one.?$') | Filters.regex('^[N|n]o.?$')),
+            0 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS,
             available_question_manipulation)],
-            1 : [MessageHandler(Filters.text & ~(Filters.command | Filters.regex('^[C|c]ancel.?$') |
-            Filters.regex('^[D|d]one.?$') | Filters.regex('^[N|n]o.?$')), answer_handler)],
+            1 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, answer_handler)],
         },
         fallbacks=[
             CommandHandler('stop', stop),
-            MessageHandler(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$') |
-            Filters.regex('^[N|n]o.?$'), stop),
+            MessageHandler(AVAILABLE_QUESTIONS_TEXT_FILTERS, stop),
         ]
     ))
     dispatcher.add_handler(CommandHandler('login', login))
