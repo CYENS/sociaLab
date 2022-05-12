@@ -335,9 +335,10 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
     MESSAGE = update.message
     MESSAGE_CONTENT = MESSAGE.text.lower()
     USER = update.effective_user
+    LANGUAGE = context.chat_data['language']
 
     if (MESSAGE is not None):   
-        if (all(el in MESSAGE_CONTENT for el in ['see', 'answers'])) :
+        if (SEE_ANSWERS[LANGUAGE].lower() in MESSAGE_CONTENT):
             request = requests.get(f'{SERVER}/question_answers', params={
                     'user_id' : USER.id,
                     'question_id' : DATA['question_id']
@@ -356,31 +357,39 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
                 else:
                     new_result += character
             if (new_result == ""):
-                MESSAGE.reply_text(NO_ANSWER[context.chat_data['language']], reply_markup=ReplyKeyboardRemove())
+                MESSAGE.reply_text(NO_ANSWER[LANGUAGE], reply_markup=ReplyKeyboardRemove())
             else:
                 MESSAGE.reply_markdown_v2(f'_{new_result}_', reply_markup=ReplyKeyboardRemove())
-        elif ('mark as solved' in MESSAGE_CONTENT):
+        elif (MARK_SOLVED[LANGUAGE] in MESSAGE_CONTENT):
             request = requests.post(f'{SERVER}/mark_as_solved', data={
                 'user_id' : USER.id,
                 'question_id' : DATA['question_id']
             }, verify=False)
             
             if (request.status_code == 200):
-                MESSAGE.reply_text(SOLVED_SUCCEDED[context.chat_data['language']],
+                MESSAGE.reply_text(SOLVED_SUCCEDED[LANGUAGE],
                 reply_markup=ReplyKeyboardRemove())
             else:
-                MESSAGE.reply_text(ERROR[context.chat_data['language']], reply_markup=ReplyKeyboardRemove())
+                MESSAGE.reply_text(ERROR[LANGUAGE], reply_markup=ReplyKeyboardRemove())
         else:
-            MESSAGE.reply_text(NO_SUCH_ANSWER[context.chat_data['language']],
+            MESSAGE.reply_text(NO_SUCH_ANSWER[LANGUAGE],
             reply_markup=ReplyKeyboardRemove())
     context.user_data
     return ConversationHandler.END
+
+
+LOGIN = {
+    'en' : "Login to WeNet",
+    'gr' : "Συνδεθέιτε στο WeNet",
+    'tr' : "WeNet'e bağlan "
+}
 
 def login(update: Update, context: CallbackContext):
     message = update.message
     if (message is not None):
         update.message.reply_html(
-            f'<a href="http://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}">Login to Wenet</a>')
+            f"<a href='http://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}'"
+            f">{LOGIN[context.chat_data['language']]}</a>")
 
 PROCESS_STOPPED = {
     'en' : "The process was stopped.",
@@ -485,12 +494,18 @@ def selected_question_choice(update: Update, context: CallbackContext):
             MESSAGE.reply_text(ANSWER_ABOUT_QUESTION[LANGUAGE],
                 reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
 
+STANDARD_COMMANDS = [
+    BotCommand('gr', "Για Ελληνικά"),
+    BotCommand('tr', "Türkçe için"),
+    BotCommand('en', "For English")
+]
+
 def change_to_greek(update: Update, context: CallbackContext):
     MESSAGE = update.message
 
     if (MESSAGE is not None):
         context.chat_data['language'] = 'gr'
-        context.bot.set_my_commands(commands=[
+        context.bot.set_my_commands(commands=STANDARD_COMMANDS + [
             BotCommand('help', HELP_INFORMATION['gr']),
             BotCommand('login', LOGIN_INFORMATION['gr']),
             BotCommand('ask_question', ASK_QUESTION_INFORMATION['gr']),
@@ -505,7 +520,7 @@ def change_to_turkish(update: Update, context: CallbackContext):
 
     if (MESSAGE is not None):
         context.chat_data['language'] = 'tr'
-        context.bot.set_my_commands(commands=[
+        context.bot.set_my_commands(commands=STANDARD_COMMANDS + [
             BotCommand('help', HELP_INFORMATION['tr']),
             BotCommand('login', LOGIN_INFORMATION['tr']),
             BotCommand('ask_question', ASK_QUESTION_INFORMATION['tr']),
@@ -520,7 +535,7 @@ def change_to_english(update: Update, context: CallbackContext):
 
     if (MESSAGE is not None):
         context.chat_data['language'] = 'en'
-        context.bot.set_my_commands(commands=[
+        context.bot.set_my_commands(commands=STANDARD_COMMANDS + [
             BotCommand('help', HELP_INFORMATION['en']),
             BotCommand('login', LOGIN_INFORMATION['en']),
             BotCommand('ask_question', ASK_QUESTION_INFORMATION['en']),
@@ -529,10 +544,9 @@ def change_to_english(update: Update, context: CallbackContext):
             BotCommand('stop', STOP_INFORMATION['en'])])
         MESSAGE.reply_text("The system's language has changed to English.")
 
-# FIXME Change the handlers behaviour to accept both Greek and Turkish.
 def main() -> None:
     bot = Bot(BOT_TOKEN)
-    bot.set_my_commands(commands=[
+    bot.set_my_commands(commands=STANDARD_COMMANDS + [
         BotCommand('help', HELP_INFORMATION['en']),
         BotCommand('login', LOGIN_INFORMATION['en']),
         BotCommand('ask_question', ASK_QUESTION_INFORMATION['en']),
@@ -542,11 +556,6 @@ def main() -> None:
     updater = Updater(BOT_TOKEN, persistence=PicklePersistence('bot/data/bot_data'))
     dispatcher = updater.dispatcher
 
-    stop_handlers = [
-        CommandHandler('stop', stop),
-        MessageHandler(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$'), stop),
-    ]
-
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('help', help))
 
@@ -554,42 +563,52 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler('tr', change_to_turkish))
     dispatcher.add_handler(CommandHandler('en', change_to_english))
 
+    ASK_QUESTION_TEXT_FILTERS = (Filters.command | Filters.regex('^[C|c]ancel.?$') |
+        Filters.regex('^[D|d]one.?$') | Filters.regex('^[Α|α]κύρωση.?$') |
+        Filters.regex('^[Τ|τ]έλος.?$') | Filters.regex('^[Y|y]apıldı.?$') |
+        Filters.regex('^[İ|i]ptal.?$'))
+
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('ask_question', ask_question)],
         states={
-            0 : [MessageHandler(
-                Filters.text &  ~(Filters.command | Filters.regex('^[D|d]one[.|$]')),
-                ask_question_handler
-            )]
+            0 : [MessageHandler(Filters.text &  ~ASK_QUESTION_TEXT_FILTERS, ask_question_handler)]
         },
-        fallbacks=stop_handlers
+        fallbacks=[
+            CommandHandler('stop',stop),
+            MessageHandler(ASK_QUESTION_TEXT_FILTERS, stop)
+        ]
     ))
+
+    ASKED_QUESTIONS_TEXT_FILTERS = (Filters.command | Filters.regex('^[C|c]ancel.?$') |
+        Filters.regex('^[D|d]one.?$') | Filters.regex('^[N|n]othing.?$') |
+        Filters.regex('^[Α|α]κύρωση.?$') | Filters.regex('^[Τ|τ]έλος.?$') |
+        Filters.regex('^[Τ|τ]ίποτα.?$')  | Filters.regex('^[Y|y]apıldı.?$') |
+        Filters.regex('^[İ|i]ptal.?$') | Filters.regex('^[H|h]içbirşey.?$'))
+
     dispatcher.add_handler(CallbackQueryHandler(selected_question_choice))
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('asked_questions', asked_questions)],
         states={
-            0 : [MessageHandler(
-                Filters.text & ~(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$') |
-                Filters.regex('^[N|n]othing.?$') | Filters.regex('^[Α|α]κύρωση.?$') |
-                Filters.regex('^[Τ|τ]έλος.?$') | Filters.regex('^[Τ|τ]ίποτα.?$')| Filters.command),
+            0 : [MessageHandler(Filters.text & ~ASKED_QUESTIONS_TEXT_FILTERS,
                 asked_question_manipulation)]
         },
         fallbacks=[
             CommandHandler('stop', stop),
-            MessageHandler(Filters.regex('^[C|c]ancel.?$') | Filters.regex('^[D|d]one.?$'), stop),
-            MessageHandler(Filters.regex('^[N|n]othing.?$'), stop)
+            MessageHandler(ASKED_QUESTIONS_TEXT_FILTERS, stop)
         ]
     ))
 
     AVAILABLE_QUESTIONS_TEXT_FILTERS = (Filters.command | Filters.regex('^[C|c]ancel.?$') |
-        Filters.regex('^[D|d]one.?$') | Filters.regex('^[Α|α]κύρωση.?$') |
-        Filters.regex('^[N|n]o.?$') | Filters.regex('^[Τ|τ]έλος.?$') | Filters.regex('"[Ό|ό]χι.?$'))
+        Filters.regex('^[D|d]one.?$') | Filters.regex('^[N|n]o.?$') |
+        Filters.regex('^[Α|α]κύρωση.?$') | Filters.regex('^[Τ|τ]έλος.?$') |
+        Filters.regex('"[Ό|ό]χι.?$') | Filters.regex('^[Y|y]apıldı.?$') |
+        Filters.regex('^[İ|i]ptal.?$') | Filters.regex('^[H|h]ayır].?$'))
     
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('available_questions', available_questions)],
         states= {
             0 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS,
-            available_question_manipulation)],
+                available_question_manipulation)],
             1 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, answer_handler)],
         },
         fallbacks=[
