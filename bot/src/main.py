@@ -177,10 +177,10 @@ def available_questions(update: Update, context: CallbackContext):
     Texts the user with the available (unsolved) questions that they have according to the WeNet 
     platform.
     """
-    message = update.message
+    MESSAGE = update.message
     USER = update.effective_user
 
-    if (message != None):
+    if (MESSAGE != None):
         request = requests.get(f'{SERVER}/available_questions', params= {'user_id' : USER.id}, verify=False)
 
         if (request.status_code == 200):
@@ -192,14 +192,11 @@ def available_questions(update: Update, context: CallbackContext):
                     'question_id' : question['id'],
                     'type' : 'available'
                 }.__str__()))
-            result = ""
-            for (index, question) in enumerate(questions):
-                result += f"{index + 1} - {question['content']}\n"
             
-            if (result == ""):
-                message.reply_text(NO_AVAILABLE_QUESTIONS[context.chat_data['language']])
+            if (len(questions) == 0):
+                MESSAGE.reply_text(NO_AVAILABLE_QUESTIONS[context.chat_data['language']])
             else:
-                message.reply_markdown_v2(AVAILABLE_QUESTIONS[context.chat_data['language']],
+                MESSAGE.reply_markdown_v2(AVAILABLE_QUESTIONS[context.chat_data['language']],
                     reply_markup=InlineKeyboardMarkup.from_column(markup_list))
         return 0
 
@@ -282,19 +279,18 @@ ASKED_QUESTIONS = {
         r"\(Soruların üzerine tıklayarak soruları yönetebilirsiniz\)_"
 }
 
-# FIXME Does not check if the user has submitted questions previously.
 def asked_questions(update: Update, context: CallbackContext):
     """
     It can be used by a user to see their asked questions.
     """
-    message = update.message
-    if (message is not None):
+    MESSAGE = update.message
+    
+    if (MESSAGE is not None):
         user = update.effective_user
         request = requests.get(f'{SERVER}/asked_questions', params={
             'user_id' : user.id
         }, verify=False)
         questions: list = request.json()['questions']
-        result = "ID - Question\n"
         
         markup_list = []
         
@@ -304,10 +300,12 @@ def asked_questions(update: Update, context: CallbackContext):
                 'question_id' : question['id'],
                 'type' : 'asked'
             }.__str__()))
-            result += f"{question['id']} - {question['text']}\n"
         
-        message.reply_markdown_v2(ASKED_QUESTIONS[context.chat_data['language']],
-            reply_markup=InlineKeyboardMarkup.from_column(markup_list))
+        if (len(questions) == 0):
+            MESSAGE.reply_text(NO_ASKED_QUESTIONS[context.chat_data['language']])
+        else:
+            MESSAGE.reply_markdown_v2(ASKED_QUESTIONS[context.chat_data['language']],
+                reply_markup=InlineKeyboardMarkup.from_column(markup_list))
         return 0
 
 NO_ANSWER = {
