@@ -7,15 +7,12 @@ import os
 from telegram import BotCommand, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ParseMode, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext, ConversationHandler, MessageHandler, Filters, CallbackQueryHandler, PicklePersistence
 
-# BOT_TOKEN = os.environ['BOT_TOKEN']
+BOT_TOKEN = os.environ['BOT_TOKEN']
 
-# APP_ID = os.environ['APP_ID']
-# SERVER = os.environ['SERVER']
-# WENET_WEBSITE = os.environ['WENET_WEBSITE']
-# WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
-BOT_TOKEN = '5397987170:AAGEspN33gK8ZReJgCwRZ1nHwKVeF4KGgYY'
-APP_ID = 'mH7Tbcd0W5'
-SERVER = 'http://localhost/wenet'
+APP_ID = os.environ['APP_ID']
+SERVER = os.environ['SERVER']
+WENET_WEBSITE = os.environ['WENET_WEBSITE']
+WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
 
 LOGIN_INFORMATION = {
     'en' : "login to your WeNet account and establish a connection with your Telegram account",
