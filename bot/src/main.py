@@ -382,11 +382,14 @@ LOGIN = {
 }
 
 def login(update: Update, context: CallbackContext):
+    """
+    Sends to the user a link which will redirect them to WeNet's login/registration page, which will
+    redirect them back to Telegram to create a connection between the two services.
+    """
     message = update.message
     if (message is not None):
         update.message.reply_html(
-            f"<a href='http://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id={APP_ID}'"
-            f">{LOGIN[context.chat_data['language']]}</a>")
+            f"<a href='{WENET_AUTHENTICATION}'>{LOGIN[context.chat_data['language']]}</a>")
 
 PROCESS_STOPPED = {
     'en' : "The process was stopped.",
@@ -442,6 +445,9 @@ NO = {
 }
 
 def stop(update: Update, context: CallbackContext):
+    """
+    Used for interrupting any process began by a `ConversationHandler`.
+    """
     update.message.reply_text(PROCESS_STOPPED[context.chat_data['language']], reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
 
@@ -498,6 +504,9 @@ STANDARD_COMMANDS = [
 ]
 
 def change_to_greek(update: Update, context: CallbackContext):
+    """
+    Changes the default UI's language to Greek.
+    """
     MESSAGE = update.message
 
     if (MESSAGE is not None):
@@ -513,6 +522,9 @@ def change_to_greek(update: Update, context: CallbackContext):
         MESSAGE.reply_text("Η γλώσσα του συστήματος έχει αλλάξει σε Ελληνικά.")
 
 def change_to_turkish(update: Update, context: CallbackContext):
+    """
+    Changes the default UI's language to Turkish.
+    """
     MESSAGE = update.message
 
     if (MESSAGE is not None):
@@ -528,6 +540,9 @@ def change_to_turkish(update: Update, context: CallbackContext):
         MESSAGE.reply_text("Sistemin dili Türkçe olarak değişti.")
 
 def change_to_english(update: Update, context: CallbackContext):
+    """
+    Changes the default UI's language to English.
+    """
     MESSAGE = update.message
 
     if (MESSAGE is not None):
