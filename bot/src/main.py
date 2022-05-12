@@ -7,38 +7,49 @@ import os
 from telegram import BotCommand, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ParseMode, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext, ConversationHandler, MessageHandler, Filters, CallbackQueryHandler, PicklePersistence
 
-BOT_TOKEN = os.environ['BOT_TOKEN']
+# BOT_TOKEN = os.environ['BOT_TOKEN']
 
-APP_ID = os.environ['APP_ID']
-SERVER = os.environ['SERVER']
-WENET_WEBSITE = os.environ['WENET_WEBSITE']
-WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
+# APP_ID = os.environ['APP_ID']
+# SERVER = os.environ['SERVER']
+# WENET_WEBSITE = os.environ['WENET_WEBSITE']
+# WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
+BOT_TOKEN = '5397987170:AAGEspN33gK8ZReJgCwRZ1nHwKVeF4KGgYY'
+APP_ID = 'mH7Tbcd0W5'
+SERVER = 'http://localhost/wenet'
 
 LOGIN_INFORMATION = {
     'en' : "login to your WeNet account and establish a connection with your Telegram account",
-    'gr' : "συνδεθήτε στο λογαριασμό σας στο WeNet για να δημιουργήσετε μια σύνδεση με το λογαριασμό σας στο Telegram"
+    'gr' : "συνδεθήτε στο λογαριασμό σας στο WeNet για να δημιουργήσετε μια σύνδεση με το λογαριασμό σας στο Telegram",
+    'tr' : "WeNet hesabınıza giriş yapın ve Telegram hesabınızla bağlantı kurun"
 }
 ASK_QUESTION_INFORMATION = {
     'en' : "ask the community a question",
-    'gr' : "κάντε μια ερώτηση στην κοινότητά μας"
+    'gr' : "κάντε μια ερώτηση στην κοινότητά μας",
+    'tr' : "Gruba soru sorun"
 }
 AVAILABLE_QUESTIONS_INFORMATION = {
     'en' : "shows the available questions for you to answer",
-    'gr' : "σας δείχνει τις διαθέσιμες ερωτήσεις που έχετε"
+    'gr' : "σας δείχνει τις διαθέσιμες ερωτήσεις που έχετε",
+    'tr' : "Size cevaplayabileceğiniz mevcut soruları gösterir"
 }
 ASKED_QUESTIONS_INFORMATION = {
     'en' : "shows all the questions that you asked and allows you to manipulate them",
-    'gr' : "σας δείχνει όλες τις ερωτήσεις που έχετε υποβάλει όπου μπορείτε να τις διαχειριστείτε"
+    'gr' : "σας δείχνει όλες τις ερωτήσεις που έχετε υποβάλει όπου μπορείτε να τις διαχειριστείτε",
+    'tr' : "Size sormuş olduğunuz tüm soruları gösterir ve üzerlerinde değişiklik yapmanıza izin verir"
 }
 STOP_INFORMATION = {
     'en' : r"allows you to stop/interrupt a process that you have started\. A process is started "\
         r"by using /ask\_question, /available\_questions, /asked\_questions and processes in them",
     'gr' : r"σας επιτρέπει να σταματήσετε τη διαδικασία που έχετε αρχίσει με μια από τις "\
-        r"εντολές\: /ask\_question, /available\_questions και /asked\_questions"
+        r"εντολές\: /ask\_question, /available\_questions και /asked\_questions",
+    'tr' : r"Başlatmış olduğunuz süreci durdurmak/kesintiye uğratmak için size izin verir. Süreç "\
+        r"/ask\_question, /available\_questions, /asked\_questions komutlarını kullanarak başlar "\
+        "ve devam ede"
 }
 HELP_INFORMATION = {
     'en' : "provides a help message",
-    'gr' : "σας παρέχει βοήθημα"
+    'gr' : "σας παρέχει βοήθημα",
+    'tr' : "Yardım mesajı gösterir"
 }
 
 logging.basicConfig(
@@ -47,14 +58,15 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-
 CONNECTION_FAILED = {
     'en' : "Could not establish a connection.\nPlease try again.",
     'gr' : "Δεν μπορέσαμε σας συνδέσουμε. Παρακαλώ δοκιμάστε ξανά.",
+    'tr' : "Bağlantı kurulamadı. Lütfen yeniden deneyiniz."
 }
 CONNECTION_SUCCEDED = {
     'en' : "Connection created!",
     'gr' : "Η σύνδεση έχει δημιουργηθεί!",
+    'tr' : "Bağlantı kuruldu!"
 }
 
 def start(update: Update, context: CallbackContext):
@@ -66,9 +78,11 @@ def start(update: Update, context: CallbackContext):
 
     if (len(passed_arguments) == 0):
         context.chat_data['language'] = 'en'
-        update.message.reply_text(f"Welcome to sociaLab. The default language is English. For Greek"
-        "send /gr and for Turkish /tr .\nΚαλως ορίσατε στο sociaLab. Η καθορισμένη γλώσσα είναι τα "
-        "Αγγλικά. Για Ελληνικά στείλτε /gr και για Τουρκικά /tr.")
+        update.message.reply_markdown_v2(rf"*_Welcome to sociaLa\!_* The default language is"
+        r"English\. For Greek send /gr and for Turkish /tr\.""\n"r"*_Καλως ορίσατε στο sociaLab\!_* "
+        r"Η καθορισμένη γλώσσα είναι τα Αγγλικά\. Για Ελληνικά στείλτε /gr και για Τουρκικά /tr\.""\n"
+        r"*_SociaLab’ a hoşgeldiniz\!_* Varsayılan dil İngilizce’dir\. Yunanca için /gr ve Türkçe için "
+        r"/tr yazıp gönderiniz\.")
     else:
         # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
         request = requests.post(f'{SERVER}/create_user', data={
@@ -95,11 +109,13 @@ def help(update: Update, context: CallbackContext):
     rf"• /available\_questions \- _{AVAILABLE_QUESTIONS_INFORMATION[LANGUAGE]}_""\n"
     rf"• /asked\_questions \- _{ASKED_QUESTIONS_INFORMATION[LANGUAGE]}_""\n"
     rf"• /stop \- _{STOP_INFORMATION[LANGUAGE]}_""\n"
-    rf"• /help \- _{HELP_INFORMATION[LANGUAGE]}_""\n")
+    rf"• /help \- _{HELP_INFORMATION[LANGUAGE]}_""\n"
+    r"• /en For English""\n"r"• /gr Για Ελληνικά""\n"r"• /tr Türkçe için")
 
 ASK_QUESTION = {
-    'en' : "Type your question ",
-    'gr' : "Πληκτρολογήστε την ερώτηση που έχετε"
+    'en' : "Type your question.",
+    'gr' : "Πληκτρολογήστε την ερώτηση που έχετε.",
+    'tr' : "Sorunuzu yazınız."
 }
 
 def ask_question(update: Update, context: CallbackContext):    
@@ -112,12 +128,16 @@ def ask_question(update: Update, context: CallbackContext):
 
 QUESTION_SUCCEDED = {
     'en' : "Your question was submitted successfully!",
-    'gr' : "Η ερώτηση σας καταχωρήθηκε επιτυχώς!"
+    'gr' : "Η ερώτηση σας καταχωρήθηκε επιτυχώς!",
+    'tr' : "Sorunuz başarıyla gönderildi!"
 }
+
 QUESTION_FAILED = {
     'en' : "Your question could not be submitted. Please try again.",
-    'gr' : "Η ερώτηση σας δεν μπόρεσε να καταχωρηθεί. Παρακαλώ δοκιμάστε ξανά."
+    'gr' : "Η ερώτηση σας δεν μπόρεσε να καταχωρηθεί. Παρακαλώ δοκιμάστε ξανά.",
+    'tr' : "Sorunuz gönderilemedi. Lütfen tekrar deneyiniz."
 }
+
 def ask_question_handler(update: Update, context: CallbackContext):
     """
     Handles the question typed by the user by sending it to the server.
@@ -140,13 +160,16 @@ def ask_question_handler(update: Update, context: CallbackContext):
 NO_AVAILABLE_QUESTIONS = {
     'en' : "Currently there are no questions for you.",
     'gr' : "Προς το παρόν δεν υπάρχουν ερωτήσεις για εσάς.",
+    'tr' : "Şu an sizin için herhangi bir soru yok."
 }
 
 AVAILABLE_QUESTIONS = {
-    'en' : r"_*__These are all the questions available for you to answer__\:*""\n"
+    'en' : r"_*__These are all the questions available for you to answer\:__*""\n"
         r"\(by pressing a question, you can answer it\)_""\n",
-    'gr' : r"_*__Αυτές είναι όλες οι ερωτήσεις που έχετε στη διάθεση σας για να απαντήσετε__\:*""\n"
-        r"\(πατώντας μια ερώτηση, μπορείτε να την απαντήσετε\)_""\n"
+    'gr' : r"_*__Αυτές είναι όλες οι ερωτήσεις που έχετε στη διάθεση σας για να απαντήσετε\:__*""\n"
+        r"\(πατώντας μια ερώτηση, μπορείτε να την απαντήσετε\)_""\n",
+    'tr' : r"_*__Cevaplamanız için hazır olan tüm sorular bunlar\:__*""\n"
+        r"\(soruların üzerine tıklayarak cevap verebilirsiniz\)_""\n"
 }
 
 def available_questions(update: Update, context: CallbackContext):
@@ -182,12 +205,14 @@ def available_questions(update: Update, context: CallbackContext):
 
 TYPE_ANSWER = {
     'en' : "Please type your answer:",
-    'gr' : "Παρακαλώ πληκτρολογήστε την απάντηση σας:"
+    'gr' : "Παρακαλώ πληκτρολογήστε την απάντηση σας:",
+    'tr' : "Lütfen cevabınızı yazınız:"
 }
 
 NO_SUCH_ANSWER = {
     'en' : "I'm sorry, I couldn't understand what you typed.",
-    'gr' : "Λυπάμαι, δεν μπόρεσα να καταλάβω τι πληκτρολογήσατε."
+    'gr' : "Λυπάμαι, δεν μπόρεσα να καταλάβω τι πληκτρολογήσατε.",
+    'tr' : "Üzgünüm, ne yazdığınızı anlayamadım."
 }
 
 def available_question_manipulation(update: Update, context: CallbackContext):
@@ -209,12 +234,14 @@ def available_question_manipulation(update: Update, context: CallbackContext):
 
 ANSWER_SUCCEDED = {
     'en' : "Your answer was submitted successfully!",
-    'gr' : "Η απάντηση σας καταχωρήθηκε επιτυχώς!"
+    'gr' : "Η απάντηση σας καταχωρήθηκε επιτυχώς!",
+    'tr' : "Cevabınız başarıyla gönderildi!"
 }
 
 ANSWER_FAILED = {
     'en' : "Your answer could not be submitted. Please try again.",
-    'gr' : "Η απάντηση σας δεν μπόρεσε να καταχωρηθεί. Παρακαλώ δοκιμάστε ξανά."
+    'gr' : "Η απάντηση σας δεν μπόρεσε να καταχωρηθεί. Παρακαλώ δοκιμάστε ξανά.",
+    'tr' : "Cevabınız gönderilemedi. Lütfen yeniden deneyiniz."
 }
 
 def answer_handler(update: Update, context: CallbackContext):
@@ -242,14 +269,17 @@ def answer_handler(update: Update, context: CallbackContext):
 NO_ASKED_QUESTIONS = {
     'en' : "Currently you do not have any active questions. You can ask using /ask_question",
     'gr' : "Προς το παρόν δεν έχετε ενεργές ερωτήσεις. Μπορείτε να ρωτήσετε χρησιμοποιώντας "
-        "/ask_question"
+        "/ask_question",
+    'tr' : "Şu an için aktif bir sorunuz yok. Şunu kullanarak sorabilirsiniz /ask_question"
 }
 
 ASKED_QUESTIONS = {
-    'en' : r"_*__These are all the questions that you have asked__\:*""\n"
+    'en' : r"_*__These are all the questions that you have asked\:__*""\n"
         r"\(by pressing a question, you can manage that question\)_""\n",
-    'gr' : r"_*__Αυτές είναι όλες οι ερωτήσεις που έχετε κάνει__\:*""\n"
-        r"\(πατώντας το μια ερώτηση, μπορείτε να τη διαχειριστείτε\)_""\n"
+    'gr' : r"_*__Αυτές είναι όλες οι ερωτήσεις που έχετε κάνει\:__*""\n"
+        r"\(πατώντας το μια ερώτηση, μπορείτε να τη διαχειριστείτε\)_""\n",
+    'tr' : r"_*__Sormuş olduğunuz tüm sorular bunlar\:__*""\n"
+        r"\(Soruların üzerine tıklayarak soruları yönetebilirsiniz\)_"
 }
 
 # FIXME Does not check if the user has submitted questions previously.
@@ -281,18 +311,21 @@ def asked_questions(update: Update, context: CallbackContext):
         return 0
 
 NO_ANSWER = {
-    'en' : "No one has yet to answer",
-    'gr' : "Κανείς δεν έχει απαντήσει ακόμη"
+    'en' : "No one has yet to answer.",
+    'gr' : "Κανείς δεν έχει απαντήσει ακόμη.",
+    'tr' : "Şu ana kadar kimse cevaplamadı."
 }
 
 SOLVED_SUCCEDED = {
     'en' : "The question was successfully marked as solved!",
-    'gr' : "Η ερώτηση έχει επισημανθεί επιτυχώς ως λυμένη!"
+    'gr' : "Η ερώτηση έχει επισημανθεί επιτυχώς ως λυμένη!",
+    'tr' : "Soru çözüldü olarak işaretlendi!"
 }
 
 ERROR = {
     'en' : "An error occurred.",
-    'gr' : "Παρουσιάστηκε κάποιο σφάλμα."
+    'gr' : "Παρουσιάστηκε κάποιο σφάλμα.",
+    'tr' : "Bir hata oluştu."
 }
 
 def asked_question_manipulation(update: Update, context: CallbackContext):
@@ -353,46 +386,55 @@ def login(update: Update, context: CallbackContext):
 
 PROCESS_STOPPED = {
     'en' : "The process was stopped.",
-    'gr' : "Η διαδικασία σταμάτησε."
+    'gr' : "Η διαδικασία σταμάτησε.",
+    'tr' : "Süreç durduruldu."
 }
 
 SELECTED = {
     'en' : "You selected:",
     'gr' : "Επιλέξατε:",
+    'tr' : "Senin seçtiğin:"
 }
 
 SEE_ANSWERS = {
     'en' : "See the answers",
-    'gr' : "Δείτε τις απαντήσεις"
+    'gr' : "Δείτε τις απαντήσεις",
+    'tr' : "Cevapları gör"
 }
 
 MARK_SOLVED = {
     'en' : "Mark as solved",
-    'gr' : "Επισημάνετε ως λυμένο"
+    'gr' : "Επισημάνετε ως λυμένο",
+    'tr' : "Çözüldü olarak işaretle"
 }
 NOTHING = {
     'en' : "Nothing",
-    'gr' : "Τίποτα"
+    'gr' : "Τίποτα",
+    'tr' : "Hiçbirşey"
 }
 
 QUESTION_ABOUT_QUESTION = {
     'en' : "What would you like to know about this question?",
-    'gr' : "Τι θα θέλατε να μάθετε για αυτή την ερώτηση;"
+    'gr' : "Τι θα θέλατε να μάθετε για αυτή την ερώτηση;",
+    'tr' : "Bu soru hakkında ne bilmek istiyorsun?"
 }
 
 ANSWER_ABOUT_QUESTION = {
     'en' : "Would you like to answer this question?",
-    'gr' : "Θα θέλατε να απαντήσετε αυτή την ερώτηση;"
+    'gr' : "Θα θέλατε να απαντήσετε αυτή την ερώτηση;",
+    'tr' : "Bu soruyu cevaplamak istiyormusun?"
 }
 
 YES = {
     'en' : "Yes",
-    'gr' : "Ναι"
+    'gr' : "Ναι",
+    'tr' : "Evet"
 }
 
 NO = {
     'en' : "No",
-    'gr' : "Όχι"
+    'gr' : "Όχι",
+    'tr' : "Hayır"
 }
 
 def stop(update: Update, context: CallbackContext):
@@ -473,7 +515,7 @@ def change_to_turkish(update: Update, context: CallbackContext):
             BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['tr']),
             BotCommand('stop', STOP_INFORMATION['tr'])])
 
-        MESSAGE.reply_text("")
+        MESSAGE.reply_text("Sistemin dili Türkçe olarak değişti.")
 
 def change_to_english(update: Update, context: CallbackContext):
     MESSAGE = update.message
@@ -489,6 +531,7 @@ def change_to_english(update: Update, context: CallbackContext):
             BotCommand('stop', STOP_INFORMATION['en'])])
         MESSAGE.reply_text("The system's language has changed to English.")
 
+# FIXME Change the handlers behaviour to accept both Greek and Turkish.
 def main() -> None:
     bot = Bot(BOT_TOKEN)
     bot.set_my_commands(commands=[
