@@ -9,7 +9,7 @@ from telegram import Bot
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
-from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
+from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 
 from .models import User, Question, Answer
 
@@ -25,6 +25,7 @@ TELEGRAM_URI = os.environ['TELEGRAM_URI']
 APPLICATION_JSON = 'application/json'
 
 @csrf_exempt
+# FIXME This, does not work. Maybe we need to create our own "callback" function.
 def messages_callback_from_wenet(request: HttpRequest):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -149,8 +150,10 @@ def create_user(request: HttpRequest):
 def ask_question(request: HttpRequest):
     user_id = request.POST['user_id']
     message = request.POST['question']
-
-    user: User = User.objects.get(telegram_id=user_id)
+    try:
+        user: User = User.objects.get(telegram_id=user_id)
+    except User.DoesNotExist:
+        return HttpResponseForbidden()
 
     question = Question(user=user, content={user.language : message})
     task_id = create_wenet_question(question)
@@ -230,7 +233,11 @@ def create_wenet_answer(answer: Answer):
 
 def asked_questions(request: HttpRequest):
     user_id = request.GET['user_id']
-    user: User = User.objects.get(telegram_id=user_id)
+    try:
+        user: User = User.objects.get(telegram_id=user_id)
+    except User.DoesNotExist:
+        return HttpResponseForbidden()
+
     questions = Question.objects.filter(user=user)
     
     result = []
@@ -274,7 +281,10 @@ def question_answers(request: HttpRequest):
 # FIXME This function should call the WeNet server and find the appopriate questions that the current
 # user should see.
 def available_questions(request: HttpRequest):
-    user: User = User.objects.get(telegram_id=request.GET['user_id'])
+    try:
+        user: User = User.objects.get(telegram_id=request.GET['user_id'])
+    except User.DoesNotExist:
+        return HttpResponseForbidden()
     
     result = []
     for question in Question.objects.filter(solved=False):
