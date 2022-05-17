@@ -194,7 +194,6 @@ def change_punctuations_to_raw(s: str):
             new_string += f"\{char}"
         else:
             new_string += char
-    print(new_string)
     return new_string
 
 SEND_ANSWER_MESSAGE = {
@@ -272,7 +271,7 @@ def asked_questions(request: HttpRequest):
     except User.DoesNotExist:
         return HttpResponseForbidden()
 
-    questions = Question.objects.filter(user=user)
+    questions = Question.objects.filter(user=user, solved=False)
     
     result = []
 
@@ -327,3 +326,15 @@ def available_questions(request: HttpRequest):
             'content' : question.content[user.language]
         })
     return JsonResponse({'questions' : result})
+
+@csrf_exempt
+def delete_question(request: HttpRequest):
+    user: User = User.objects.get(telegram_id=request.POST['user_id'])
+    question: Question = Question.objects.get(id=request.POST['question_id'])
+    query_result = question.delete()
+
+    if (query_result[0] > 0):
+        return HttpResponse()
+
+    return HttpResponseBadRequest()
+    

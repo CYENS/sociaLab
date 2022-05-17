@@ -14,4 +14,5 @@ urlpatterns = [
     path('question_answers', views.question_answers, name='question_answers'),
     path('available_questions', views.available_questions),
     path('messages_callback_from_wenet', views.messages_callback_from_wenet, name='messages_callback_from_wenet'),
+    path('delete_question', views.delete_question)
 ]
