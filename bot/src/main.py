@@ -16,33 +16,38 @@ WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
 
 LOGIN_INFORMATION = {
     'en' : "login to your WeNet account and establish a connection with your Telegram account",
-    'gr' : "συνδεθήτε στο λογαριασμό σας στο WeNet για να δημιουργήσετε μια σύνδεση με το λογαριασμό σας στο Telegram",
+    'gr' : "συνδεθείτε στο λογαριασμό σας στο WeNet για να δημιουργήσετε μια σύνδεση με το λογαριασμό σας στο Telegram",
     'tr' : "WeNet hesabınıza giriş yapın ve Telegram hesabınızla bağlantı kurun"
 }
+
 ASK_QUESTION_INFORMATION = {
     'en' : "ask the community a question",
     'gr' : "κάντε μια ερώτηση στην κοινότητά μας",
     'tr' : "Gruba soru sorun"
 }
+
 AVAILABLE_QUESTIONS_INFORMATION = {
     'en' : "shows the available questions for you to answer",
     'gr' : "σας δείχνει τις διαθέσιμες ερωτήσεις που έχετε",
     'tr' : "Size cevaplayabileceğiniz mevcut soruları gösterir"
 }
+
 ASKED_QUESTIONS_INFORMATION = {
     'en' : "shows all the questions that you asked and allows you to manipulate them",
     'gr' : "σας δείχνει όλες τις ερωτήσεις που έχετε υποβάλει όπου μπορείτε να τις διαχειριστείτε",
     'tr' : "Size sormuş olduğunuz tüm soruları gösterir ve üzerlerinde değişiklik yapmanıza izin verir"
 }
+
 STOP_INFORMATION = {
     'en' : r"allows you to stop/interrupt a process that you have started\. A process is started "\
         r"by using /ask\_question, /available\_questions, /asked\_questions and processes in them",
     'gr' : r"σας επιτρέπει να σταματήσετε τη διαδικασία που έχετε αρχίσει με μια από τις "\
         r"εντολές\: /ask\_question, /available\_questions και /asked\_questions",
-    'tr' : r"Başlatmış olduğunuz süreci durdurmak/kesintiye uğratmak için size izin verir. Süreç "\
+    'tr' : r"Başlatmış olduğunuz süreci durdurmak/kesintiye uğratmak için size izin verir\. Süreç "\
         r"/ask\_question, /available\_questions, /asked\_questions komutlarını kullanarak başlar "\
         "ve devam ede"
 }
+
 HELP_INFORMATION = {
     'en' : "provides a help message",
     'gr' : "σας παρέχει βοήθημα",
@@ -60,6 +65,7 @@ CONNECTION_FAILED = {
     'gr' : "Δεν μπορέσαμε σας συνδέσουμε. Παρακαλώ δοκιμάστε ξανά.",
     'tr' : "Bağlantı kurulamadı. Lütfen yeniden deneyiniz."
 }
+
 CONNECTION_SUCCEDED = {
     'en' : "Connection created!",
     'gr' : "Η σύνδεση έχει δημιουργηθεί!",
@@ -75,7 +81,7 @@ def start(update: Update, context: CallbackContext):
 
     if (len(passed_arguments) == 0):
         context.chat_data['language'] = 'en'
-        update.message.reply_markdown_v2(rf"*_Welcome to sociaLa\!_* The default language is"
+        update.message.reply_markdown_v2(rf"*_Welcome to sociaLab\!_* The default language is "
         r"English\. For Greek send /gr and for Turkish /tr\.""\n"r"*_Καλως ορίσατε στο sociaLab\!_* "
         r"Η καθορισμένη γλώσσα είναι τα Αγγλικά\. Για Ελληνικά στείλτε /gr και για Τουρκικά /tr\.""\n"
         r"*_SociaLab’ a hoşgeldiniz\!_* Varsayılan dil İngilizce’dir\. Yunanca için /gr ve Türkçe için "
@@ -92,15 +98,22 @@ def start(update: Update, context: CallbackContext):
         else:
             update.message.reply_text(CONNECTION_SUCCEDED[LANGUAGE])
         update.message.delete()
-        
+
+AVAILABLE_COMMANDS = {
+    'en' : "These are the available commands",
+    'gr' : "Αυτές είναι οι διαθέσιμες αλλαγές",
+    'tr' : "Mevcut olan komutlar bunlar"
+}
+
 def help(update: Update, context: CallbackContext):
     """
     Can be used by the user to print (text) them the available actions.
     """
     user = update.effective_user
     LANGUAGE = context.chat_data['language']
-    update.message.reply_markdown_v2(rf"Hi _{user.first_name}_\!""\n"
-    r"*These are the available commands*\:""\n"
+
+    update.message.reply_markdown_v2(
+    rf"*{AVAILABLE_COMMANDS[LANGUAGE]}*\:""\n"
     rf"• /login \- _{LOGIN_INFORMATION[LANGUAGE]}_""\n"
     rf"• /ask\_question \- _{ASK_QUESTION_INFORMATION[LANGUAGE]}_""\n"
     rf"• /available\_questions \- _{AVAILABLE_QUESTIONS_INFORMATION[LANGUAGE]}_""\n"
@@ -115,7 +128,7 @@ ASK_QUESTION = {
     'tr' : "Sorunuzu yazınız."
 }
 
-def ask_question(update: Update, context: CallbackContext):    
+def ask_question(update: Update, context: CallbackContext):
     """
     It can be used by the user to make a question, which will be send to the appropriate users 
     according to the WeNet platform.
@@ -135,23 +148,31 @@ QUESTION_FAILED = {
     'tr' : "Sorunuz gönderilemedi. Lütfen tekrar deneyiniz."
 }
 
+QUESTION_NOT_LOGGED_IN = {
+    'en' : "Your question could not be submitted because you have not logged in yet.",
+    'gr' : "Η ερώτηση σας δεν μπόρεσε να καταχωρηθεί επειδή δεν έχετε συνδεθεί ακόμη",
+    'tr' : "Henüz giriş yapmadığınız için sorunuz iletilemedi"
+}
+
 def ask_question_handler(update: Update, context: CallbackContext):
     """
     Handles the question typed by the user by sending it to the server.
     """
-    message = update.message
-    user = update.effective_user
+    MESSAGE = update.message
+    USER = update.effective_user
 
-    if (message is not None):
+    if (MESSAGE is not None):
         request = requests.post(f'{SERVER}/ask_question', data={
-                'user_id' : user.id,
-                'question' : message.text,
+                'user_id' : USER.id,
+                'question' : MESSAGE.text,
             }, verify=False)
 
         if (request.status_code == 200):
-            message.reply_text(QUESTION_SUCCEDED[context.chat_data['language']])
+            MESSAGE.reply_text(QUESTION_SUCCEDED[context.chat_data['language']])
+        elif (request.status_code == 400):
+            MESSAGE.reply_text(QUESTION_NOT_LOGGED_IN[context.chat_data['language']])
         else:
-            message.reply_text(QUESTION_FAILED[context.chat_data['language']])
+            MESSAGE.reply_text(QUESTION_FAILED[context.chat_data['language']])
     return ConversationHandler.END
 
 NO_AVAILABLE_QUESTIONS = {
@@ -167,6 +188,12 @@ AVAILABLE_QUESTIONS = {
         r"\(πατώντας μια ερώτηση, μπορείτε να την απαντήσετε\)_""\n",
     'tr' : r"_*__Cevaplamanız için hazır olan tüm sorular bunlar\:__*""\n"
         r"\(soruların üzerine tıklayarak cevap verebilirsiniz\)_""\n"
+}
+
+AVAILABLE_QUESTIONS_NOT_LOGGED_IN = {
+    'en' : "Your have to be logged in to see any available questions for you.",
+    'gr' : "Πρέπει να είστε συνδεδεμένοι για να δείτε τυχόν διαθέσιμες ερωτήσεις για εσάς.",
+    'tr' : "Sizin için herhangi bir soru olup olmadığını görmeniz için giriş yapmanız gerekir."
 }
 
 def available_questions(update: Update, context: CallbackContext):
@@ -195,6 +222,8 @@ def available_questions(update: Update, context: CallbackContext):
             else:
                 MESSAGE.reply_markdown_v2(AVAILABLE_QUESTIONS[context.chat_data['language']],
                     reply_markup=InlineKeyboardMarkup.from_column(markup_list))
+        else:
+            MESSAGE.reply_text(AVAILABLE_QUESTIONS_NOT_LOGGED_IN[context.chat_data['language']])
         return 0
 
 TYPE_ANSWER = {
@@ -276,6 +305,12 @@ ASKED_QUESTIONS = {
         r"\(Soruların üzerine tıklayarak soruları yönetebilirsiniz\)_"
 }
 
+ASKED_QUESTIONS_NOT_LOGGED_IN = {
+    'en' : "You have to be logged in to see questions that you have asked.",
+    'gr' : "Πρέπει να είστε συνδεδεμένοι για να δείτε ερωτήσεις που έχετε κάνει.",
+    'tr' : "Sormuş olduğunuz soruları görebilmeniz için giriş yapmanız gerekir"
+}
+
 def asked_questions(update: Update, context: CallbackContext):
     """
     It can be used by a user to see their asked questions.
@@ -287,22 +322,26 @@ def asked_questions(update: Update, context: CallbackContext):
         request = requests.get(f'{SERVER}/asked_questions', params={
             'user_id' : user.id
         }, verify=False)
-        questions: list = request.json()['questions']
         
-        markup_list = []
-        
-        for (index, question) in enumerate(questions):
-            markup_list.append(InlineKeyboardButton(question['text'], callback_data={
-                'button_id' : index,
-                'question_id' : question['id'],
-                'type' : 'asked'
-            }.__str__()))
-        
-        if (len(questions) == 0):
-            MESSAGE.reply_text(NO_ASKED_QUESTIONS[context.chat_data['language']])
+        if (request.status_code == 200):
+            questions: list = request.json()['questions']
+            
+            markup_list = []
+            
+            for (index, question) in enumerate(questions):
+                markup_list.append(InlineKeyboardButton(question['text'], callback_data={
+                    'button_id' : index,
+                    'question_id' : question['id'],
+                    'type' : 'asked'
+                }.__str__()))
+            
+            if (len(questions) == 0):
+                MESSAGE.reply_text(NO_ASKED_QUESTIONS[context.chat_data['language']])
+            else:
+                MESSAGE.reply_markdown_v2(ASKED_QUESTIONS[context.chat_data['language']],
+                    reply_markup=InlineKeyboardMarkup.from_column(markup_list))
         else:
-            MESSAGE.reply_markdown_v2(ASKED_QUESTIONS[context.chat_data['language']],
-                reply_markup=InlineKeyboardMarkup.from_column(markup_list))
+            MESSAGE.reply_text(ASKED_QUESTIONS_NOT_LOGGED_IN[context.chat_data['language']])
         return 0
 
 NO_ANSWER = {
@@ -377,7 +416,7 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
 
 LOGIN = {
     'en' : "Login to WeNet",
-    'gr' : "Συνδεθέιτε στο WeNet",
+    'gr' : "Συνδεθείτε στο WeNet",
     'tr' : "WeNet'e bağlan "
 }
 
@@ -386,10 +425,12 @@ def login(update: Update, context: CallbackContext):
     Sends to the user a link which will redirect them to WeNet's login/registration page, which will
     redirect them back to Telegram to create a connection between the two services.
     """
-    message = update.message
-    if (message is not None):
-        update.message.reply_html(
+    MESSAGE = update.message
+    if (MESSAGE is not None):
+        MESSAGE.reply_html(
             f"<a href='{WENET_AUTHENTICATION}'>{LOGIN[context.chat_data['language']]}</a>")
+
+# TODO Create another function, which allows the user to delete their account and all associated data.
 
 PROCESS_STOPPED = {
     'en' : "The process was stopped.",
