@@ -362,6 +362,18 @@ ERROR = {
     'tr' : "Bir hata oluştu."
 }
 
+DELETE_QUESTION_SUCCEDED = {
+    'en' : "The question was successfully deleted!",
+    'gr' : "Η ερώτηση διαγράφτηκε με επιτυχία!",
+    'tr' : "Soru başarılı bir şekilde silindi!"
+}
+
+DELETE_QUESTION_FAILED = {
+    'en' : "The question could not be deleted. Please try again.",
+    'gr' : "Η ερώτηση δεν μπόρεσε να διαγραφτεί. Παρακαλώ δοκιμάστε ξανά.",
+    'tr' : "Soru silinemedi. Lütfen tekrar deneyiniz."
+}
+
 def asked_question_manipulation(update: Update, context: CallbackContext):
     """
     This does handles the action that the user has selected from `selected_question_choice`. It either
@@ -396,7 +408,7 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
                 MESSAGE.reply_text(NO_ANSWER[LANGUAGE], reply_markup=ReplyKeyboardRemove())
             else:
                 MESSAGE.reply_markdown_v2(f'_{new_result}_', reply_markup=ReplyKeyboardRemove())
-        elif (MARK_SOLVED[LANGUAGE] in MESSAGE_CONTENT):
+        elif (MARK_SOLVED[LANGUAGE].lower() in MESSAGE_CONTENT):
             request = requests.post(f'{SERVER}/mark_as_solved', data={
                 'user_id' : USER.id,
                 'question_id' : DATA['question_id']
@@ -407,6 +419,18 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
                 reply_markup=ReplyKeyboardRemove())
             else:
                 MESSAGE.reply_text(ERROR[LANGUAGE], reply_markup=ReplyKeyboardRemove())
+        elif (DELETE_QUESTION[LANGUAGE].lower() in MESSAGE_CONTENT):
+            request = requests.post(f'{SERVER}/delete_question', data={
+                'user_id' : USER.id,
+                'question_id' : DATA['question_id']
+            })
+
+            if (request.status_code == 200):
+                MESSAGE.reply_text(DELETE_QUESTION_SUCCEDED[LANGUAGE],
+                    reply_markup=ReplyKeyboardRemove())
+            else:
+                MESSAGE.reply_text(DELETE_QUESTION_FAILED[LANGUAGE],
+                    reply_markup=ReplyKeyboardRemove())
         else:
             MESSAGE.reply_text(NO_SUCH_ANSWER[LANGUAGE],
             reply_markup=ReplyKeyboardRemove())
@@ -431,6 +455,14 @@ def login(update: Update, context: CallbackContext):
             f"<a href='{WENET_AUTHENTICATION}'>{LOGIN[context.chat_data['language']]}</a>")
 
 # TODO Create another function, which allows the user to delete their account and all associated data.
+def delete(update: Update, context: CallbackContext):
+    """
+    Allows the user to delete their account with an alert box to ensure their decision. All of their
+     associated data will be delete from the server and telegram.
+    """
+    MESSAGE = update.message
+
+    pass
 
 PROCESS_STOPPED = {
     'en' : "The process was stopped.",
@@ -485,6 +517,12 @@ NO = {
     'tr' : "Hayır"
 }
 
+DELETE_QUESTION = {
+    'en' : "Delete",
+    'gr' : "Διαγραφή",
+    'tr' : "Sil"
+}
+
 def stop(update: Update, context: CallbackContext):
     """
     Used for interrupting any process began by a `ConversationHandler`.
@@ -523,7 +561,8 @@ def selected_question_choice(update: Update, context: CallbackContext):
         if (TYPE == 'asked'):
             markup_list = [
                 KeyboardButton(SEE_ANSWERS[LANGUAGE]),
-                KeyboardButton(SEE_ANSWERS[LANGUAGE]),
+                KeyboardButton(MARK_SOLVED[LANGUAGE]),
+                KeyboardButton(DELETE_QUESTION[LANGUAGE]),
                 KeyboardButton(NOTHING[LANGUAGE])
             ]
 
