@@ -1,3 +1,4 @@
+import string
 import requests
 import os
 import time
@@ -5,7 +6,7 @@ import json
 
 from threading import Thread
 from googletrans import Translator
-from telegram import Bot
+from telegram import Bot, ParseMode
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
@@ -97,14 +98,13 @@ def _translate(user: User, message: Question or Answer):
         message.content['el'] = translator.translate(message.content['en'], dest='el').text
     
     message.save()
+    if (isinstance(message, Answer)):
+        send_answer_to_user(message)
 
 def _translate_to_english(user: User, message: Question or Answer):
     translator = Translator()
 
     message.content['en'] = translator.translate(message.content[user.language], src=user.language).text
-
-    if (isinstance(message, Question)):
-        message.task_id = create_wenet_question(message)
 
     message.save()
 
@@ -187,37 +187,71 @@ def create_wenet_question(question: Question):
 
     return request.json().get('id')
 
+def change_punctuations_to_raw(s: str):
+    new_string = ""
+    for char in s:
+        if (char in string.punctuation):
+            new_string += f"\{char}"
+        else:
+            new_string += char
+    print(new_string)
+    return new_string
+
+SEND_ANSWER_MESSAGE = {
+    'en' : lambda a: r"*Your receive an answer to the question\:* "
+        rf"_{change_punctuations_to_raw(a.question.content['en'])}_\.""\n"
+        rf"*The answer is\:* _{change_punctuations_to_raw(a.content['en'])}_",
+    'el' : lambda a: r"*Έχετε λάβει απάντηση στην ερώτηση\:* "
+        rf"_{change_punctuations_to_raw(a.question.content['el'])}_\.""\n"
+        rf"*Η απάντηση είναι\:* _{change_punctuations_to_raw(a.content['el'])}_",
+    'tr' : lambda a: r"*\:* "
+        rf"_{change_punctuations_to_raw(a.question.content['tr'])}_\.""\n"
+        rf"\"_{change_punctuations_to_raw(a.content['tr'])}_\" *sorusuna cevap aldınız.*\."
+}
+
+def send_answer_to_user(answer: Answer):
+    bot = Bot(BOT_TOKEN)
+    questioner: User = answer.question.user
+
+    bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
+        parse_mode=ParseMode.MARKDOWN_V2)
+
 @csrf_exempt
 def send_answer(request: HttpRequest):
     user_id = request.POST['user_id']
     question_id = request.POST['question_id']
     message = request.POST['answer']
 
-    user: User = User.objects.get(telegram_id=user_id)
+    answerer: User = User.objects.get(telegram_id=user_id)
     question: Question = Question.objects.get(id=question_id)
+    questioner: User = question.user
 
-    answer = Answer(user=user, question=question, content={user.language : message})
-    answer.save()
-    thread = Thread(target=_translate, args=(user, answer))
-    thread.start()
-    thread.join()
+    if (create_wenet_answer(message, answerer, question)):
+        answer = Answer(user=answerer, question=question, content={answerer.language : message})
+        answer.save()
 
-    if (create_wenet_answer(answer)):
+        if (answerer.language == questioner.language):
+            send_answer_to_user(answer)
+        else:
+            thread = Thread(target=_translate, args=(answerer, answer))
+            thread.start()
+            thread.join()
+
         return HttpResponse()
     return HttpResponseBadRequest()
 
-def create_wenet_answer(answer: Answer):
+def create_wenet_answer(answer: str, answerer: User, question: Question):
     HEADERS = {
-        'Authorization' : answer.user.access_token,
+        'Authorization' : answerer.access_token,
         'Accept' : APPLICATION_JSON
     }
     DATA = {
-        'taskId' : answer.question.task_id,
+        'taskId' : question.task_id,
         'label' : 'AnswerQuestion',
         'attributes' : {
-            'message' : answer.content[answer.user.language]
+            'message' : answer
         },
-        'actioneerId' : str(answer.user.id),
+        'actioneerId' : str(answerer.id),
         '_creationTs' : int(time.time()*1000.0),
         '_lastUpdateTs' : int(time.time()*1000.0),
 
@@ -225,8 +259,8 @@ def create_wenet_answer(answer: Answer):
     response = requests.post(f'{WENET_SERVICES}/task/transaction', headers=HEADERS, json=DATA)
     
     if (response.status_code != 201):
-        _update_user_token(answer.user)
-        HEADERS['Authorization'] = answer.user.access_token
+        _update_user_token(answerer)
+        HEADERS['Authorization'] = answerer.access_token
         response = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
     return response.ok
 
