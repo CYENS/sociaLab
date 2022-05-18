@@ -38,6 +38,13 @@ ASKED_QUESTIONS_INFORMATION = {
     'tr' : "Size sormuş olduğunuz tüm soruları gösterir ve üzerlerinde değişiklik yapmanıza izin verir"
 }
 
+SOLVED_QUESTION_INFORMATION = {
+    'en' : "shows all the solved questions that you asked and allows you to manipulate them",
+    'gr' : "σας δείχνει όλες τις λυμένες ερωτήσεις που έχετε υποβάλει όπου μπορείτε να τις "
+        "διαχειριστείτε",
+    'tr' : "Sormuş olduğunuz tüm soruları gösterir ve üzerlerinde değişiklik yapmanıza izin verir"
+}
+
 STOP_INFORMATION = {
     'en' : r"allows you to stop/interrupt a process that you have started\. A process is started "\
         r"by using /ask\_question, /available\_questions, /asked\_questions and processes in them",
@@ -118,6 +125,7 @@ def help(update: Update, context: CallbackContext):
     rf"• /ask\_question \- _{ASK_QUESTION_INFORMATION[LANGUAGE]}_""\n"
     rf"• /available\_questions \- _{AVAILABLE_QUESTIONS_INFORMATION[LANGUAGE]}_""\n"
     rf"• /asked\_questions \- _{ASKED_QUESTIONS_INFORMATION[LANGUAGE]}_""\n"
+    rf"• /solved\_questions \- _{SOLVED_QUESTION_INFORMATION[LANGUAGE]}_""\n"
     rf"• /stop \- _{STOP_INFORMATION[LANGUAGE]}_""\n"
     rf"• /help \- _{HELP_INFORMATION[LANGUAGE]}_""\n"
     r"• /en For English""\n"r"• /gr Για Ελληνικά""\n"r"• /tr Türkçe için")
@@ -222,9 +230,10 @@ def available_questions(update: Update, context: CallbackContext):
             else:
                 MESSAGE.reply_markdown_v2(AVAILABLE_QUESTIONS[context.chat_data['language']],
                     reply_markup=InlineKeyboardMarkup.from_column(markup_list))
+                return 0
         else:
             MESSAGE.reply_text(AVAILABLE_QUESTIONS_NOT_LOGGED_IN[context.chat_data['language']])
-        return 0
+        return ConversationHandler.END
 
 TYPE_ANSWER = {
     'en' : "Please type your answer:",
@@ -340,9 +349,10 @@ def asked_questions(update: Update, context: CallbackContext):
             else:
                 MESSAGE.reply_markdown_v2(ASKED_QUESTIONS[context.chat_data['language']],
                     reply_markup=InlineKeyboardMarkup.from_column(markup_list))
+                return 0
         else:
             MESSAGE.reply_text(ASKED_QUESTIONS_NOT_LOGGED_IN[context.chat_data['language']])
-        return 0
+        return ConversationHandler.END
 
 NO_ANSWER = {
     'en' : "No one has yet to answer.",
@@ -350,10 +360,16 @@ NO_ANSWER = {
     'tr' : "Şu ana kadar kimse cevaplamadı."
 }
 
-SOLVED_SUCCEDED = {
+MARK_SOLVED_SUCCEDED = {
     'en' : "The question was successfully marked as solved!",
     'gr' : "Η ερώτηση έχει επισημανθεί επιτυχώς ως λυμένη!",
     'tr' : "Soru çözüldü olarak işaretlendi!"
+}
+
+MARK_SOLVED_FAILED = {
+    'en' : "The question could not be marked as solved. Please try again.",
+    'gr' : "Η ερώτηση δεν μπόρεσε να επισημανθεί ως λυμένη. Παρακαλώ δοκιμάστε ξανά.",
+    'tr' : "Soru cevaplandı olarak işaretlenemedi. Lütfen tekrar deneyiniz."
 }
 
 ERROR = {
@@ -393,20 +409,21 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
                 }, verify=False)
                 
             answers: list = request.json()['answers']
-            result = ""
-
-            for (index, answer) in enumerate(answers):
-                result += f"{index + 1} - {answer['text']}\n"
-            
-            new_result = ""
-            for character in result:
-                if (character in string.punctuation):
-                    new_result += f"\{character}"
-                else:
-                    new_result += character
-            if (new_result == ""):
+            if (len(answers) == 0):
                 MESSAGE.reply_text(NO_ANSWER[LANGUAGE], reply_markup=ReplyKeyboardRemove())
             else:
+                result = ""
+
+                for (index, answer) in enumerate(answers):
+                    result += f"{index + 1} - {answer['text']}\n"
+
+                new_result = ""
+                for character in result:
+                    if (character in string.punctuation):
+                        new_result += f"\{character}"
+                    else:
+                        new_result += character
+
                 MESSAGE.reply_markdown_v2(f'_{new_result}_', reply_markup=ReplyKeyboardRemove())
         elif (MARK_SOLVED[LANGUAGE].lower() in MESSAGE_CONTENT):
             request = requests.post(f'{SERVER}/mark_as_solved', data={
@@ -415,10 +432,10 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
             }, verify=False)
             
             if (request.status_code == 200):
-                MESSAGE.reply_text(SOLVED_SUCCEDED[LANGUAGE],
+                MESSAGE.reply_text(MARK_SOLVED_SUCCEDED[LANGUAGE],
                 reply_markup=ReplyKeyboardRemove())
             else:
-                MESSAGE.reply_text(ERROR[LANGUAGE], reply_markup=ReplyKeyboardRemove())
+                MESSAGE.reply_text(MARK_SOLVED_FAILED[LANGUAGE], reply_markup=ReplyKeyboardRemove())
         elif (DELETE_QUESTION[LANGUAGE].lower() in MESSAGE_CONTENT):
             request = requests.post(f'{SERVER}/delete_question', data={
                 'user_id' : USER.id,
@@ -434,8 +451,140 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
         else:
             MESSAGE.reply_text(NO_SUCH_ANSWER[LANGUAGE],
             reply_markup=ReplyKeyboardRemove())
-    context.user_data
+            return 0
     return ConversationHandler.END
+
+NO_SOLVED_QUESTIONS = {
+    'en' : "There are no solved questions.",
+    'gr' : "Δεν υπάρχουν λυμένες ερωτήσεις",
+    'tr' : "Cevaplanmış sorular yok."
+}
+
+SOLVED_QUESTIONS = {
+    'en' : r"_*__These are all the questions that you have marked as solved\:__*""\n"
+        r"\(by pressing a question, you can manage that question\)_""\n",
+    'gr' : r"_*__Αυτές είναι όλες οι ερωτήσεις που έχετε επισημάνει ως λυμένες\:__*""\n"
+        r"\(πατώντας το μια ερώτηση, μπορείτε να τη διαχειριστείτε\)_""\n",
+    'tr' : r"_*__Cevaplandı olarak işaretlediğiniz tüm sorular bunlar\:__*""\n"
+        r"\(Soruların üzerine tıklayarak soruları yönetebilirsiniz\)_""\n"
+}
+
+SOLVED_QUESTIONS_NOT_LOGGED_IN = {
+    'en' : "You have to be logged in to see questions that you have marked as solved.",
+    'gr' : "Πρέπει να είστε συνδεδεμένοι για να δείτε ερωτήσεις που έχετε επισημάνει ως λυμένες.",
+    'en' : "Cevaplandı olarak işaretlediğiniz soruları görebilmeniz için giriş yapmanız gerekir."
+}
+
+def solved_questions(update: Update, context: CallbackContext):
+    DATA = context.user_data['question']
+    MESSAGE = update.message
+    USER = update.effective_user
+    LANGUAGE = context.chat_data['language']
+
+    if (MESSAGE is not None):
+        request = requests.get(f'{SERVER}/solved_questions', params={
+            'user_id' : USER.id,
+            'question_id' : DATA['question_id']
+        })
+        
+        if (request.status_code == 200):
+            questions = request.json()['questions']
+
+            if (len(questions) == 0):
+                MESSAGE.reply_text(NO_SOLVED_QUESTIONS[LANGUAGE])
+            else:
+                markup_list = []
+                for (index, question) in enumerate(questions):
+                    markup_list.append(InlineKeyboardButton(question['text'], callback_data={
+                        'button_id' : index,
+                        'question_id' : question['id'],
+                        'type' : 'solved'
+                    }.__str__()))
+                
+                MESSAGE.reply_markdown_v2(SOLVED_QUESTIONS[LANGUAGE],
+                    reply_markup=InlineKeyboardMarkup.from_column(markup_list))
+                return 0
+        else:
+            MESSAGE.reply_text(SOLVED_QUESTIONS_NOT_LOGGED_IN[LANGUAGE])
+        return ConversationHandler.END
+
+MARK_UNSOLVED = {
+    'en' : "Mark as unsolved",
+    'gr' : "Επισημάνετε ως άλυτο",
+    'tr' : "Cevaplanmadı olarak işaretle."
+}
+
+MARK_UNSOLVED_SUCCEDED = {
+    'en' : "The question was successfully marked as unsolved!",
+    'gr' : "Η ερώτηση έχει επισημανθεί επιτυχώς ως άλυτη!",
+    'tr' : "Soru cevaplanmadı olarak işaretlendi!"
+}
+
+MARK_UNSOLVED_FAILED = {
+    'en' : "The question could not be marked as unsolved. Please try again.",
+    'gr' : "Η ερώτηση δεν μπόρεσε να επισημανθεί ως άλυτη. Παρακαλώ δοκιμάστε ξανά.",
+    'tr' : "Soru cevaplanmadı olarak işaretlenemedi. Lütfen tekrar deneyiniz."
+}
+
+def solved_question_manipulation(update: Update, context: CallbackContext):
+    DATA = context.user_data['question']
+    MESSAGE = update.message
+    MESSAGE_CONTENT = MESSAGE.text.lower()
+    USER = update.effective_user
+    LANGUAGE = context.chat_data['language']
+
+    if (MESSAGE is not None):
+        if (SEE_ANSWERS[LANGUAGE].lower() in MESSAGE_CONTENT):
+            request = requests.get(f'{SERVER}/question_answers', params={
+                    'user_id' : USER.id,
+                    'question_id' : DATA['question_id']
+                }, verify=False)
+                
+            answers: list = request.json()['answers']
+            if (len(answers) == 0):
+                MESSAGE.reply_text(NO_ANSWER[LANGUAGE], reply_markup=ReplyKeyboardRemove())
+            else:
+                result = ""
+
+                for (index, answer) in enumerate(answers):
+                    result += f"{index + 1} - {answer['text']}\n"
+
+                new_result = ""
+                for character in result:
+                    if (character in string.punctuation):
+                        new_result += f"\{character}"
+                    else:
+                        new_result += character
+
+                MESSAGE.reply_markdown_v2(f'_{new_result}_', reply_markup=ReplyKeyboardRemove())
+        elif (MARK_UNSOLVED[LANGUAGE].lower() in MESSAGE_CONTENT):
+            request = requests.post(f'{SERVER}/mark_as_unsolved', data={
+                'question_id' : DATA['question_id']
+            })
+            
+            if (request.status_code == 200):
+                MESSAGE.reply_text(MARK_UNSOLVED_SUCCEDED[LANGUAGE],
+                    reply_markup=ReplyKeyboardRemove())
+            else:
+                MESSAGE.reply_text(MARK_UNSOLVED_FAILED[LANGUAGE],
+                    reply_markup=ReplyKeyboardRemove())
+            
+        elif (DELETE_QUESTION[LANGUAGE].lower() in MESSAGE_CONTENT):
+            request = requests.post(f'{SERVER}/delete_question', data={
+                'user_id' : USER.id,
+                'question_id' : DATA['question_id']
+            })
+
+            if (request.status_code == 200):
+                MESSAGE.reply_text(DELETE_QUESTION_SUCCEDED[LANGUAGE],
+                    reply_markup=ReplyKeyboardRemove())
+            else:
+                MESSAGE.reply_text(DELETE_QUESTION_FAILED[LANGUAGE],
+                    reply_markup=ReplyKeyboardRemove())
+        else:
+            MESSAGE.reply_text(NO_SUCH_ANSWER[LANGUAGE], reply_markup=ReplyKeyboardRemove())
+            return 0
+        return ConversationHandler.END
 
 
 LOGIN = {
@@ -499,7 +648,7 @@ QUESTION_ABOUT_QUESTION = {
     'tr' : "Bu soru hakkında ne bilmek istiyorsun?"
 }
 
-ANSWER_ABOUT_QUESTION = {
+QUESTION_ABOUT_ANSWER = {
     'en' : "Would you like to answer this question?",
     'gr' : "Θα θέλατε να απαντήσετε αυτή την ερώτηση;",
     'tr' : "Bu soruyu cevaplamak istiyormusun?"
@@ -530,6 +679,7 @@ def stop(update: Update, context: CallbackContext):
     update.message.reply_text(PROCESS_STOPPED[context.chat_data['language']], reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
 
+# FIXME Documentation
 def selected_question_choice(update: Update, context: CallbackContext):
     """
     Depending on the question that the user (submitter) selected, it shows the possible actions:
@@ -574,7 +724,16 @@ def selected_question_choice(update: Update, context: CallbackContext):
                 KeyboardButton(NO[LANGUAGE])
             ]
 
-            MESSAGE.reply_text(ANSWER_ABOUT_QUESTION[LANGUAGE],
+            MESSAGE.reply_text(QUESTION_ABOUT_ANSWER[LANGUAGE],
+                reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+        elif (TYPE == 'solved'):
+            markup_list = [
+                KeyboardButton(SEE_ANSWERS[LANGUAGE]),
+                KeyboardButton(MARK_UNSOLVED[LANGUAGE]),
+                KeyboardButton(DELETE_QUESTION[LANGUAGE]),
+                KeyboardButton(NOTHING[LANGUAGE])
+            ]
+            MESSAGE.reply_text(QUESTION_ABOUT_QUESTION[LANGUAGE],
                 reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
 
 STANDARD_COMMANDS = [
@@ -597,6 +756,7 @@ def change_to_greek(update: Update, context: CallbackContext):
             BotCommand('ask_question', ASK_QUESTION_INFORMATION['gr']),
             BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['gr']),
             BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['gr']),
+            BotCommand('solved_questions', SOLVED_QUESTION_INFORMATION['gr']),
             BotCommand('stop', STOP_INFORMATION['gr'])])
 
         MESSAGE.reply_text("Η γλώσσα του συστήματος έχει αλλάξει σε Ελληνικά.")
@@ -615,6 +775,7 @@ def change_to_turkish(update: Update, context: CallbackContext):
             BotCommand('ask_question', ASK_QUESTION_INFORMATION['tr']),
             BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['tr']),
             BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['tr']),
+            BotCommand('solved_questions', SOLVED_QUESTION_INFORMATION['tr']),
             BotCommand('stop', STOP_INFORMATION['tr'])])
 
         MESSAGE.reply_text("Sistemin dili Türkçe olarak değişti.")
@@ -633,6 +794,7 @@ def change_to_english(update: Update, context: CallbackContext):
             BotCommand('ask_question', ASK_QUESTION_INFORMATION['en']),
             BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['en']),
             BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['en']),
+            BotCommand('solved_questions', SOLVED_QUESTION_INFORMATION['en']),
             BotCommand('stop', STOP_INFORMATION['en'])])
         MESSAGE.reply_text("The system's language has changed to English.")
 
@@ -644,7 +806,8 @@ def main() -> None:
         BotCommand('ask_question', ASK_QUESTION_INFORMATION['en']),
         BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['en']),
         BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['en']),
-        BotCommand('stop', STOP_INFORMATION['en'])])
+        BotCommand('solved_questions', SOLVED_QUESTION_INFORMATION['en']),
+        BotCommand('stop', STOP_INFORMATION['en']),])
     updater = Updater(BOT_TOKEN, persistence=PicklePersistence('bot/data/bot_data'))
     dispatcher = updater.dispatcher
 
@@ -706,6 +869,18 @@ def main() -> None:
         fallbacks=[
             CommandHandler('stop', stop),
             MessageHandler(AVAILABLE_QUESTIONS_TEXT_FILTERS, stop),
+        ]
+    ))
+    
+    dispatcher.add_handler(ConversationHandler(
+        entry_points=[CommandHandler('solved_questions', solved_questions)],
+        states={
+            0 : [MessageHandler(Filters.text & ~ASKED_QUESTIONS_TEXT_FILTERS,
+                solved_question_manipulation)],
+        },
+        fallbacks=[
+            CommandHandler('stop', stop),
+            MessageHandler(ASKED_QUESTIONS_TEXT_FILTERS, stop)
         ]
     ))
     dispatcher.add_handler(CommandHandler('login', login))
