@@ -256,7 +256,7 @@ def create_wenet_answer(answer: str, answerer: User, question: Question):
 
     }
     response = requests.post(f'{WENET_SERVICES}/task/transaction', headers=HEADERS, json=DATA)
-    
+
     if (response.status_code != 201):
         _update_user_token(answerer)
         HEADERS['Authorization'] = answerer.access_token
@@ -272,7 +272,7 @@ def asked_questions(request: HttpRequest):
         return HttpResponseForbidden()
 
     questions = Question.objects.filter(user=user, solved=False)
-    
+
     result = []
 
     for question in questions:
@@ -294,6 +294,15 @@ def mark_as_solved(request: HttpRequest):
         return HttpResponse()
     else:
         return result
+
+@csrf_exempt
+def mark_as_unsolved(request: HttpRequest):
+    result: Question = Question.objects.get(id=request.POST['question_id'])
+
+    result.solved = False
+    result.save()
+
+    return HttpResponse()
 
 def question_answers(request: HttpRequest):
     user: User = User.objects.get(telegram_id=request.GET['user_id'])
@@ -318,9 +327,9 @@ def available_questions(request: HttpRequest):
         user: User = User.objects.get(telegram_id=request.GET['user_id'])
     except User.DoesNotExist:
         return HttpResponseForbidden()
-    
+
     result = []
-    for question in Question.objects.filter(solved=False):
+    for question in Question.objects.filter(solved=False).exclude(user=user):
         result.append({
             'id' : question.id,
             'content' : question.content[user.language]
@@ -337,4 +346,21 @@ def delete_question(request: HttpRequest):
         return HttpResponse()
 
     return HttpResponseBadRequest()
-    
+
+def solved_questions(request: HttpRequest):
+    try:
+        user: User = User.objects.get(telegram_id=request.GET['user_id'])
+    except User.DoesNotExist:
+        return HttpResponseForbidden()
+
+    questions = Question.objects.filter(user=user, solved=True)
+
+    result = []
+
+    for question in questions:
+        result.append({
+            'id' : question.id,
+            'text' : question.content[user.language]
+        })
+
+    return JsonResponse({'questions' : result})
