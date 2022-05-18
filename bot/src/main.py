@@ -679,13 +679,23 @@ def stop(update: Update, context: CallbackContext):
     update.message.reply_text(PROCESS_STOPPED[context.chat_data['language']], reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
 
-# FIXME Documentation
 def selected_question_choice(update: Update, context: CallbackContext):
     """
-    Depending on the question that the user (submitter) selected, it shows the possible actions:
-        - to see the answers
-        - to mark the question as solved
-        - or nothing 
+    This function handles all the callback from a inline button once a question is selected.
+    For `asked_question` the user can:
+        - see their answers
+        - mark that question as solved
+        - delete the question or
+        - do nothing
+
+    For `available_questions` they can selected Yes or No to whether to answer that question or not.
+
+    For `solved_questions` the user can:
+        - see their answers
+        - mark that question as unsolved
+        - delete the question or
+        - do nothing
+
     """
     QUERY = update.callback_query
     DATA = json.loads(QUERY.data.replace("'",'"'))
