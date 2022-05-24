@@ -20,6 +20,12 @@ LOGIN_INFORMATION = {
     'tr' : "WeNet hesabınıza giriş yapın ve Telegram hesabınızla bağlantı kurun"
 }
 
+DELETE_ACCOUNT_INFORMATION = {
+    'en' : "delete the connection between your WeNet and Telegram accounts",
+    'gr' : "διαγράψτε τη σύνδεση μεταξύ των λογαριασμών σας στο WeNet και στο Telegram",
+    'tr' : "WeNet ile Telegram hesaplarınız arasındaki bağlantıyı siliniz"
+}
+
 ASK_QUESTION_INFORMATION = {
     'en' : "ask the community a question",
     'gr' : "κάντε μια ερώτηση στην κοινότητά μας",
@@ -52,7 +58,7 @@ STOP_INFORMATION = {
         r"εντολές\: /ask\_question, /available\_questions και /asked\_questions",
     'tr' : r"Başlatmış olduğunuz süreci durdurmak/kesintiye uğratmak için size izin verir\. Süreç "\
         r"/ask\_question, /available\_questions, /asked\_questions komutlarını kullanarak başlar "\
-        "ve devam ede"
+        r"ve devam ede"
 }
 
 HELP_INFORMATION = {
@@ -95,7 +101,7 @@ def start(update: Update, context: CallbackContext):
         r"/tr yazıp gönderiniz\.")
     else:
         # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
-        request = requests.post(f'{SERVER}/create_user', data={
+        request = requests.post(f'{SERVER}/create_account', data={
             'code' : passed_arguments[0],
             'user_id' : user.id,
         }, verify=False)
@@ -586,7 +592,6 @@ def solved_question_manipulation(update: Update, context: CallbackContext):
             return 0
         return ConversationHandler.END
 
-
 LOGIN = {
     'en' : "Login to WeNet",
     'gr' : "Συνδεθείτε στο WeNet",
@@ -599,19 +604,70 @@ def login(update: Update, context: CallbackContext):
     redirect them back to Telegram to create a connection between the two services.
     """
     MESSAGE = update.message
+
     if (MESSAGE is not None):
         MESSAGE.reply_html(
             f"<a href='{WENET_AUTHENTICATION}'>{LOGIN[context.chat_data['language']]}</a>")
 
+DELETE_ACCOUNT_WARNING = {
+    'en' : r"Are you sure you want to delete your account\? All the questions you asked and all the"
+        r" answers you gave will be deleted\. Type *_Yes_*, if you want to proceed\.",
+    'gr' : r"Είστε σίγουροι ότι θέλετε να διαγράψετε τη σύνδεση\; Όλες οι ερωτήσεις που έχετε κάνει"
+        r" και όλες οι απαντήσεις που έχετε δώσει θα διαγραφτούν\. Πληκτρολογήστε *_Ναι_*, αν θέλετε"
+        r" να συνεχίσετε\.",
+    'tr' : r"Hesabınızı silmek istediğinizden eminmisiniz\? Sormuş olduğunuz tüm sorular ve vermiş "
+        r"olduğunuz tüm cevaplar silinecek\. Devam etmek istiyorsanız *_Evet_* yazınız\."
+}
+
+DELETE_USER_SUCCEDED = {
+    'en' : "Your account was successfully deleted!",
+    'gr' : "Ο λογαριασμός διαγράφηκε επιτυχώς!",
+    'tr' : "Hesabınız başarıyla silindi!"
+}
+
+DELETE_USER_FAILED = {
+    'en' : "Your account could not be deleted. Please try again.",
+    'gr' : "Ο λογαριασμός σας δεν μπόρεσε να διαγραφτεί. Παρακαλώ δοκιμάστε ξανά.",
+    'tr' : "Hesabınız silinemedi. Lütfen yeniden deneyiniz."
+}
+
 # TODO Create another function, which allows the user to delete their account and all associated data.
-def delete(update: Update, context: CallbackContext):
+def delete_account(update: Update, context: CallbackContext):
     """
     Allows the user to delete their account with an alert box to ensure their decision. All of their
      associated data will be delete from the server and telegram.
     """
     MESSAGE = update.message
+    LANGUAGE = context.chat_data['language']
+    
+    if (MESSAGE is not None):
+        MESSAGE.reply_markdown_v2(DELETE_ACCOUNT_WARNING[LANGUAGE])
 
-    pass
+        return 0
+
+def delete_account_helper(update: Update, context: CallbackContext):
+    """
+    Handles the user confirming answer sent by the user to whether their account will be deleted or
+    not.
+    """
+    MESSAGE = update.message
+    MESSAGE_CONTENT = MESSAGE.text.lower()
+    LANGUAGE = context.chat_data['language']
+    USER = update.effective_user
+
+    if (MESSAGE is not None):
+        if (YES[LANGUAGE].lower() in MESSAGE_CONTENT.lower()):
+            request = requests.post(f'{SERVER}/delete_account', data={
+                'user_id' : USER.id
+            })
+
+            if (request.status_code == 200):
+                MESSAGE.reply_text(DELETE_USER_SUCCEDED[LANGUAGE])
+            else:
+                MESSAGE.reply_text(DELETE_USER_FAILED[LANGUAGE])
+        else:
+            MESSAGE.reply_text(PROCESS_STOPPED[LANGUAGE])
+        return ConversationHandler.END
 
 PROCESS_STOPPED = {
     'en' : "The process was stopped.",
@@ -767,8 +823,9 @@ def change_to_greek(update: Update, context: CallbackContext):
             BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['gr']),
             BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['gr']),
             BotCommand('solved_questions', SOLVED_QUESTION_INFORMATION['gr']),
-            BotCommand('stop', STOP_INFORMATION['gr'])])
-
+            BotCommand('stop', STOP_INFORMATION['gr']),
+            BotCommand('delete_account', DELETE_ACCOUNT_INFORMATION['gr'])])
+            
         MESSAGE.reply_text("Η γλώσσα του συστήματος έχει αλλάξει σε Ελληνικά.")
 
 def change_to_turkish(update: Update, context: CallbackContext):
@@ -786,7 +843,8 @@ def change_to_turkish(update: Update, context: CallbackContext):
             BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['tr']),
             BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['tr']),
             BotCommand('solved_questions', SOLVED_QUESTION_INFORMATION['tr']),
-            BotCommand('stop', STOP_INFORMATION['tr'])])
+            BotCommand('stop', STOP_INFORMATION['tr']),
+            BotCommand('delete_account', DELETE_ACCOUNT_INFORMATION['tr'])])
 
         MESSAGE.reply_text("Sistemin dili Türkçe olarak değişti.")
 
@@ -805,7 +863,9 @@ def change_to_english(update: Update, context: CallbackContext):
             BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['en']),
             BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['en']),
             BotCommand('solved_questions', SOLVED_QUESTION_INFORMATION['en']),
-            BotCommand('stop', STOP_INFORMATION['en'])])
+            BotCommand('stop', STOP_INFORMATION['en']),
+            BotCommand('delete_account', DELETE_ACCOUNT_INFORMATION['en'])])
+
         MESSAGE.reply_text("The system's language has changed to English.")
 
 def main() -> None:
@@ -817,7 +877,9 @@ def main() -> None:
         BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['en']),
         BotCommand('asked_questions', ASKED_QUESTIONS_INFORMATION['en']),
         BotCommand('solved_questions', SOLVED_QUESTION_INFORMATION['en']),
-        BotCommand('stop', STOP_INFORMATION['en']),])
+        BotCommand('stop', STOP_INFORMATION['en']),
+        BotCommand('delete_account', DELETE_ACCOUNT_INFORMATION['en'])])
+
     updater = Updater(BOT_TOKEN, persistence=PicklePersistence('bot/data/bot_data'))
     dispatcher = updater.dispatcher
 
@@ -894,6 +956,23 @@ def main() -> None:
         ]
     ))
     dispatcher.add_handler(CommandHandler('login', login))
+
+    DELETE_ACCOUNT_TEXT_FILTERS = (Filters.command | Filters.regex('^[C|c]ancel.?$') |
+        Filters.regex('^[N|n]o.?$') | Filters.regex('^[Α|α]κύρωση.?$') |
+        Filters.regex('"[Ό|ό]χι.?$') | Filters.regex('^[Y|y]apıldı.?$') |
+        Filters.regex('^[H|h]ayır].?$'))
+
+    dispatcher.add_handler(ConversationHandler(
+        entry_points=[CommandHandler('delete_account', delete_account)],
+        states= {
+            0 : [MessageHandler(Filters.text & ~DELETE_ACCOUNT_TEXT_FILTERS,
+                delete_account_helper)]
+        },
+        fallbacks=[
+            CommandHandler('stop', stop),
+            MessageHandler(DELETE_ACCOUNT_TEXT_FILTERS, stop)
+        ]
+    ))
 
     updater.start_polling()
     updater.idle()

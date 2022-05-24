@@ -117,7 +117,7 @@ def authorise_user(request: HttpRequest):
     return redirect(f"{TELEGRAM_URI}{request.GET['code']}")
 
 @csrf_exempt
-def create_user(request: HttpRequest):
+def create_account(request: HttpRequest):
     oauth2_request = requests.post(WENET_TOKEN_GENERATOR, data={
         'grant_type': 'authorization_code',
         'client_id' : APP_ID,
@@ -145,6 +145,16 @@ def create_user(request: HttpRequest):
     u.save()
     
     return JsonResponse({'message' : 'user_created'})
+
+@csrf_exempt
+def delete_account(request: HttpRequest):
+    try:
+        user: User = User.objects.get(telegram_id=request.POST['user_id'])
+    except User.DoesNotExist:
+        return HttpResponseForbidden()
+
+    user.delete()
+    return HttpResponse()
 
 @csrf_exempt
 def ask_question(request: HttpRequest):

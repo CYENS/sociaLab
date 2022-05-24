@@ -6,7 +6,8 @@ app_name = 'wenet'
 urlpatterns = [
     path('', views.index, name='index'),
     path('authorise_user', views.authorise_user, name='authorise_user'),
-    path('create_user', views.create_user, name='create_user'),
+    path('create_account', views.create_account, name='create_user'),
+    path('delete_account', views.delete_account),
     path('ask_question', views.ask_question, name='ask_question'),
     path('send_answer', views.send_answer, name='send_answer'),
     path('asked_questions', views.asked_questions, name='asked_questions'),
