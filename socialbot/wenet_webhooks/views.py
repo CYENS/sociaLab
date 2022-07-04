@@ -213,9 +213,9 @@ SEND_ANSWER_MESSAGE = {
     'el' : lambda a: r"*Έχετε λάβει απάντηση στην ερώτηση\:* "
         rf"_{change_punctuations_to_raw(a.question.content['el'])}_\.""\n"
         rf"*Η απάντηση είναι\:* _{change_punctuations_to_raw(a.content['el'])}_",
-    'tr' : lambda a: r"*\:* "
-        rf"_{change_punctuations_to_raw(a.question.content['tr'])}_\.""\n"
-        rf"\"_{change_punctuations_to_raw(a.content['tr'])}_\" *sorusuna cevap aldınız.*\."
+    'tr' : lambda a: rf"_{change_punctuations_to_raw(a.question.content['tr'])}_\, "
+        r"*sorusuna cevap aldınız*\.""\n"r"*Aldığınız cevap\:*"
+        rf"_{change_punctuations_to_raw(a.content['tr'])}_"
 }
 
 def send_answer_to_user(answer: Answer):
