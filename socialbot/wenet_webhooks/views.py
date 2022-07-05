@@ -39,13 +39,13 @@ def messages_callback_from_wenet(request: HttpRequest):
         message = data.get('attributes').get('message')
         taskId = data.get('attributes').get('taskId')
         if message_type == "AnswerQuestion":
-            telegram_bot_answer_question(get_user(user_id), message, get_question(taskId))
+            _telegram_bot_answer_question(_get_user(user_id), message, _get_question(taskId))
     return HttpResponse()
 
 # TODO The translation should happen here if needed before sending it to the user. During this 
 # process the function should also save the translation where it is appropriate (corresponding 
 # answer entry in answer_table).
-def telegram_bot_answer_question(user: User, message, question: Question):
+def _telegram_bot_answer_question(user: User, message, question: Question):
     """
     Used to send the answer to the user. Functions is obsolete. Use send_answer_to_user instead.
     """
@@ -53,14 +53,14 @@ def telegram_bot_answer_question(user: User, message, question: Question):
     message = bot.send_message(user.telegram_id, f"You received an answer to the question \""
     f"{question.content[user.language]}\". The answer is: {message}")
 
-def get_user(user_id):
+def _get_user(user_id):
     """
     Helper function to find the `User` given their WeNet ID.
     """
     user: User = User.objects.get(id=user_id)
     return user
 
-def get_question(question_id):
+def _get_question(question_id):
     """
     Helper function to find the `Question` given its task ID.
     """
@@ -118,7 +118,7 @@ def _translate(user: User, message: Question or Answer):
     
     message.save()
     if (isinstance(message, Answer)):
-        send_answer_to_user(message)
+        _send_answer_to_user(message)
 
 def _translate_to_english(user: User, message: Question or Answer):
     """
@@ -206,7 +206,7 @@ def ask_question(request: HttpRequest):
         return HttpResponseForbidden()
 
     question = Question(user=user, content={user.language : message})
-    task_id = create_wenet_question(question)
+    task_id = _create_wenet_question(question)
     if task_id:
         question.task_id = task_id
         question.save()
@@ -214,7 +214,7 @@ def ask_question(request: HttpRequest):
         thread.start()
     return HttpResponse()
 
-def create_wenet_question(question: Question):
+def _create_wenet_question(question: Question):
     """
     Helper function which creates a WeNet `Task` (`Question`).
     """
@@ -240,7 +240,7 @@ def create_wenet_question(question: Question):
 
     return request.json().get('id')
 
-def change_punctuations_to_raw(s: str):
+def _change_punctuations_to_raw(s: str):
     """
     Changes the given string to be suitable for the Telegram's Markdown V2.
     """
@@ -254,17 +254,17 @@ def change_punctuations_to_raw(s: str):
 
 SEND_ANSWER_MESSAGE = {
     'en' : lambda a: r"*Your receive an answer to the question\:* "
-        rf"_{change_punctuations_to_raw(a.question.content['en'])}_\.""\n"
-        rf"*The answer is\:* _{change_punctuations_to_raw(a.content['en'])}_",
+        rf"_{_change_punctuations_to_raw(a.question.content['en'])}_\.""\n"
+        rf"*The answer is\:* _{_change_punctuations_to_raw(a.content['en'])}_",
     'el' : lambda a: r"*Έχετε λάβει απάντηση στην ερώτηση\:* "
-        rf"_{change_punctuations_to_raw(a.question.content['el'])}_\.""\n"
-        rf"*Η απάντηση είναι\:* _{change_punctuations_to_raw(a.content['el'])}_",
-    'tr' : lambda a: rf"_{change_punctuations_to_raw(a.question.content['tr'])}_\, "
+        rf"_{_change_punctuations_to_raw(a.question.content['el'])}_\.""\n"
+        rf"*Η απάντηση είναι\:* _{_change_punctuations_to_raw(a.content['el'])}_",
+    'tr' : lambda a: rf"_{_change_punctuations_to_raw(a.question.content['tr'])}_\, "
         r"*sorusuna cevap aldınız*\.""\n"r"*Aldığınız cevap\:*"
-        rf"_{change_punctuations_to_raw(a.content['tr'])}_"
+        rf"_{_change_punctuations_to_raw(a.content['tr'])}_"
 }
 
-def send_answer_to_user(answer: Answer):
+def _send_answer_to_user(answer: Answer):
     """
     Sends the given `Answer` by a `User` to the questioner.
     """
@@ -287,12 +287,12 @@ def send_answer(request: HttpRequest):
     question: Question = Question.objects.get(id=question_id)
     questioner: User = question.user
 
-    if (create_wenet_answer(message, answerer, question)):
+    if (_create_wenet_answer(message, answerer, question)):
         answer = Answer(user=answerer, question=question, content={answerer.language : message})
         answer.save()
 
         if (answerer.language == questioner.language):
-            send_answer_to_user(answer)
+            _send_answer_to_user(answer)
         else:
             thread = Thread(target=_translate, args=(answerer, answer))
             thread.start()
@@ -301,7 +301,7 @@ def send_answer(request: HttpRequest):
         return HttpResponse()
     return HttpResponseBadRequest()
 
-def create_wenet_answer(answer: str, answerer: User, question: Question):
+def _create_wenet_answer(answer: str, answerer: User, question: Question):
     """
     Helper function which creates a WeNet `Transcation` (`Answer`) on the given `Task` (`Question`).
     """
@@ -401,7 +401,7 @@ def question_answers(request: HttpRequest):
 # user should see.
 def available_questions(request: HttpRequest):
     """
-    Returns to a `User` all the available `Questions` that they can `Answer`. These `Questions` 
+    Returns to a `User` all the available `Questions` that they can answer. These `Questions` 
     will have been already selected by the WeNet's diversity algorithm.
     """
     try:
