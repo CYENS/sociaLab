@@ -28,6 +28,9 @@ APPLICATION_JSON = 'application/json'
 @csrf_exempt
 # FIXME This, does not work. Maybe we need to create our own "callback" function.
 def messages_callback_from_wenet(request: HttpRequest):
+    """
+    Callback function which wenet should use.
+    """
     if request.method == 'POST':
         data = json.loads(request.body)
         message_type = data.get('label')
@@ -43,23 +46,39 @@ def messages_callback_from_wenet(request: HttpRequest):
 # process the function should also save the translation where it is appropriate (corresponding 
 # answer entry in answer_table).
 def telegram_bot_answer_question(user: User, message, question: Question):
+    """
+    Used to send the answer to the user. Functions is obsolete. Use send_answer_to_user instead.
+    """
     bot = Bot(BOT_TOKEN)
     message = bot.send_message(user.telegram_id, f"You received an answer to the question \""
     f"{question.content[user.language]}\". The answer is: {message}")
 
 def get_user(user_id):
+    """
+    Helper function to find the `User` given their WeNet ID.
+    """
     user: User = User.objects.get(id=user_id)
     return user
 
 def get_question(question_id):
+    """
+    Helper function to find the `Question` given its task ID.
+    """
     question: Question = Question.objects.get(id=question_id)
     return question
+
 def _check_oauth2_tokens(dict: dict):
+    """
+    Helper function which checks if the OAuth 2.0 tokens where created correctly or not.
+    """
     if (dict.keys().__contains__('error')):
         return HttpResponseBadRequest()
     return None
 
 def _question_checks(user: User, question_id_field):
+    """
+    Helper function which checks whether a `Question` exists or not.
+    """
     try:
         question: Question = Question.objects.get(id=question_id_field)
     except Question.DoesNotExist:
@@ -72,8 +91,8 @@ def _question_checks(user: User, question_id_field):
 
 def _update_user_token(user: User):
     """
-    
-    Used to create a new access refresh token pair for the user to keep using the app."""
+    Used to create a new access and refresh token pair for the `User` to keep using the app.
+    """
     oauth2_request = requests.post(WENET_TOKEN_GENERATOR, data={
         'grant_type' : 'refresh_token',
         'client_id' : APP_ID,
@@ -102,6 +121,9 @@ def _translate(user: User, message: Question or Answer):
         send_answer_to_user(message)
 
 def _translate_to_english(user: User, message: Question or Answer):
+    """
+    Translates the given `Question` or `Answer` to English.
+    """
     translator = Translator()
 
     message.content['en'] = translator.translate(message.content[user.language], src=user.language).text
@@ -114,10 +136,17 @@ def index(request: HttpRequest):
     return HttpResponse("WeNet webhooks")
 
 def authorise_user(request: HttpRequest):
+    """
+    Redirects the `User` to their telegram application so that they can connect they WeNet account
+    with their Telegram account.
+    """
     return redirect(f"{TELEGRAM_URI}{request.GET['code']}")
 
 @csrf_exempt
 def create_account(request: HttpRequest):
+    """
+    Creates an account to the database using the `User`'s information.
+    """
     oauth2_request = requests.post(WENET_TOKEN_GENERATOR, data={
         'grant_type': 'authorization_code',
         'client_id' : APP_ID,
@@ -148,6 +177,9 @@ def create_account(request: HttpRequest):
 
 @csrf_exempt
 def delete_account(request: HttpRequest):
+    """
+    Allows the `User` to delete their account.
+    """
     try:
         user: User = User.objects.get(telegram_id=request.POST['user_id'])
     except User.DoesNotExist:
@@ -156,8 +188,16 @@ def delete_account(request: HttpRequest):
     user.delete()
     return HttpResponse()
 
+# TODO Create a callback style funcction which will send the question to the appropriate users.
+
 @csrf_exempt
 def ask_question(request: HttpRequest):
+    """
+    Takes the `Question` that a `User` has posted, sends it to the WeNet application which will make
+    the diverse `User` decision and translates the `Question` to the language of the other community.
+
+    E.g.: If the `Question` was in Greek, it will get translated in Turkish.
+    """
     user_id = request.POST['user_id']
     message = request.POST['question']
     try:
@@ -175,6 +215,9 @@ def ask_question(request: HttpRequest):
     return HttpResponse()
 
 def create_wenet_question(question: Question):
+    """
+    Helper function which creates a WeNet `Task` (`Question`).
+    """
     HEADERS = {
         'Authorization' : question.user.access_token,
         'Accept' : APPLICATION_JSON
@@ -198,6 +241,9 @@ def create_wenet_question(question: Question):
     return request.json().get('id')
 
 def change_punctuations_to_raw(s: str):
+    """
+    Changes the given string to be suitable for the Telegram's Markdown V2.
+    """
     new_string = ""
     for char in s:
         if (char in string.punctuation):
@@ -219,6 +265,9 @@ SEND_ANSWER_MESSAGE = {
 }
 
 def send_answer_to_user(answer: Answer):
+    """
+    Sends the given `Answer` by a `User` to the questioner.
+    """
     bot = Bot(BOT_TOKEN)
     questioner: User = answer.question.user
 
@@ -227,6 +276,9 @@ def send_answer_to_user(answer: Answer):
 
 @csrf_exempt
 def send_answer(request: HttpRequest):
+    """
+    Takes the `Answer` a `User` has posted for translation and saves is under the correct `Question`.
+    """
     user_id = request.POST['user_id']
     question_id = request.POST['question_id']
     message = request.POST['answer']
@@ -250,6 +302,9 @@ def send_answer(request: HttpRequest):
     return HttpResponseBadRequest()
 
 def create_wenet_answer(answer: str, answerer: User, question: Question):
+    """
+    Helper function which creates a WeNet `Transcation` (`Answer`) on the given `Task` (`Question`).
+    """
     HEADERS = {
         'Authorization' : answerer.access_token,
         'Accept' : APPLICATION_JSON
@@ -275,6 +330,9 @@ def create_wenet_answer(answer: str, answerer: User, question: Question):
 
 
 def asked_questions(request: HttpRequest):
+    """
+    Returns to the requesting `User` the `Questions` that they have asked.
+    """
     user_id = request.GET['user_id']
     try:
         user: User = User.objects.get(telegram_id=user_id)
@@ -295,6 +353,9 @@ def asked_questions(request: HttpRequest):
 
 @csrf_exempt
 def mark_as_solved(request: HttpRequest):
+    """
+    Allows a `User` to mark one of their `Questions` as solved.
+    """
     user: User = User.objects.get(telegram_id=request.POST['user_id'])
     result = _question_checks(user, request.POST['question_id'])
 
@@ -307,6 +368,9 @@ def mark_as_solved(request: HttpRequest):
 
 @csrf_exempt
 def mark_as_unsolved(request: HttpRequest):
+    """
+    Allows a `User` to mark one of their `Questions` as unsolved.
+    """
     result: Question = Question.objects.get(id=request.POST['question_id'])
 
     result.solved = False
@@ -315,6 +379,9 @@ def mark_as_unsolved(request: HttpRequest):
     return HttpResponse()
 
 def question_answers(request: HttpRequest):
+    """
+    Returns to a `User` the `Answers` that they have received for the selected `Question`.
+    """
     user: User = User.objects.get(telegram_id=request.GET['user_id'])
     result = _question_checks(user, request.GET['question_id'])
 
@@ -333,6 +400,10 @@ def question_answers(request: HttpRequest):
 # FIXME This function should call the WeNet server and find the appopriate questions that the current
 # user should see.
 def available_questions(request: HttpRequest):
+    """
+    Returns to a `User` all the available `Questions` that they can `Answer`. These `Questions` 
+    will have been already selected by the WeNet's diversity algorithm.
+    """
     try:
         user: User = User.objects.get(telegram_id=request.GET['user_id'])
     except User.DoesNotExist:
@@ -348,6 +419,9 @@ def available_questions(request: HttpRequest):
 
 @csrf_exempt
 def delete_question(request: HttpRequest):
+    """
+    Allows a `User` to delete their selected posted `Question`.
+    """
     user: User = User.objects.get(telegram_id=request.POST['user_id'])
     question: Question = Question.objects.get(id=request.POST['question_id'])
     query_result = question.delete()
@@ -358,6 +432,10 @@ def delete_question(request: HttpRequest):
     return HttpResponseBadRequest()
 
 def solved_questions(request: HttpRequest):
+    """
+    Returns to a `User` all of their solved `Questions`. These `Questions` would have been marked a 
+    solved by the `User`.
+    """
     try:
         user: User = User.objects.get(telegram_id=request.GET['user_id'])
     except User.DoesNotExist:
