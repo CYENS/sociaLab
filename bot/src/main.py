@@ -985,6 +985,7 @@ def main() -> None:
         ]
     ))
     dispatcher.add_handler(CommandHandler('login', login))
+    dispatcher.add_handler(CommandHandler('sign_up', sign_up))
 
     DELETE_ACCOUNT_TEXT_FILTERS = (Filters.command | Filters.regex('^[C|c]ancel.?$') |
         Filters.regex('^[N|n]o.?$') | Filters.regex('^[Α|α]κύρωση.?$') |
