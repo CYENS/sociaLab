@@ -879,7 +879,7 @@ def main() -> None:
         BotCommand('stop', STOP_INFORMATION['en']),
         BotCommand('delete_account', DELETE_ACCOUNT_INFORMATION['en'])])
 
-    updater = Updater(BOT_TOKEN, persistence=PicklePersistence('./'))
+    updater = Updater(BOT_TOKEN, persistence=PicklePersistence('./bot_data'))
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler('start', start))
