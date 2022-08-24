@@ -13,11 +13,18 @@ APP_ID = os.environ['APP_ID']
 SERVER = os.environ['SERVER']
 WENET_WEBSITE = os.environ['WENET_WEBSITE']
 WENET_AUTHENTICATION = os.environ['WENET_AUTHENTICATION']
+WENET_SIGN_UP = os.environ['WENET_SIGN_UP']
 
 LOGIN_INFORMATION = {
     'en' : "login to your WeNet account and establish a connection with your Telegram account",
     'gr' : "συνδεθείτε στο λογαριασμό σας στο WeNet για να δημιουργήσετε μια σύνδεση με το λογαριασμό σας στο Telegram",
     'tr' : "WeNet hesabınıza giriş yapın ve Telegram hesabınızla bağlantı kurun"
+}
+
+SIGN_UP_INFORMATION = {
+    'en' : "sign up for a WeNet account and activate your account visiting your email inbox",
+    'gr' : "δημιουργήστε το λογαριασμό σας στο WeNet και ενεργοποιείστε τον απο τον σύνδεσμο που θα σταλεί στο email σας",
+    'tr' : "WeNet hesabınızı oluşturun ve e-postanıza gönderilecek bağlantıdan etkinleştirin"
 }
 
 DELETE_ACCOUNT_INFORMATION = {
@@ -127,6 +134,7 @@ def help(update: Update, context: CallbackContext):
 
     update.message.reply_markdown_v2(
     rf"*{AVAILABLE_COMMANDS[LANGUAGE]}*\:""\n"
+    rf"• /sign\_up \- _{SIGN_UP_INFORMATION[LANGUAGE]}_""\n"
     rf"• /login \- _{LOGIN_INFORMATION[LANGUAGE]}_""\n"
     rf"• /ask\_question \- _{ASK_QUESTION_INFORMATION[LANGUAGE]}_""\n"
     rf"• /available\_questions \- _{AVAILABLE_QUESTIONS_INFORMATION[LANGUAGE]}_""\n"
@@ -598,6 +606,13 @@ LOGIN = {
     'tr' : "WeNet'e bağlan "
 }
 
+SIGN_UP = {
+    'en' : "sign up to WeNet",
+    'gr' : "εγγραφή στο WeNet",
+    'tr' : "WeNet'kaydı "
+}
+
+
 def login(update: Update, context: CallbackContext):
     """
     Sends to the user a link which will redirect them to WeNet's login/registration page, which will
@@ -608,6 +623,17 @@ def login(update: Update, context: CallbackContext):
     if (MESSAGE is not None):
         MESSAGE.reply_html(
             f"<a href='{WENET_AUTHENTICATION}'>{LOGIN[context.chat_data['language']]}</a>")
+
+
+def sign_up(update: Update, context: CallbackContext):
+    """
+    Sends to the user a link which will redirect them to WeNet's sign up page.
+    """
+    MESSAGE = update.message
+
+    if (MESSAGE is not None):
+        MESSAGE.reply_html(
+            f"<a href='{WENET_SIGN_UP}'>{SIGN_UP[context.chat_data['language']]}</a>")
 
 DELETE_ACCOUNT_WARNING = {
     'en' : r"Are you sure you want to delete your account\? All the questions you asked and all the"
@@ -817,6 +843,7 @@ def change_to_greek(update: Update, context: CallbackContext):
         context.chat_data['language'] = 'gr'
         context.bot.set_my_commands(commands=STANDARD_COMMANDS + [
             BotCommand('help', HELP_INFORMATION['gr']),
+            BotCommand('sign_up', SIGN_UP_INFORMATION['gr']),
             BotCommand('login', LOGIN_INFORMATION['gr']),
             BotCommand('ask_question', ASK_QUESTION_INFORMATION['gr']),
             BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['gr']),
@@ -837,6 +864,7 @@ def change_to_turkish(update: Update, context: CallbackContext):
         context.chat_data['language'] = 'tr'
         context.bot.set_my_commands(commands=STANDARD_COMMANDS + [
             BotCommand('help', HELP_INFORMATION['tr']),
+            BotCommand('sign_up', SIGN_UP_INFORMATION['tr']),
             BotCommand('login', LOGIN_INFORMATION['tr']),
             BotCommand('ask_question', ASK_QUESTION_INFORMATION['tr']),
             BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['tr']),
@@ -857,6 +885,7 @@ def change_to_english(update: Update, context: CallbackContext):
         context.chat_data['language'] = 'en'
         context.bot.set_my_commands(commands=STANDARD_COMMANDS + [
             BotCommand('help', HELP_INFORMATION['en']),
+            BotCommand('sign_up', SIGN_UP_INFORMATION['en']),
             BotCommand('login', LOGIN_INFORMATION['en']),
             BotCommand('ask_question', ASK_QUESTION_INFORMATION['en']),
             BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['en']),
@@ -871,6 +900,7 @@ def main() -> None:
     bot = Bot(BOT_TOKEN)
     bot.set_my_commands(commands=STANDARD_COMMANDS + [
         BotCommand('help', HELP_INFORMATION['en']),
+        BotCommand('sign_up', SIGN_UP_INFORMATION['en']),
         BotCommand('login', LOGIN_INFORMATION['en']),
         BotCommand('ask_question', ASK_QUESTION_INFORMATION['en']),
         BotCommand('available_questions', AVAILABLE_QUESTIONS_INFORMATION['en']),
