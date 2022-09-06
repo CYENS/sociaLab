@@ -21,5 +21,6 @@ urlpatterns = [
     path('wenet/', include('wenet_webhooks.urls')),
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
+    path('privacy', views.privacy, name='privacy'),
     path('autodeploy', views.autodeploy, name='autodeploy'),
 ]
