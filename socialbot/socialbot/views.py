@@ -13,4 +13,4 @@ def autodeploy(request):
     return HttpResponse(result.stderr)
 
 def privacy (request):
-    return render(request, 'templates/privacy.html')
+    return render(request, 'socialbot/socialbot/templates/privacy.html')
