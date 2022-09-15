@@ -730,9 +730,9 @@ QUESTION_ABOUT_QUESTION = {
 }
 
 QUESTION_ABOUT_ANSWER = {
-    'en' : "Would you like to answer this question?",
-    'gr' : "Θα θέλατε να απαντήσετε αυτή την ερώτηση;",
-    'tr' : "Bu soruyu cevaplamak istiyormusun?"
+    'en' : "Would you like to answer this question? Πlease press yes or no",
+    'gr' : "Θα θέλατε να απαντήσετε αυτή την ερώτηση; Επιλεξτε ναι η οχι πιο κατω",
+    'tr' : "Bu soruyu cevaplamak istiyormusun? ütfen evet veya hayır düğmesine basın"
 }
 
 YES = {
