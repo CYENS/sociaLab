@@ -31,15 +31,15 @@ def messages_callback_from_wenet(request: HttpRequest):
     """
     Callback function which wenet should use.
     """
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        message_type = data.get('label')
-        user_id = data.get('receiverId')
-        app_id = data.get('appId')
-        message = data.get('attributes').get('message')
-        taskId = data.get('attributes').get('taskId')
-        if message_type == "AnswerQuestion":
-            _telegram_bot_answer_question(_get_user(user_id), message, _get_question(taskId))
+    # if request.method == 'POST':
+    #     data = json.loads(request.body)
+    #     message_type = data.get('label')
+    #     user_id = data.get('receiverId')
+    #     app_id = data.get('appId')
+    #     message = data.get('attributes').get('message')
+    #     taskId = data.get('attributes').get('taskId')
+    #     if message_type == "AnswerQuestion":
+    #         _telegram_bot_answer_question(_get_user(user_id), message, _get_question(taskId))
     return HttpResponse()
 
 # TODO The translation should happen here if needed before sending it to the user. During this 
