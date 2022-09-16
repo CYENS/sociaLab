@@ -6,3 +6,4 @@ pyOpenSSL==22.0.0
 requests
 python-telegram-bot>=13.13
 googletrans==4.0.0-rc1
+gunicorn
