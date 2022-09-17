@@ -11,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=postgres
   web:
     build: .
-    command: gunicorn socialbot.socialbot.wsgi --bind 0.0.0.0:8000 --certfile cognition-srv2_ouc_ac_cy.pem --keyfile cogition-srv2a.key
+    command: gunicorn socialbot/socialbot.wsgi:application --bind 0.0.0.0:8000 --certfile cognition-srv2_ouc_ac_cy.pem --keyfile cogition-srv2a.key
     volumes:
       - .:/code
       - .:/root/.ssh:rw
