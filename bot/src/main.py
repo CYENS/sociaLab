@@ -261,6 +261,11 @@ NO_SUCH_ANSWER = {
     'gr' : "Λυπάμαι, δεν μπόρεσα να καταλάβω τι πληκτρολογήσατε.",
     'tr' : "Üzgünüm, ne yazdığınızı anlayamadım."
 }
+NEGATIVE_ANSWER = {
+    'en' : "ok!",
+    'gr' : "όπως θέλετε!",
+    'tr' : "nasıl istersen!"
+}
 
 def available_question_manipulation(update: Update, context: CallbackContext):
     """
@@ -276,7 +281,7 @@ def available_question_manipulation(update: Update, context: CallbackContext):
                 reply_markup=ReplyKeyboardRemove())
             return 1
         else:
-            MESSAGE.reply_text(NO_SUCH_ANSWER[LANGUAGE],
+            MESSAGE.reply_text(NEGATIVE_ANSWER[LANGUAGE],
                 reply_markup=ReplyKeyboardRemove())
 
 ANSWER_SUCCEDED = {
@@ -696,9 +701,9 @@ def delete_account_helper(update: Update, context: CallbackContext):
         return ConversationHandler.END
 
 PROCESS_STOPPED = {
-    'en' : "The process was stopped.",
-    'gr' : "Η διαδικασία σταμάτησε.",
-    'tr' : "Süreç durduruldu."
+    'en' : "The previous process was stopped.",
+    'gr' : "Η προηγούμενη διαδικασία σταμάτησε.",
+    'tr' : "Önceki Süreç durduruldu."
 }
 
 SELECTED = {
