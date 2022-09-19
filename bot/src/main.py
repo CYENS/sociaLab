@@ -225,6 +225,7 @@ def available_questions(update: Update, context: CallbackContext):
     """
     MESSAGE = update.message
     USER = update.effective_user
+    logger.info(MESSAGE)
 
     if (MESSAGE != None):
         request = requests.get(f'{SERVER}/available_questions', params= {'user_id' : USER.id}, verify=False)
