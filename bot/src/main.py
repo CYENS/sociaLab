@@ -271,18 +271,27 @@ def available_question_manipulation(update: Update, context: CallbackContext):
     """
     Handles the response of the user given their choice from the questions listed.
     """
-    MESSAGE = update.message
-    MESSAGE_CONTENT = MESSAGE.text.lower()
-    LANGUAGE = context.chat_data['language']
-
-    if (MESSAGE is not None):
-        if (YES[LANGUAGE].lower() in MESSAGE_CONTENT):
-            MESSAGE.reply_text(TYPE_ANSWER[LANGUAGE],
-                reply_markup=ReplyKeyboardRemove())
-            return 1
-        else:
-            MESSAGE.reply_text(NEGATIVE_ANSWER[LANGUAGE],
-                reply_markup=ReplyKeyboardRemove())
+    try:
+        MESSAGE = update.message
+        MESSAGE_CONTENT = MESSAGE.text.lower()
+        #LANGUAGE = context.chat_data['language']
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND[LANGUAGE],
+                               reply_markup=ReplyKeyboardRemove())
+        elif (MESSAGE is not None):
+            if YES[LANGUAGE].lower() in MESSAGE_CONTENT:
+                MESSAGE.reply_text(TYPE_ANSWER[LANGUAGE],
+                    reply_markup=ReplyKeyboardRemove())
+                return 1
+            elif NO[LANGUAGE].lower() in MESSAGE_CONTENT:
+                MESSAGE.reply_text(NEGATIVE_ANSWER[LANGUAGE],
+                    reply_markup=ReplyKeyboardRemove())
+            else:
+                MESSAGE.reply_text(NO_SUCH_ANSWER[LANGUAGE],
+                    reply_markup=ReplyKeyboardRemove())
+    except Exception as e:
+        logger.info("available_question_manipulation failed")
 
 ANSWER_SUCCEDED = {
     'en' : "Your answer was submitted successfully!",
@@ -408,6 +417,11 @@ DELETE_QUESTION_FAILED = {
     'en' : "The question could not be deleted. Please try again.",
     'gr' : "Η ερώτηση δεν μπόρεσε να διαγραφτεί. Παρακαλώ δοκιμάστε ξανά.",
     'tr' : "Soru silinemedi. Lütfen tekrar deneyiniz."
+}
+LANGUAGE_NOT_FOUND = {
+    'en' : "Woops! looks like we don't know your language, please select /gr,/tr,/en",
+    'gr' : "ουπς! φαίνεται οτι δεν γνωρίζουμε τη γλωσσα σου, παρακαλω επιλεξτε απο /gr,/tr,/en",
+    'tr' : "Dilinizi bilmiyoruz gibi görünüyor, lütfen seçin /gr,/tr,/en."
 }
 
 def asked_question_manipulation(update: Update, context: CallbackContext):
