@@ -223,32 +223,38 @@ def available_questions(update: Update, context: CallbackContext):
     Texts the user with the available (unsolved) questions that they have according to the WeNet 
     platform.
     """
-    MESSAGE = update.message
-    USER = update.effective_user
-    logger.info(MESSAGE)
+    try:
+        MESSAGE = update.message
+        USER = update.effective_user
+        logger.info(MESSAGE)
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND[LANGUAGE],
+                               reply_markup=ReplyKeyboardRemove())
+        elif (MESSAGE != None):
+            request = requests.get(f'{SERVER}/available_questions', params= {'user_id' : USER.id}, verify=False)
 
-    if (MESSAGE != None):
-        request = requests.get(f'{SERVER}/available_questions', params= {'user_id' : USER.id}, verify=False)
+            if (request.status_code == 200):
+                markup_list = []
+                questions: list = request.json()['questions']
+                for (index, question) in enumerate(request.json()['questions']):
+                    markup_list.append(InlineKeyboardButton(question['content'], callback_data={
+                        'button_id' : index,
+                        'question_id' : question['id'],
+                        'type' : 'available'
+                    }.__str__()))
 
-        if (request.status_code == 200):
-            markup_list = []
-            questions: list = request.json()['questions']
-            for (index, question) in enumerate(request.json()['questions']):
-                markup_list.append(InlineKeyboardButton(question['content'], callback_data={
-                    'button_id' : index,
-                    'question_id' : question['id'],
-                    'type' : 'available'
-                }.__str__()))
-            
-            if (len(questions) == 0):
-                MESSAGE.reply_text(NO_AVAILABLE_QUESTIONS[context.chat_data['language']])
+                if (len(questions) == 0):
+                    MESSAGE.reply_text(NO_AVAILABLE_QUESTIONS[context.chat_data['language']])
+                else:
+                    MESSAGE.reply_markdown_v2(AVAILABLE_QUESTIONS[context.chat_data['language']],
+                        reply_markup=InlineKeyboardMarkup.from_column(markup_list))
+                    return 0
             else:
-                MESSAGE.reply_markdown_v2(AVAILABLE_QUESTIONS[context.chat_data['language']],
-                    reply_markup=InlineKeyboardMarkup.from_column(markup_list))
-                return 0
-        else:
-            MESSAGE.reply_text(AVAILABLE_QUESTIONS_NOT_LOGGED_IN[context.chat_data['language']])
-        return ConversationHandler.END
+                MESSAGE.reply_text(AVAILABLE_QUESTIONS_NOT_LOGGED_IN[context.chat_data['language']])
+            return ConversationHandler.END
+    except Exception as e:
+        logger.info("available_question failed")
 
 TYPE_ANSWER = {
     'en' : "Please type your answer:",
