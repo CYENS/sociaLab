@@ -257,7 +257,7 @@ def available_questions(update: Update, context: CallbackContext):
                 MESSAGE.reply_text(AVAILABLE_QUESTIONS_NOT_LOGGED_IN[context.chat_data['language']])
             return ConversationHandler.END
     except Exception as e:
-        logger.info("available_question failed")
+        logger.exception("available_question failed")
 
 TYPE_ANSWER = {
     'en' : "Please type your answer:",
