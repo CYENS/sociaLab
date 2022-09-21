@@ -227,11 +227,14 @@ def available_questions(update: Update, context: CallbackContext):
         MESSAGE = update.message
         USER = update.effective_user
         logger.info(MESSAGE)
-        LANGUAGE = context.chat_data.get('language')
-        if not LANGUAGE:
-            MESSAGE.reply_text(LANGUAGE_NOT_FOUND[LANGUAGE],
-                               reply_markup=ReplyKeyboardRemove())
-        elif (MESSAGE != None):
+        try:
+            LANGUAGE = context.chat_data.get('language')
+            if not LANGUAGE:
+                MESSAGE.reply_text(LANGUAGE_NOT_FOUND[LANGUAGE])
+        except Exception as e:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND[LANGUAGE])
+
+        if MESSAGE != None and LANGUAGE:
             request = requests.get(f'{SERVER}/available_questions', params= {'user_id' : USER.id}, verify=False)
 
             if (request.status_code == 200):
