@@ -129,8 +129,15 @@ def help(update: Update, context: CallbackContext):
     """
     Can be used by the user to print (text) them the available actions.
     """
+    MESSAGE = update.message
     user = update.effective_user
-    LANGUAGE = context.chat_data['language']
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
 
     update.message.reply_markdown_v2(
     rf"*{AVAILABLE_COMMANDS[LANGUAGE]}*\:""\n"
@@ -182,8 +189,15 @@ def ask_question_handler(update: Update, context: CallbackContext):
     """
     MESSAGE = update.message
     USER = update.effective_user
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
 
-    if (MESSAGE is not None):
+    if MESSAGE is not None and LANGUAGE:
         request = requests.post(f'{SERVER}/ask_question', data={
                 'user_id' : USER.id,
                 'question' : MESSAGE.text,
@@ -320,23 +334,35 @@ def answer_handler(update: Update, context: CallbackContext):
     """
     Handles the answer typed by the user by sending it to the server.
     """
-    DATA = context.user_data['question']
-    MESSAGE = update.message
-    USER = update.effective_user
+    try:
+        DATA = context.user_data['question']
+        MESSAGE = update.message
+        USER = update.effective_user
+        try:
+            LANGUAGE = context.chat_data.get('language')
+            if not LANGUAGE:
+                MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        except Exception as e:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+            LANGUAGE = None
 
-    if (MESSAGE is not None):
-        request = requests.post(f'{SERVER}/send_answer', data={
-                'user_id' : USER.id,
-                'question_id' : DATA['question_id'],
-                'answer' : MESSAGE.text,
-            }, verify=False)
+        if MESSAGE is not None and LANGUAGE:
+            request = requests.post(f'{SERVER}/send_answer', data={
+                    'user_id' : USER.id,
+                    'question_id' : DATA['question_id'],
+                    'answer' : MESSAGE.text,
+                }, verify=False)
 
-        if (request.status_code == 200):
-            MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
-        else:
-            MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
+            if (request.status_code == 200):
+                MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
+            else:
+                MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
 
-    return ConversationHandler.END
+        return ConversationHandler.END
+    except Exception as e:
+        logger.exception("answer_handler failed")
+        MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
+
 
 NO_ASKED_QUESTIONS = {
     'en' : "Currently you do not have any active questions. You can ask using /ask_question",
@@ -365,8 +391,15 @@ def asked_questions(update: Update, context: CallbackContext):
     It can be used by a user to see their asked questions.
     """
     MESSAGE = update.message
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
     
-    if (MESSAGE is not None):
+    if MESSAGE is not None and LANGUAGE:
         user = update.effective_user
         request = requests.get(f'{SERVER}/asked_questions', params={
             'user_id' : user.id
@@ -444,9 +477,15 @@ def asked_question_manipulation(update: Update, context: CallbackContext):
     MESSAGE = update.message
     MESSAGE_CONTENT = MESSAGE.text.lower()
     USER = update.effective_user
-    LANGUAGE = context.chat_data['language']
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
 
-    if (MESSAGE is not None):   
+    if MESSAGE is not None and LANGUAGE:
         if (SEE_ANSWERS[LANGUAGE].lower() in MESSAGE_CONTENT):
             request = requests.get(f'{SERVER}/question_answers', params={
                     'user_id' : USER.id,
@@ -524,9 +563,15 @@ def solved_questions(update: Update, context: CallbackContext):
     DATA = context.user_data['question']
     MESSAGE = update.message
     USER = update.effective_user
-    LANGUAGE = context.chat_data['language']
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
 
-    if (MESSAGE is not None):
+    if MESSAGE is not None and LANGUAGE:
         request = requests.get(f'{SERVER}/solved_questions', params={
             'user_id' : USER.id,
             'question_id' : DATA['question_id']
@@ -576,9 +621,15 @@ def solved_question_manipulation(update: Update, context: CallbackContext):
     MESSAGE = update.message
     MESSAGE_CONTENT = MESSAGE.text.lower()
     USER = update.effective_user
-    LANGUAGE = context.chat_data['language']
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
 
-    if (MESSAGE is not None):
+    if MESSAGE is not None and LANGUAGE:
         if (SEE_ANSWERS[LANGUAGE].lower() in MESSAGE_CONTENT):
             request = requests.get(f'{SERVER}/question_answers', params={
                     'user_id' : USER.id,
@@ -708,10 +759,16 @@ def delete_account_helper(update: Update, context: CallbackContext):
     """
     MESSAGE = update.message
     MESSAGE_CONTENT = MESSAGE.text.lower()
-    LANGUAGE = context.chat_data['language']
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
     USER = update.effective_user
 
-    if (MESSAGE is not None):
+    if MESSAGE is not None and LANGUAGE:
         if (YES[LANGUAGE].lower() in MESSAGE_CONTENT.lower()):
             request = requests.post(f'{SERVER}/delete_account', data={
                 'user_id' : USER.id
@@ -812,8 +869,15 @@ def selected_question_choice(update: Update, context: CallbackContext):
     QUERY = update.callback_query
     DATA = json.loads(QUERY.data.replace("'",'"'))
     MESSAGE = QUERY.message
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
 
-    if (MESSAGE is not None):
+    if MESSAGE is not None and LANGUAGE:
         LANGUAGE = context.chat_data['language']
         TYPE = DATA['type']
         SELECTED_BUTTON = MESSAGE.reply_markup.inline_keyboard[DATA['button_id']][0].text
