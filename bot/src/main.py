@@ -284,11 +284,13 @@ def available_question_manipulation(update: Update, context: CallbackContext):
         MESSAGE = update.message
         MESSAGE_CONTENT = MESSAGE.text.lower()
         #LANGUAGE = context.chat_data['language']
-        LANGUAGE = context.chat_data.get('language')
-        if not LANGUAGE:
-            MESSAGE.reply_text(LANGUAGE_NOT_FOUND[LANGUAGE],
-                               reply_markup=ReplyKeyboardRemove())
-        elif (MESSAGE is not None):
+        try:
+            LANGUAGE = context.chat_data.get('language')
+            if not LANGUAGE:
+                MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        except Exception as e:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        if MESSAGE is not None and LANGUAGE:
             if YES[LANGUAGE].lower() in MESSAGE_CONTENT:
                 MESSAGE.reply_text(TYPE_ANSWER[LANGUAGE],
                     reply_markup=ReplyKeyboardRemove())
@@ -428,7 +430,7 @@ DELETE_QUESTION_FAILED = {
     'tr' : "Soru silinemedi. Lütfen tekrar deneyiniz."
 }
 LANGUAGE_NOT_FOUND = {
-    'en' : "Woops! looks like we don't know your language, please select /gr,/tr,/en",
+    'en' : "Woops! looks like we don't know your language, please select /gr, /tr, /en",
     'gr' : "ουπς! φαίνεται οτι δεν γνωρίζουμε τη γλωσσα σου, παρακαλω επιλεξτε απο /gr,/tr,/en",
     'tr' : "Dilinizi bilmiyoruz gibi görünüyor, lütfen seçin /gr,/tr,/en."
 }
