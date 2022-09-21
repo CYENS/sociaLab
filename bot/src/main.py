@@ -232,7 +232,7 @@ def available_questions(update: Update, context: CallbackContext):
             if not LANGUAGE:
                 MESSAGE.reply_text(LANGUAGE_NOT_FOUND[LANGUAGE])
         except Exception as e:
-            MESSAGE.reply_text(LANGUAGE_NOT_FOUND[LANGUAGE])
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
 
         if MESSAGE != None and LANGUAGE:
             request = requests.get(f'{SERVER}/available_questions', params= {'user_id' : USER.id}, verify=False)
