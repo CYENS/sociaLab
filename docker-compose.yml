@@ -27,8 +27,8 @@ services:
       - WENET_TOKEN_GENERATOR=https://wenet.u-hopper.com/dev/api/oauth2/token
       - WENET_WEBSITE=https://wenet.u-hopper.com/dev/hub/frontend
       - WENET_SERVICES=https://wenet.u-hopper.com/dev/api/service
-      - TELEGRAM_URI=https://t.me/sociaLabGRCYTRCYBot?start=
-      - BOT_TOKEN=5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw
+      - TELEGRAM_URI=https://t.me/ChatEasy_bot?start=
+      - BOT_TOKEN=5593408195:AAEW8SO7xtaYUZyExvnEXVdqk27YBBLR_ow
     depends_on:
       - db
   bot:
@@ -41,6 +41,6 @@ services:
       - WENET_SIGN_UP=https://wenet.u-hopper.com/dev/hub/frontend/user/signup
       - WENET_TOKEN_GENERATOR=https://wenet.u-hopper.com/dev/api/oauth2/token
       - WENET_WEBSITE=https://wenet.u-hopper.com/dev/hub/frontend
-      - BOT_TOKEN=5190722737:AAHrk9MCT01h646wPP9G5M2qjOYm3fiRYtw
+      - BOT_TOKEN=5593408195:AAEW8SO7xtaYUZyExvnEXVdqk27YBBLR_ow
     depends_on:
       - web

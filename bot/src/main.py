@@ -101,11 +101,11 @@ def start(update: Update, context: CallbackContext):
 
     if (len(passed_arguments) == 0):
         context.chat_data['language'] = 'en'
-        update.message.reply_markdown_v2(rf"*_Welcome to sociaLab\!_* The default language is "
+        update.message.reply_markdown_v2(rf"*_Welcome to ChatEasy\!_* The default language is "
         r"English\. For Greek send /gr and for Turkish /tr\.""\n"r"*_Καλως ορίσατε στο sociaLab\!_* "
         r"Η καθορισμένη γλώσσα είναι τα Αγγλικά\. Για Ελληνικά στείλτε /gr και για Τουρκικά /tr\.""\n"
         r"*_SociaLab’ a hoşgeldiniz\!_* Varsayılan dil İngilizce’dir\. Yunanca için /gr ve Türkçe için "
-        r"/tr yazıp gönderiniz\.")
+        r"/tr yazıp gönderiniz\. To use the bot /sign_up to the Wenet platform and use your credentials to /login for interactions accross language barriers ! : D")
     else:
         # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
         request = requests.post(f'{SERVER}/create_account', data={
