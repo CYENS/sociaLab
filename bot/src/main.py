@@ -101,8 +101,7 @@ def start(update: Update, context: CallbackContext):
 
     if (len(passed_arguments) == 0):
         context.chat_data['language'] = 'en'
-        update.message.reply_markdown_v2(rf"*_Welcome to ChatEasy\!_* The default language is "
-        r"English\. For Greek send /gr and for Turkish /tr\.""\n"r"*_Καλως ορίσατε στο ChatEasy\!_* "
+        update.message.reply_markdown_v2(r"*_Καλως ορίσατε στο ChatEasy\!_* "
         r"Η καθορισμένη γλώσσα είναι τα Αγγλικά\. Για Ελληνικά στείλτε /gr και για Τουρκικά /tr\.""\n"
         r"*_SociaLab’ a hoşgeldiniz\!_* Varsayılan dil İngilizce’dir\. Yunanca için /gr ve Türkçe için "
         r"/tr yazıp gönderiniz\.")
