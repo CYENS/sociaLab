@@ -87,7 +87,7 @@ CONNECTION_FAILED = {
 }
 
 CONNECTION_SUCCEDED = {
-    'en' : "Connection created!",
+    'en' : "Connection created! Press start for social interactions across language barriers!",
     'gr' : "Η σύνδεση έχει δημιουργηθεί!",
     'tr' : "Bağlantı kuruldu!"
 }
@@ -112,7 +112,9 @@ def start(update: Update, context: CallbackContext):
             'code' : passed_arguments[0],
             'user_id' : user.id,
         }, verify=False)
-        LANGUAGE = context.chat_data['language']
+        if request.json().get('language') and request.json().get('language') in {'tr','en','el'}:
+            context.chat_data['language'] = request.json().get('language')
+            LANGUAGE = context.chat_data['language']
         if (request.status_code == 400):
             update.message.reply_text(CONNECTION_FAILED[LANGUAGE])
         else:

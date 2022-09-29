@@ -208,7 +208,7 @@ def create_account(request: HttpRequest):
             access_token=user_access_token, refresh_token=user_refresh_token)
         u.save()
 
-        return JsonResponse({'message' : 'user_created'})
+        return JsonResponse({'message' : 'user_created', 'language': u.language})
     except Exception as e:
         logger.info('create_account failed')
 
