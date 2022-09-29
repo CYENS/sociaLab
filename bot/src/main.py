@@ -106,6 +106,7 @@ def start(update: Update, context: CallbackContext):
         r"Η καθορισμένη γλώσσα είναι τα Αγγλικά\. Για Ελληνικά στείλτε /gr και για Τουρκικά /tr\.""\n"
         r"*_SociaLab’ a hoşgeldiniz\!_* Varsayılan dil İngilizce’dir\. Yunanca için /gr ve Türkçe için "
         r"/tr yazıp gönderiniz\.")
+        update.message.reply_text("Using the bot is simple, by pressing / you see all the available commands for the bot to execute. Now let's create a Wenet profile for you , the system that powers ChatEasy ! Press /sign_up ")
     else:
         # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
         request = requests.post(f'{SERVER}/create_account', data={
@@ -718,6 +719,7 @@ def sign_up(update: Update, context: CallbackContext):
     if (MESSAGE is not None):
         MESSAGE.reply_html(
             f"<a href='{WENET_SIGN_UP}'>{SIGN_UP[context.chat_data['language']]}</a>")
+        MESSAGE.reply_text("Hurray !! please don't forget to 1) verify your email address to Wenet after sign up and 2)fill in the extra details to your profile as prompted to proceed to the next step /login ! :D ")
 
 DELETE_ACCOUNT_WARNING = {
     'en' : r"Are you sure you want to delete your account\? All the questions you asked and all the"
