@@ -357,7 +357,7 @@ def mark_question_as_solved_handler(update: Update, context: CallbackContext):
         MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
         LANGUAGE = None
     USER = update.effective_user
-
+    MESSAGE.reply_text("good so far")
     if MESSAGE is not None and LANGUAGE:
         if (YES[LANGUAGE].lower() in MESSAGE_CONTENT.lower()):
             MESSAGE.reply_text("you selectes yes"+str(DATA))
