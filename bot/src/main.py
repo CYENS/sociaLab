@@ -332,6 +332,18 @@ ANSWER_FAILED = {
     'tr' : "Cevabınız gönderilemedi. Lütfen yeniden deneyiniz."
 }
 
+def mark_question_as_solved_handler(update: Update, context: CallbackContext):
+    DATA = context.user_data['question']
+    MESSAGE = update.message
+    USER = update.effective_user
+    LANGUAGE = context.chat_data.get('language')
+    markup_list = [
+        KeyboardButton(YES[LANGUAGE]),
+        KeyboardButton(NO[LANGUAGE])
+    ]
+    MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
+                       reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+
 def answer_handler(update: Update, context: CallbackContext):
     """
     Handles the answer typed by the user by sending it to the server.
@@ -357,6 +369,7 @@ def answer_handler(update: Update, context: CallbackContext):
 
             if (request.status_code == 200):
                 MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
+                mark_question_as_solved_handler(update,context)
             else:
                 MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
 
@@ -691,8 +704,8 @@ LOGIN = {
 }
 
 SIGN_UP = {
-    'en' : "sign up to WeNet",
-    'gr' : "εγγραφή στο WeNet",
+    'en' : "Sign up to WeNet",
+    'gr' : "Εγγραφή στο WeNet",
     'tr' : "WeNet'kaydı "
 }
 
@@ -716,9 +729,10 @@ def sign_up(update: Update, context: CallbackContext):
     MESSAGE = update.message
 
     if (MESSAGE is not None):
+        MESSAGE.reply_text("Hurray !!")
         MESSAGE.reply_html(
             f"<a href='{WENET_SIGN_UP}'>{SIGN_UP[context.chat_data['language']]}</a>")
-        MESSAGE.reply_text("Hurray !! please don't forget to 1) verify your email address to Wenet after sign up and 2)fill in the extra details to your profile as prompted to proceed to the next step /login ! :D ")
+        MESSAGE.reply_text("*please don't forget to 1) verify your email address to Wenet after sign up  2)fill in the extra details to your profile as prompted which are necessary for the next step /login ! :D ")
 
 DELETE_ACCOUNT_WARNING = {
     'en' : r"Are you sure you want to delete your account\? All the questions you asked and all the"
