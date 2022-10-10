@@ -397,7 +397,7 @@ def answer_handler(update: Update, context: CallbackContext):
 
             if (request.status_code == 200):
                 MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
-                return 1
+                return 2
             else:
                 MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
 
