@@ -397,6 +397,12 @@ def answer_handler(update: Update, context: CallbackContext):
 
             if (request.status_code == 200):
                 MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
+                markup_list = [
+                    KeyboardButton(YES[LANGUAGE]),
+                    KeyboardButton(NO[LANGUAGE])
+                ]
+                MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
+                                   reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
                 return 2
             else:
                 MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
