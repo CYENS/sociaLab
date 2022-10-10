@@ -343,7 +343,7 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     ]
     MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
                        reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
-    return 0
+    return 3
 
 def mark_question_as_solved_handler(update: Update, context: CallbackContext):
     DATA = context.user_data['question']
@@ -397,7 +397,7 @@ def answer_handler(update: Update, context: CallbackContext):
 
             if (request.status_code == 200):
                 MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
-                mark_question_as_solved(update,context)
+                return 1
             else:
                 MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
 
@@ -1106,6 +1106,8 @@ def main() -> None:
             0 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS,
                 available_question_manipulation)],
             1 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, answer_handler)],
+            2 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, mark_question_as_solved)],
+            3 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, mark_question_as_solved_handler())],
         },
         fallbacks=[
             CommandHandler('stop', stop),
@@ -1126,17 +1128,17 @@ def main() -> None:
     ))
     dispatcher.add_handler(CommandHandler('login', login))
     dispatcher.add_handler(CommandHandler('sign_up', sign_up))
-    dispatcher.add_handler(ConversationHandler(
-        entry_points=[CommandHandler('mark_question_as_solved', mark_question_as_solved)],
-        states={
-            0 : [MessageHandler(Filters.text & ~ASKED_QUESTIONS_TEXT_FILTERS,
-                mark_question_as_solved_handler)],
-        },
-        fallbacks=[
-            CommandHandler('stop', stop),
-            MessageHandler(ASKED_QUESTIONS_TEXT_FILTERS, stop)
-        ]
-    ))
+    # dispatcher.add_handler(ConversationHandler(
+    #     entry_points=[CommandHandler('mark_question_as_solved', mark_question_as_solved)],
+    #     states={
+    #         0 : [MessageHandler(Filters.text & ~ASKED_QUESTIONS_TEXT_FILTERS,
+    #             mark_question_as_solved_handler)],
+    #     },
+    #     fallbacks=[
+    #         CommandHandler('stop', stop),
+    #         MessageHandler(ASKED_QUESTIONS_TEXT_FILTERS, stop)
+    #     ]
+    # ))
 
     DELETE_ACCOUNT_TEXT_FILTERS = (Filters.command | Filters.regex('^[C|c]ancel.?$') |
         Filters.regex('^[N|n]o.?$') | Filters.regex('^[Α|α]κύρωση.?$') |
