@@ -6,7 +6,7 @@ import json
 
 from threading import Thread
 from googletrans import Translator
-from telegram import Bot, ParseMode
+from telegram import Bot, ParseMode, KeyboardButton, ReplyKeyboardMarkup
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
@@ -320,6 +320,15 @@ def _send_answer_to_user(answer: Answer):
 
         bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
             parse_mode=ParseMode.MARKDOWN_V2)
+        markup_list = [
+            KeyboardButton("Yes"),
+            KeyboardButton("No")
+        ]
+        reply=bot.send_message(questioner.telegram_id, reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+        if "Yes" in reply:
+            bot.send_message(questioner.telegram_id, "ok marked as solved!",
+                             parse_mode=ParseMode.MARKDOWN_V2)
+
     except Exception as e:
         logger.info('_send_answer_to_user failed')
 

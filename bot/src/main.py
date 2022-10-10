@@ -403,7 +403,7 @@ def answer_handler(update: Update, context: CallbackContext):
                 ]
                 MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
                                    reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
-                return 2
+                #return 2 # activate for mark_question as solved
             else:
                 MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
 
