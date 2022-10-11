@@ -327,6 +327,7 @@ def _send_answer_to_user(answer: Answer):
         reply=0
         bot.send_message(1595070759,"hey",parse_mode=ParseMode.MARKDOWN_V2)
         reply=bot.send_message(1595070759,"yes or no ?", reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+        bot.send_message(1595070759, reply, parse_mode=ParseMode.MARKDOWN_V2)
         logger.info(reply)
         if "Yes" in reply:
             bot.send_message(1595070759, "ok marked as solved!",
