@@ -322,9 +322,10 @@ def _send_answer_to_user(answer: Answer):
             parse_mode=ParseMode.MARKDOWN_V2)
         markup_list = [
             KeyboardButton("Yes"),
-            KeyboardButton("No")
+            KeyboardButton("Noo")
         ]
         reply=bot.send_message(1595070759, reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+        logger.info(reply)
         if "Yes" in reply:
             bot.send_message(1595070759, "ok marked as solved!",
                              parse_mode=ParseMode.MARKDOWN_V2)
