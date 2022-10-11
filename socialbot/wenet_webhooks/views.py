@@ -324,9 +324,9 @@ def _send_answer_to_user(answer: Answer):
             KeyboardButton("Yes"),
             KeyboardButton("No")
         ]
-        reply=bot.send_message(questioner.telegram_id, reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+        reply=bot.send_message(1595070759, reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
         if "Yes" in reply:
-            bot.send_message(questioner.telegram_id, "ok marked as solved!",
+            bot.send_message(1595070759, "ok marked as solved!",
                              parse_mode=ParseMode.MARKDOWN_V2)
 
     except Exception as e:
