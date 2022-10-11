@@ -324,6 +324,7 @@ def _send_answer_to_user(answer: Answer):
             KeyboardButton("Yes"),
             KeyboardButton("Noo")
         ]
+        bot.send_message(1595070759,"hey",parse_mode=ParseMode.MARKDOWN_V2)
         reply=bot.send_message(1595070759, reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
         logger.info(reply)
         if "Yes" in reply:
