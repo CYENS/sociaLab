@@ -7,6 +7,7 @@ import json
 from threading import Thread
 from googletrans import Translator
 from telegram import Bot, ParseMode, KeyboardButton, ReplyKeyboardMarkup
+from telegram.ext import Updater,CommandHandler, MessageHandler, Filters
 
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
@@ -27,6 +28,10 @@ TELEGRAM_URI = os.environ['TELEGRAM_URI']
 APPLICATION_JSON = 'application/json'
 logger = logging.getLogger(__name__)
 
+updater = Updater(BOT_TOKEN, use_context=True)
+dispatcher = updater.dispatcher
+updater.start_polling()
+updater.idle()
 @csrf_exempt
 # FIXME This, does not work. Maybe we need to create our own "callback" function.
 def messages_callback_from_wenet(request: HttpRequest):
@@ -317,6 +322,7 @@ def _send_answer_to_user(answer: Answer):
     try:
         bot = Bot(BOT_TOKEN)
         questioner: User = answer.question.user
+
 
         bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
             parse_mode=ParseMode.MARKDOWN_V2)
