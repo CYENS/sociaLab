@@ -397,7 +397,7 @@ def answer_handler(update: Update, context: CallbackContext):
 
             if (request.status_code == 200):
                 MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
-                MESSAGE.reply_text(request.json)
+                MESSAGE.reply_text(request.json())
                 # markup_list = [
                 #     KeyboardButton(YES[LANGUAGE]),
                 #     KeyboardButton(NO[LANGUAGE])
