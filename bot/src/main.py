@@ -397,6 +397,7 @@ def answer_handler(update: Update, context: CallbackContext):
 
             if (request.status_code == 200):
                 MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
+                MESSAGE.reply_text(request.json)
                 # markup_list = [
                 #     KeyboardButton(YES[LANGUAGE]),
                 #     KeyboardButton(NO[LANGUAGE])
@@ -1078,8 +1079,8 @@ def main() -> None:
         fallbacks=[
             CommandHandler('stop',stop),
             MessageHandler(ASK_QUESTION_TEXT_FILTERS, stop)
-        ]
-    ))
+        ],
+    run_async = True))
 
     ASKED_QUESTIONS_TEXT_FILTERS = (Filters.command | Filters.regex('^[C|c]ancel.?$') |
         Filters.regex('^[D|d]one.?$') | Filters.regex('^[N|n]othing.?$') |

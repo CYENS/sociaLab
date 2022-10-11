@@ -28,10 +28,6 @@ TELEGRAM_URI = os.environ['TELEGRAM_URI']
 APPLICATION_JSON = 'application/json'
 logger = logging.getLogger(__name__)
 
-updater = Updater(BOT_TOKEN, use_context=True)
-dispatcher = updater.dispatcher
-updater.start_polling()
-updater.idle()
 @csrf_exempt
 # FIXME This, does not work. Maybe we need to create our own "callback" function.
 def messages_callback_from_wenet(request: HttpRequest):
@@ -326,19 +322,7 @@ def _send_answer_to_user(answer: Answer):
 
         bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
             parse_mode=ParseMode.MARKDOWN_V2)
-        markup_list = [
-            KeyboardButton("Yes"),
-            KeyboardButton("Noo")
-        ]
-        reply=0
-        bot.send_message(1595070759,"hey",parse_mode=ParseMode.MARKDOWN_V2)
-        reply=bot.send_message(1595070759,"yes or no ?", reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
-        bot.send_message(1595070759, reply, parse_mode=ParseMode.MARKDOWN_V2)
-        logger.info(reply)
-        if "Yes" in reply:
-            bot.send_message(1595070759, "ok marked as solved!",
-                             parse_mode=ParseMode.MARKDOWN_V2)
-
+        return JsonResponse({'questioner_telegram_id': questioner.telegram_id,'answer': answer,'question': answer.question,})
     except Exception as e:
         logger.info('_send_answer_to_user failed')
 
