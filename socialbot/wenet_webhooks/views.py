@@ -322,7 +322,12 @@ def _send_answer_to_user(answer: Answer):
 
         bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
             parse_mode=ParseMode.MARKDOWN_V2)
-        return JsonResponse({'questioner_telegram_id': questioner.telegram_id,'answer': answer,'question': answer.question,})
+        markup_list = [
+            KeyboardButton("Mark question as solved"),
+            KeyboardButton("No i haven't received a satisfying answer")
+        ]
+        bot.send_message(1595070759, "is your answer solved ? ",
+                           reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
     except Exception as e:
         logger.info('_send_answer_to_user failed')
 

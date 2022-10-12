@@ -397,7 +397,6 @@ def answer_handler(update: Update, context: CallbackContext):
 
             if (request.status_code == 200):
                 MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
-                MESSAGE.reply_text(request.json())
                 # markup_list = [
                 #     KeyboardButton(YES[LANGUAGE]),
                 #     KeyboardButton(NO[LANGUAGE])
@@ -405,6 +404,7 @@ def answer_handler(update: Update, context: CallbackContext):
                 # MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
                 #                    reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
                 #return 2 # activate for mark_question as solved
+                #mark_question_as_solved_handler(update, context)
             else:
                 MESSAGE.reply_text(ANSWER_FAILED[context.chat_data['language']])
 
@@ -1151,6 +1151,8 @@ def main() -> None:
         Filters.regex('^[N|n]o.?$') | Filters.regex('^[Α|α]κύρωση.?$') |
         Filters.regex('"[Ό|ό]χι.?$') | Filters.regex('^[Y|y]apıldı.?$') |
         Filters.regex('^[H|h]ayır].?$'))
+    MARK_SOLVED_TEXT_FILTERS = (Filters.command | Filters.regex('^[M|m]ark question as solved.?$') |
+        Filters.regex('^[N|n]o.?$'))
 
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('delete_account', delete_account)],
@@ -1163,6 +1165,7 @@ def main() -> None:
             MessageHandler(DELETE_ACCOUNT_TEXT_FILTERS, stop)
         ]
     ))
+    dispatcher.add_handler(MessageHandler(Filters.text & ~MARK_SOLVED_TEXT_FILTERS, mark_question_as_solved))
 
     updater.start_polling(timeout=600)
     updater.idle()
