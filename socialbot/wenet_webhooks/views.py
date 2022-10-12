@@ -320,8 +320,10 @@ def _send_answer_to_user(answer: Answer):
         questioner: User = answer.question.user
 
         buttons = [[InlineKeyboardButton("👍",callback_data="like")],[InlineKeyboardButton("👎",callback_data="dislike")]]
-        bot.send_message(1595070759, SEND_ANSWER_MESSAGE[questioner.language](answer),reply_markup=InlineKeyboardButton(buttons),
-            parse_mode=ParseMode.MARKDOWN_V2)# replace id with questioner.telegram_id
+        bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
+            parse_mode=ParseMode.MARKDOWN_V2)
+        bot.send_message(1595070759, "is your answer solved ? ",
+                         reply_markup=InlineKeyboardButton(buttons))
     except Exception as e:
         logger.info('_send_answer_to_user failed')
 
