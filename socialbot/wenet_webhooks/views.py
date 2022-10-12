@@ -6,7 +6,7 @@ import json
 
 from threading import Thread
 from googletrans import Translator
-from telegram import Bot, ParseMode, KeyboardButton, ReplyKeyboardMarkup
+from telegram import Bot, ParseMode, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater,CommandHandler, MessageHandler, Filters
 
 from django.views.decorators.csrf import csrf_exempt
@@ -319,15 +319,9 @@ def _send_answer_to_user(answer: Answer):
         bot = Bot(BOT_TOKEN)
         questioner: User = answer.question.user
 
-
-        bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
-            parse_mode=ParseMode.MARKDOWN_V2)
-        markup_list = [
-            KeyboardButton("Mark question as solved"),
-            KeyboardButton("No i haven't received a satisfying answer")
-        ]
-        bot.send_message(1595070759, "is your answer solved ? ",
-                           reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+        buttons = [[InlineKeyboardButton("👍",callback_data="like")],[InlineKeyboardButton("👎",callback_data="dislike")]]
+        bot.send_message(1595070759, SEND_ANSWER_MESSAGE[questioner.language](answer),reply_markup=InlineKeyboardButton(buttons),
+            parse_mode=ParseMode.MARKDOWN_V2)# replace id with questioner.telegram_id
     except Exception as e:
         logger.info('_send_answer_to_user failed')
 
