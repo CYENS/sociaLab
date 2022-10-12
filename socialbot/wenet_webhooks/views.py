@@ -6,7 +6,7 @@ import json
 
 from threading import Thread
 from googletrans import Translator
-from telegram import Bot, ParseMode, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton
+from telegram import Bot, ParseMode, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater,CommandHandler, MessageHandler, Filters
 
 from django.views.decorators.csrf import csrf_exempt
@@ -322,7 +322,7 @@ def _send_answer_to_user(answer: Answer):
         buttons = [[InlineKeyboardButton("👍",callback_data="like")], [InlineKeyboardButton("👎",callback_data="dislike")]]
         bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
             parse_mode=ParseMode.MARKDOWN_V2)
-        bot.send_message(1595070759, "is your answer solved ? ")
+        bot.send_message(1595070759,reply_markup=InlineKeyboardMarkup(buttons), text="is your answer solved ? ")
     except Exception as e:
         logger.info('_send_answer_to_user failed')
 
