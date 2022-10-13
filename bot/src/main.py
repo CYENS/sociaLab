@@ -333,10 +333,9 @@ ANSWER_FAILED = {
 }
 
 def mark_question_as_solved(update: Update, context: CallbackContext):
-    DATA = update.callback_query.data
+    DATA = json.loads(update.callback_query.data.replace("'", '"'))
     logger.info(DATA)
     update.callback_query.answer()
-    MESSAGE = DATA.message
     USER = update.effective_user
     LANGUAGE = context.chat_data.get('language')
     # markup_list = [
