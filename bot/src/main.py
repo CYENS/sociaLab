@@ -333,17 +333,20 @@ ANSWER_FAILED = {
 }
 
 def mark_question_as_solved(update: Update, context: CallbackContext):
-    DATA = context.user_data['question']
+    DATA = update.callback_query.data
+    logger.info(DATA)
+    update.callback_query.answer()
     MESSAGE = update.message
     USER = update.effective_user
     LANGUAGE = context.chat_data.get('language')
-    markup_list = [
-        KeyboardButton(YES[LANGUAGE]),
-        KeyboardButton(NO[LANGUAGE])
-    ]
-    MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
-                       reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
-    return 3
+    # markup_list = [
+    #     KeyboardButton(YES[LANGUAGE]),
+    #     KeyboardButton(NO[LANGUAGE])
+    # ]
+    MESSAGE.reply_text(DATA)
+    # MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
+    #                    reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
+    # return 3
 
 def mark_question_as_solved_handler(update: Update, context: CallbackContext):
     DATA = context.user_data['question']
@@ -1165,7 +1168,8 @@ def main() -> None:
             MessageHandler(DELETE_ACCOUNT_TEXT_FILTERS, stop)
         ]
     ))
-    dispatcher.add_handler(MessageHandler(Filters.text & ~MARK_SOLVED_TEXT_FILTERS, mark_question_as_solved))
+    #ispatcher.add_handler(MessageHandler(Filters.text & ~MARK_SOLVED_TEXT_FILTERS, mark_question_as_solved))
+    dispatcher.add_handler(CallbackQueryHandler(mark_question_as_solved))
 
     updater.start_polling(timeout=600)
     updater.idle()
