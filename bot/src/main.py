@@ -1169,7 +1169,7 @@ def main() -> None:
         ]
     ))
     #ispatcher.add_handler(MessageHandler(Filters.text & ~MARK_SOLVED_TEXT_FILTERS, mark_question_as_solved))
-    dispatcher.add_handler(CallbackQueryHandler(mark_question_as_solved))
+    dispatcher.add_handler(CallbackQueryHandler(mark_question_as_solved,pattern="^" + "like" + "$"))
 
     updater.start_polling(timeout=600)
     updater.idle()
