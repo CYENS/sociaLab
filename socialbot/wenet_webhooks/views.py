@@ -320,12 +320,12 @@ def _send_answer_to_user(answer: Answer):
         questioner: User = answer.question.user
 
         buttons = [[InlineKeyboardButton("👍",callback_data={
-                        'button_id' : "like",
-                        'question_id' : answer.question.task_id,
+                        'button_id' : 'like',
+                        'question_id' : '19',
                         'type' : 'like'
                     }.__str__())], [InlineKeyboardButton("👎",callback_data={
-                        'button_id' : "dislike",
-                        'question_id' : answer.question.task_id,
+                        'button_id' : 'dislike',
+                        'question_id' : '20',
                         'type' : 'dislike'
                     }.__str__())]]
         bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
