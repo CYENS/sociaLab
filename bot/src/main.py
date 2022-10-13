@@ -336,7 +336,7 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     DATA = update.callback_query.data
     logger.info(DATA)
     update.callback_query.answer()
-    MESSAGE = update.message
+    MESSAGE = DATA.message
     USER = update.effective_user
     LANGUAGE = context.chat_data.get('language')
     # markup_list = [
