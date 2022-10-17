@@ -1060,7 +1060,7 @@ def main() -> None:
 
     updater = Updater(BOT_TOKEN, persistence=PicklePersistence('./bot_data'))
     dispatcher = updater.dispatcher
-    dispatcher.add_handler(CallbackQueryHandler(mark_question_as_solved, pattern="{'button_id'"))
+    dispatcher.add_handler(CallbackQueryHandler(mark_question_as_solved, pattern="{'like_type'"))
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('help', help))
 

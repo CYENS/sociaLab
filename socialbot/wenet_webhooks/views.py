@@ -320,10 +320,10 @@ def _send_answer_to_user(answer: Answer):
         questioner: User = answer.question.user
 
         buttons = [[InlineKeyboardButton("👍",callback_data={
-                        'button_id_like' : 'like',
+                        'like_type' : 'like',
                         'question_id' : '19'
         }.__str__())], [InlineKeyboardButton("👎",callback_data={
-                        'button_id_like' : 'dislike',
+                        'like_type' : 'dislike',
                         'question_id' : '20'
         }.__str__())]]
         logger.info({
