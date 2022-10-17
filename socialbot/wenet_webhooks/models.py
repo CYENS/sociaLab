@@ -27,5 +27,50 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     content = models.JSONField('answer')
 
+class Best_Answer(models.Model):
+    question = models.OneToOneField(
+        Question,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.answer.content)
+
+# class OnboardingQA(models.Model):
+#     GENDERS = [
+#         ('M', 'Male'),
+#         ('F', 'Female'),
+#         ('NB', 'Non Binary'),
+#     ]
+#     HOBBIES = [
+#         ('M', 'Male'),
+#         ('F', 'Female'),
+#         ('NB', 'Non Binary'),
+#     ]
+#     AGEGROUPS = [
+#         ('A', '18-24'),
+#         ('B', '24-30'),
+#         ('C', '30+'),
+#     ]
+#     FREQUENCY = [
+#         ('low', '1-2 times a week'),
+#         ('medium', '1-2 times a month'),
+#         ('high', '1-2 times a year'),
+#     ]
+#     STUDIES = [
+#         ('A', 'Engineering'),
+#         ('B', 'Medicine'),
+#         ('C', 'other'),
+#     ]
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     gender_question = models.CharField(choices=GENDERS)
+#     study_background_question=models.CharField(choices=STUDIES)
+#     hobbies_question = models.MultipleChoiceField(choices=HOBBIES)
+#     age_group_question = models.CharField(choices=AGEGROUPS)
+#     culture_interaction_question = models.CharField(choices=AGEGROUPS)
+
     def __str__(self) -> str:
         return f'{self.content} by {self.user} on {self.question}'
