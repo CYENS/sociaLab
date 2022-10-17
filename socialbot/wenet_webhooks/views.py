@@ -321,17 +321,14 @@ def _send_answer_to_user(answer: Answer):
 
         buttons = [[InlineKeyboardButton("👍",callback_data={
                         'button_id' : 'like',
-                        'question_id' : '19',
-                        'type' : 'like'
-                    }.__str__())], [InlineKeyboardButton("👎",callback_data={
+                        'question_id' : '19'
+        }.__str__())], [InlineKeyboardButton("👎",callback_data={
                         'button_id' : 'dislike',
-                        'question_id' : '20',
-                        'type' : 'dislike'
-                    }.__str__())]]
+                        'question_id' : '20'
+        }.__str__())]]
         logger.info({
                         'button_id' : 'dislike',
-                        'question_id' : '20',
-                        'type' : 'dislike'
+                        'question_id' : '20'
                     }.__str__())
         bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
             parse_mode=ParseMode.MARKDOWN_V2)
