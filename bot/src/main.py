@@ -1090,7 +1090,7 @@ def main() -> None:
         Filters.regex('^[Τ|τ]ίποτα.?$')  | Filters.regex('^[Y|y]apıldı.?$') |
         Filters.regex('^[İ|i]ptal.?$') | Filters.regex('^[H|h]içbirşey.?$'))
 
-    dispatcher.add_handler(CallbackQueryHandler(selected_question_choice),pattern=r"type")
+    dispatcher.add_handler(CallbackQueryHandler(selected_question_choice, pattern=r"type"))
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('asked_questions', asked_questions)],
         states={
