@@ -1060,7 +1060,7 @@ def main() -> None:
 
     updater = Updater(BOT_TOKEN, persistence=PicklePersistence('./bot_data'))
     dispatcher = updater.dispatcher
-    dispatcher.add_handler(CallbackQueryHandler(mark_question_as_solved, pattern="like"))
+    dispatcher.add_handler(CallbackQueryHandler(mark_question_as_solved, pattern="{'button_id'"))
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('help', help))
 
@@ -1090,7 +1090,7 @@ def main() -> None:
         Filters.regex('^[Τ|τ]ίποτα.?$')  | Filters.regex('^[Y|y]apıldı.?$') |
         Filters.regex('^[İ|i]ptal.?$') | Filters.regex('^[H|h]içbirşey.?$'))
 
-    dispatcher.add_handler(CallbackQueryHandler(selected_question_choice, pattern="type"))
+    dispatcher.add_handler(CallbackQueryHandler(selected_question_choice, pattern="{'button_id_like'"))
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CommandHandler('asked_questions', asked_questions)],
         states={
