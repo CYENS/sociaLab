@@ -338,11 +338,18 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     update.callback_query.answer()
     USER = update.effective_user
     LANGUAGE = context.chat_data.get('language')
+    TYPE = DATA.get('like_type')
+    question_id = DATA.get('question_id')
+    if question_id and TYPE:
+        request = requests.post(f'{SERVER}/mark_as_solved', data={
+            'user_id': USER.id,
+            'question_id': DATA['question_id']
+        }, verify=False)
+
     # markup_list = [
     #     KeyboardButton(YES[LANGUAGE]),
     #     KeyboardButton(NO[LANGUAGE])
     # ]
-    MESSAGE.reply_text(DATA)
     # MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
     #                    reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
     # return 3

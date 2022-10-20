@@ -321,10 +321,11 @@ def _send_answer_to_user(answer: Answer):
 
         buttons = [[InlineKeyboardButton("👍",callback_data={
                         'like_type' : 'like',
-                        'question_id' : '19'
+                        'question_id' : answer.question.id,
+                        'answer_id' : answer.id
         }.__str__())], [InlineKeyboardButton("👎",callback_data={
-                        'like_type' : 'dislike',
-                        'question_id' : '20'
+                        'like_type' : answer.question.id,
+                        'answer_id' : answer.id
         }.__str__())]]
         logger.info({
                         'button_id' : 'dislike',
@@ -335,6 +336,19 @@ def _send_answer_to_user(answer: Answer):
         bot.send_message(1595070759,reply_markup=InlineKeyboardMarkup(buttons), text="is your answer solved ?")
     except Exception as e:
         logger.info('_send_answer_to_user failed')
+
+@csrf_exempt
+def set_best_answer(request: HttpRequest):
+    try:
+        user_id = request.POST['user_id']
+        question_id = request.POST.get('question_id')
+        answer_id = request.POST.get('answer_id')
+        best_answer= Best_Answer(question=question_id,answer=answer_id)
+        best_answer.save
+        logger.info(best_answer.__str__())
+        return JsonResponse({"msg":"Above was marked as best answer"})
+    except Exception as e:
+        logger.info('_send_answer failed')
 
 @csrf_exempt
 def send_answer(request: HttpRequest):
