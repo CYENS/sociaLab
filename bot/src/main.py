@@ -340,10 +340,11 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     LANGUAGE = context.chat_data.get('language')
     TYPE = DATA.get('like_type')
     question_id = DATA.get('question_id')
+    answer_id = DATA.get('answer_id')
     if question_id and TYPE:
         request = requests.post(f'{SERVER}/set_best_answer', data={
-            'user_id': USER.id,
-            'question_id': DATA['question_id']
+            'answer_id': answer_id,
+            'question_id': question_id
         }, verify=False)
 
     # markup_list = [
