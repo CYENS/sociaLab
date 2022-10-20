@@ -345,8 +345,7 @@ def set_best_answer(request: HttpRequest):
         answer_id = request.POST.get('answer_id')
         best_answer= Best_Answer(question=question_id,answer=answer_id)
         best_answer.save
-        logger.info(best_answer.__str__())
-        return JsonResponse({"msg":"Above was marked as best answer"})
+        return HttpResponse()
     except Exception as e:
         logger.info('_send_answer failed')
 
