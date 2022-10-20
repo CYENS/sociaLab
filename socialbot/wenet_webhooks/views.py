@@ -13,8 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 import logging
-
-from .models import User, Question, Answer
+from .models import User, Question, Answer, Best_Answer
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
 
