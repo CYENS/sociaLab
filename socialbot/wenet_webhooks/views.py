@@ -343,12 +343,12 @@ def set_best_answer(request: HttpRequest):
         answer_id = request.POST['answer_id']
         logger.info("*****"+str(question_id))
         logger.info(answer_id)
-        best_answer= Best_Answer(question=question_id, answer=answer_id)
+        best_answer = Best_Answer(question=question_id, answer=answer_id)
         best_answer.save
         return HttpResponse()
     except Exception as e:
         logger.info('_send_answer failed')
-        return HttpResponseBadRequest
+        return HttpResponseBadRequest()
 
 @csrf_exempt
 def send_answer(request: HttpRequest):

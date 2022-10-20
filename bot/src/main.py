@@ -339,8 +339,8 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     USER = update.effective_user
     LANGUAGE = context.chat_data.get('language')
     TYPE = DATA.get('like_type')
-    question_id = DATA.get('question_id')
-    answer_id = DATA.get('answer_id')
+    question_id = DATA['question_id']
+    answer_id = DATA['answer_id']
     if question_id and TYPE:
         request = requests.post(f'{SERVER}/set_best_answer', data={
             'answer_id': answer_id,
