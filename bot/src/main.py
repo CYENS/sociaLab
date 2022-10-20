@@ -341,7 +341,7 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     TYPE = DATA.get('like_type')
     question_id = DATA.get('question_id')
     if question_id and TYPE:
-        request = requests.post(f'{SERVER}/mark_as_solved', data={
+        request = requests.post(f'{SERVER}/set_best_answer', data={
             'user_id': USER.id,
             'question_id': DATA['question_id']
         }, verify=False)
