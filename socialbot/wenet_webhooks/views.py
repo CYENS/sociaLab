@@ -341,6 +341,7 @@ def set_best_answer(request: HttpRequest):
     try:
         if request.method == 'POST':
             question_id = request.POST.get('question_id')
+            print(request.POST)
             print(question_id)
             # answer_id = request.POST['answer_id']
             # logger.info("*****"+str(question_id))
