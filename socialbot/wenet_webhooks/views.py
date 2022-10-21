@@ -347,7 +347,7 @@ def set_best_answer(request: HttpRequest):
             question: Question = Question.objects.get(id=question_id)
             answer: Answer = Answer.objects.get(id=answer_id)
             best_answer = Best_Answer(question=question, answer=answer)
-            best_answer.save
+            best_answer.save()
             return HttpResponse()
     except Exception as e:
         logger.info('_send_answer failed')
