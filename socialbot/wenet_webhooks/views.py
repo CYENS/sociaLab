@@ -342,7 +342,7 @@ def set_best_answer(request: HttpRequest):
         # question_id = request.POST['question_id']
         # answer_id = request.POST['answer_id']
         # logger.info("*****"+str(question_id))
-        logger.info(request.POST)
+        logger.info(request.body)
         # best_answer = Best_Answer(question=question_id, answer=answer_id)
         # best_answer.save
         return HttpResponse()
