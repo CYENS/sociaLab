@@ -39,7 +39,7 @@ class Best_Answer(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.answer.__str__())
+        return f'{self.answer}'
 
 # class OnboardingQA(models.Model):
 #     GENDERS = [
