@@ -339,10 +339,10 @@ def _send_answer_to_user(answer: Answer):
 @csrf_exempt
 def set_best_answer(request: HttpRequest):
     try:
-        question_id = request.POST['question_id']
-        answer_id = request.POST['answer_id']
+        # question_id = request.POST['question_id']
+        # answer_id = request.POST['answer_id']
         # logger.info("*****"+str(question_id))
-        # logger.info(answer_id)
+        logger.info(request.POST)
         # best_answer = Best_Answer(question=question_id, answer=answer_id)
         # best_answer.save
         return HttpResponse()
