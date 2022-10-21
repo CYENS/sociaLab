@@ -346,7 +346,7 @@ def set_best_answer(request: HttpRequest):
             print(question_id,answer_id)
             question: Question = Question.objects.get(id=question_id)
             answer: Answer = Answer.objects.get(id=answer_id)
-            best_answer = Best_Answer(question=question, answer=answer)
+            best_answer = Best_Answer(question=question, answer=answer, content={answer.user.language : answer.})
             best_answer.save()
             return HttpResponse()
     except Exception as e:

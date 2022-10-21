@@ -27,6 +27,8 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     content = models.JSONField('answer')
 
+    def __str__(self) -> str:
+        return f'{self.content} by {self.user} on {self.question}'
 class Best_Answer(models.Model):
     question = models.OneToOneField(
         Question,
@@ -37,7 +39,7 @@ class Best_Answer(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.answer.content)
+        return str(self.answer.__str__())
 
 # class OnboardingQA(models.Model):
 #     GENDERS = [
@@ -72,5 +74,3 @@ class Best_Answer(models.Model):
 #     age_group_question = models.CharField(choices=AGEGROUPS)
 #     culture_interaction_question = models.CharField(choices=AGEGROUPS)
 
-    def __str__(self) -> str:
-        return f'{self.content} by {self.user} on {self.question}'
