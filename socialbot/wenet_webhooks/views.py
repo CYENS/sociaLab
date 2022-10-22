@@ -342,12 +342,15 @@ def set_best_answer(request: HttpRequest):
         if request.method == 'POST':
             question_id = request.POST.get('question_id')
             answer_id = request.POST.get('answer_id')
-            print(request.POST)
-            print(question_id,answer_id)
             question: Question = Question.objects.get(id=question_id)
             answer: Answer = Answer.objects.get(id=answer_id)
-            best_answer = Best_Answer(question=question, answer=answer)
-            best_answer.save()
+            best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
+            if best_answer_exists:
+                best_answer_exists.answer = answer
+                best_answer_exists.save
+            else:
+                best_answer = Best_Answer(question=question, answer=answer)
+                best_answer.save()
             return HttpResponse()
     except Exception as e:
         logger.info('_send_answer failed')
