@@ -896,6 +896,11 @@ NO = {
     'gr' : "Όχι",
     'tr' : "Hayır"
 }
+BEST_ANSWER = {
+    'en' : "Βest answer",
+    'gr' : "Εμφάνιση καλύτερης απάντησης",
+    'tr' : "En iyi cevabı göster"
+}
 
 DELETE_QUESTION = {
     'en' : "Delete",
@@ -969,7 +974,8 @@ def selected_question_choice(update: Update, context: CallbackContext):
         elif (TYPE == 'available'):
             markup_list = [
                 KeyboardButton(YES[LANGUAGE]),
-                KeyboardButton(NO[LANGUAGE])
+                KeyboardButton(NO[LANGUAGE]),
+                KeyboardButton(BEST_ANSWER[LANGUAGE])
             ]
 
             MESSAGE.reply_text(QUESTION_ABOUT_ANSWER[LANGUAGE],
