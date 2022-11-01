@@ -96,13 +96,13 @@ def get_best_answer(request: HttpRequest):
                 best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
             if best_answer_exists:
                 logger.info("found answer")
-                return JsonResponse({'best_answer':best_answer_exists.answer.__str__()})
+                return JsonResponse(best_answer_exists.answer.__str__())
             else:
                 return HttpResponse()
         return HttpResponse()
     except Exception as e:
         logger.info('_get_question - cannot get user using their question id' + str(question_id))
-        return HttpResponseBadRequest
+        return HttpResponseBadRequest()
 
 def _check_oauth2_tokens(dict: dict):
     """
