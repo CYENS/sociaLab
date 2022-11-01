@@ -80,6 +80,20 @@ def _get_question(question_id):
     except Exception as e:
         logger.info('_get_question - cannot get user using their question id' + str(question_id))
 
+@csrf_exempt
+def _get_best_answer(request: HttpRequest):
+    """
+    Helper function to find the `Best Answer` given its question ID.
+    """
+    try:
+        if request.method == 'POST':
+            question_id = request.POST.get('question_id')
+            question: Question = Question.objects.get(id=question_id)
+            best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
+            return JsonResponse(best_answer_exists.answer.content())
+    except Exception as e:
+        logger.info('_get_question - cannot get user using their question id' + str(question_id))
+
 def _check_oauth2_tokens(dict: dict):
     """
     Helper function which checks if the OAuth 2.0 tokens where created correctly or not.
@@ -351,6 +365,8 @@ def set_best_answer(request: HttpRequest):
             else:
                 best_answer = Best_Answer(question=question, answer=answer)
                 best_answer.save()
+                question.solved = True
+                question.save()
             return HttpResponse()
     except Exception as e:
         logger.info('_send_answer failed')
