@@ -81,7 +81,7 @@ def _get_question(question_id):
         logger.info('_get_question - cannot get user using their question id' + str(question_id))
 
 @csrf_exempt
-def _get_best_answer(request: HttpRequest):
+def get_best_answer(request: HttpRequest):
     """
     Helper function to find the `Best Answer` given its question ID.
     """
