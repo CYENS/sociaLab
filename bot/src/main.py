@@ -314,6 +314,10 @@ def available_question_manipulation(update: Update, context: CallbackContext):
             elif NO[LANGUAGE].lower() in MESSAGE_CONTENT:
                 MESSAGE.reply_text(NEGATIVE_ANSWER[LANGUAGE],
                     reply_markup=ReplyKeyboardRemove())
+            elif BEST_ANSWER[LANGUAGE].lower() in MESSAGE_CONTENT:
+                MESSAGE.reply_text("🏎",
+                    reply_markup=ReplyKeyboardRemove())
+                return 5
             else:
                 MESSAGE.reply_text(NO_SUCH_ANSWER[LANGUAGE],
                     reply_markup=ReplyKeyboardRemove())
@@ -354,6 +358,28 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     # MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
     #                    reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
     # return 3
+
+def best_answer_handler(update: Update, context: CallbackContext):
+    DATA = context.user_data['question']
+    MESSAGE = update.message
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
+
+    if MESSAGE is not None and LANGUAGE:
+        request = requests.post(f'{SERVER}/get_best_answer', data={
+            'question_id': DATA['question_id'],
+        }, verify=False)
+    print(request.json)
+    MESSAGE.reply_text(request.json.get(LANGUAGE))
+
+
+
+
 
 def mark_question_as_solved_handler(update: Update, context: CallbackContext):
     DATA = context.user_data['question']
@@ -897,7 +923,7 @@ NO = {
     'tr' : "Hayır"
 }
 BEST_ANSWER = {
-    'en' : "Βest answer",
+    'en' : "View best answer",
     'gr' : "Εμφάνιση καλύτερης απάντησης",
     'tr' : "En iyi cevabı göster"
 }
@@ -1131,6 +1157,7 @@ def main() -> None:
             1 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, answer_handler)],
             2 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, mark_question_as_solved)],
             3 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, mark_question_as_solved_handler)],
+            5: [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, best_answer_handler)],
         },
         fallbacks=[
             CommandHandler('stop', stop),
