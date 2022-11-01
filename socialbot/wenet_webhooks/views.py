@@ -91,9 +91,10 @@ def get_best_answer(request: HttpRequest):
             question: Question = Question.objects.get(id=question_id)
             best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
             if best_answer_exists:
+                logger.info("found answer")
                 return JsonResponse(best_answer_exists.answer.content())
             else:
-                {}
+                return HttpResponse()
     except Exception as e:
         logger.info('_get_question - cannot get user using their question id' + str(question_id))
 
