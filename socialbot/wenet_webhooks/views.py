@@ -90,7 +90,7 @@ def get_best_answer(request: HttpRequest):
             try:
                 question_id = request.POST.get('question_id')
             except:
-                return HttpResponseBadRequest("didnt found question id")
+                return HttpResponseBadRequest()
             if question_id:
                 question: Question = Question.objects.get(id=question_id)
                 best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
