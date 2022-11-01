@@ -87,7 +87,11 @@ def get_best_answer(request: HttpRequest):
     """
     try:
         if request.method == 'POST':
-            question_id = request.POST.get('question_id')
+            try:
+                question_id = request.POST.get('question_id')
+            except:
+                logger.exception("didnt found question id")
+                return HttpResponseBadRequest
             question: Question = Question.objects.get(id=question_id)
             best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
             if best_answer_exists:
@@ -95,8 +99,10 @@ def get_best_answer(request: HttpRequest):
                 return JsonResponse(best_answer_exists.answer.content())
             else:
                 return HttpResponse()
+        return HttpResponse()
     except Exception as e:
         logger.info('_get_question - cannot get user using their question id' + str(question_id))
+        return HttpResponseBadRequest
 
 def _check_oauth2_tokens(dict: dict):
     """
