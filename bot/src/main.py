@@ -362,6 +362,7 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
 def best_answer_handler(update: Update, context: CallbackContext):
     DATA = context.user_data['question']
     MESSAGE = update.message
+    MESSAGE.reply_text("am in best answer handler")
     try:
         LANGUAGE = context.chat_data.get('language')
         if not LANGUAGE:
@@ -374,7 +375,8 @@ def best_answer_handler(update: Update, context: CallbackContext):
         request = requests.post(f'{SERVER}/get_best_answer', data={
             'question_id': DATA['question_id'],
         }, verify=False)
-    print(request.json)
+    print(request.status_code)
+    logger.info(request.json)
     MESSAGE.reply_text(request.json.get(LANGUAGE))
 
 
