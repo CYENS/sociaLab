@@ -377,9 +377,9 @@ def best_answer_handler(update: Update, context: CallbackContext):
             request = requests.post(f'{SERVER}/get_best_answer', data={
                 'question_id': DATA['question_id'],
             }, verify=False)
-            best_answer = request.json().get('best_answer')
+            best_answer = request.json().get(LANGUAGE)
             if best_answer:
-                MESSAGE.reply_text(json.loads(best_answer).get(LANGUAGE))
+                MESSAGE.reply_text(best_answer)
     except:
         logger.exception("Something went wrong")
 
