@@ -96,7 +96,7 @@ def get_best_answer(request: HttpRequest):
                 best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
             if best_answer_exists:
                 logger.info("found answer")
-                return JsonResponse({'best_answer':best_answer_exists.answer.content})
+                return JsonResponse({'best_answer':best_answer_exists.answer.content.__str__()})
             else:
                 return HttpResponse()
         return HttpResponse()
