@@ -364,6 +364,7 @@ def best_answer_handler(update: Update, context: CallbackContext):
         DATA = context.user_data['question']
         MESSAGE = update.message
         MESSAGE.reply_text("am in best answer handler")
+        print(DATA)
         try:
             LANGUAGE = context.chat_data.get('language')
             if not LANGUAGE:
