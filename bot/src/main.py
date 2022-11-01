@@ -378,7 +378,7 @@ def best_answer_handler(update: Update, context: CallbackContext):
             }, verify=False)
         print(request.status_code)
         logger.info(request.json)
-        MESSAGE.reply_text(request.json().get(LANGUAGE))
+        MESSAGE.reply_text(request.json())
     except:
         logger.exception("Something went wrong")
 
