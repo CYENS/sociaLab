@@ -1162,7 +1162,7 @@ def main() -> None:
             1 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, answer_handler)],
             # 2 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, mark_question_as_solved)],
             # 3 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, mark_question_as_solved_handler)],
-            2: [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, best_answer_handler)],
+            2 : [MessageHandler(Filters.text & ~AVAILABLE_QUESTIONS_TEXT_FILTERS, best_answer_handler)]
         },
         fallbacks=[
             CommandHandler('stop', stop),
