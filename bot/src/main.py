@@ -317,7 +317,7 @@ def available_question_manipulation(update: Update, context: CallbackContext):
             elif BEST_ANSWER[LANGUAGE].lower() in MESSAGE_CONTENT:
                 MESSAGE.reply_text("🏎 getting the best answer for you",
                     reply_markup=ReplyKeyboardRemove())
-                return 2
+                return 1
             else:
                 MESSAGE.reply_text(NO_SUCH_ANSWER[LANGUAGE],
                     reply_markup=ReplyKeyboardRemove())
