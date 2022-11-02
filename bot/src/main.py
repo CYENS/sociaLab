@@ -437,7 +437,7 @@ def answer_handler(update: Update, context: CallbackContext):
         except Exception as e:
             MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
             LANGUAGE = None
-
+        print(USER.id,DATA['question_id'],MESSAGE.text)
         if MESSAGE is not None and LANGUAGE:
             try:
                 request = requests.post(f'{SERVER}/send_answer', data={
