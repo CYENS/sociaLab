@@ -388,29 +388,34 @@ def send_answer(request: HttpRequest):
     Takes the `Answer` a `User` has posted for translation and saves is under the correct `Question`.
     """
     try:
-        user_id = request.POST['user_id']
-        question_id = request.POST['question_id']
-        message = request.POST['answer']
+        try:
+            user_id = request.POST['user_id']
+            question_id = request.POST['question_id']
+            message = request.POST['answer']
+        except:
+            logger.exception("Could not get data from POST request")
+            return HttpResponseBadRequest()
+        if user_id and question_id and message:
+            answerer: User = User.objects.get(telegram_id=user_id)
+            question: Question = Question.objects.get(id=question_id)
+            questioner: User = question.user
 
-        answerer: User = User.objects.get(telegram_id=user_id)
-        question: Question = Question.objects.get(id=question_id)
-        questioner: User = question.user
+            if (_create_wenet_answer(message, answerer, question)):
+                answer = Answer(user=answerer, question=question, content={answerer.language : message})
+                answer.save()
 
-        if (_create_wenet_answer(message, answerer, question)):
-            answer = Answer(user=answerer, question=question, content={answerer.language : message})
-            answer.save()
+                if (answerer.language == questioner.language):
+                    _send_answer_to_user(answer)
+                else:
+                    thread = Thread(target=_translate, args=(answerer, answer))
+                    thread.start()
+                    thread.join()
 
-            if (answerer.language == questioner.language):
-                _send_answer_to_user(answer)
-            else:
-                thread = Thread(target=_translate, args=(answerer, answer))
-                thread.start()
-                thread.join()
-
-            return HttpResponse()
-        return HttpResponseBadRequest()
+                return HttpResponse()
+            return HttpResponseBadRequest()
     except Exception as e:
         logger.info('_send_answer failed')
+        return HttpResponseBadRequest()
 
 def _create_wenet_answer(answer: str, answerer: User, question: Question):
     """

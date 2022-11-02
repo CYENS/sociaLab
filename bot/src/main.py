@@ -423,9 +423,13 @@ def answer_handler(update: Update, context: CallbackContext):
     Handles the answer typed by the user by sending it to the server.
     """
     try:
-        DATA = context.user_data['question']
-        MESSAGE = update.message
-        USER = update.effective_user
+        try:
+            DATA = context.user_data['question']
+            MESSAGE = update.message
+            USER = update.effective_user
+        except:
+            logger.exception("something went wrong ")
+
         try:
             LANGUAGE = context.chat_data.get('language')
             if not LANGUAGE:
@@ -435,11 +439,14 @@ def answer_handler(update: Update, context: CallbackContext):
             LANGUAGE = None
 
         if MESSAGE is not None and LANGUAGE:
-            request = requests.post(f'{SERVER}/send_answer', data={
-                    'user_id' : USER.id,
-                    'question_id' : DATA['question_id'],
-                    'answer' : MESSAGE.text,
-                }, verify=False)
+            try:
+                request = requests.post(f'{SERVER}/send_answer', data={
+                        'user_id' : USER.id,
+                        'question_id' : DATA['question_id'],
+                        'answer' : MESSAGE.text,
+                    }, verify=False)
+            except:
+                logger.exception("Couldnt POST to send_answer")
 
             if (request.status_code == 200):
                 MESSAGE.reply_text(ANSWER_SUCCEDED[context.chat_data['language']])
