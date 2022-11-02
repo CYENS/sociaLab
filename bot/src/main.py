@@ -1104,7 +1104,7 @@ def change_to_english(update: Update, context: CallbackContext):
 
 def main() -> None:
     bot = Bot(BOT_TOKEN)
-    bot.set_my_commands(commands=STANDARD_COMMANDS + [
+    bot.set_my_commands(commands=[
         BotCommand('help', HELP_INFORMATION['en']),
         BotCommand('sign_up', SIGN_UP_INFORMATION['en']),
         BotCommand('login', LOGIN_INFORMATION['en']),
