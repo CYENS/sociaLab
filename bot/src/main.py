@@ -354,12 +354,10 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
         MESSAGE = update.message
         MESSAGE.reply_text("Marked as best answer!")
     if TYPE=="dislike":
-        question_id = DATA['question_id']
         answer_id = DATA['answer_id']
         if question_id and TYPE:
             request = requests.post(f'{SERVER}/notify_admin', data={
                 'answer_id': answer_id,
-                'question_id': question_id
             }, verify=False)
         MESSAGE = update.message
         MESSAGE.reply_text("thank you for letting us know")

@@ -389,9 +389,7 @@ def set_best_answer(request: HttpRequest):
 def notify_admin(request: HttpRequest):
     try:
         if request.method == 'POST':
-            question_id = request.POST.get('question_id')
             answer_id = request.POST.get('answer_id')
-            question: Question = Question.objects.get(id=question_id)
             answer: Answer = Answer.objects.get(id=answer_id)
             bot = Bot(BOT_TOKEN)
             bot.send_message(1595070759, reply_markup=InlineKeyboardMarkup(buttons), text="**Reported question**" + answer.content.__str__())
