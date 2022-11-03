@@ -343,13 +343,27 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     USER = update.effective_user
     LANGUAGE = context.chat_data.get('language')
     TYPE = DATA.get('like_type')
-    question_id = DATA['question_id']
-    answer_id = DATA['answer_id']
-    if question_id and TYPE:
-        request = requests.post(f'{SERVER}/set_best_answer', data={
-            'answer_id': answer_id,
-            'question_id': question_id
-        }, verify=False)
+    if TYPE=="like":
+        question_id = DATA['question_id']
+        answer_id = DATA['answer_id']
+        if question_id and TYPE:
+            request = requests.post(f'{SERVER}/set_best_answer', data={
+                'answer_id': answer_id,
+                'question_id': question_id
+            }, verify=False)
+        MESSAGE = update.message
+        MESSAGE.reply_text("Marked as best answer!")
+    if TYPE=="dislike":
+        question_id = DATA['question_id']
+        answer_id = DATA['answer_id']
+        if question_id and TYPE:
+            request = requests.post(f'{SERVER}/notify_admin', data={
+                'answer_id': answer_id,
+                'question_id': question_id
+            }, verify=False)
+        MESSAGE = update.message
+        MESSAGE.reply_text("thank you for letting us know")
+
 
     # markup_list = [
     #     KeyboardButton(YES[LANGUAGE]),
@@ -437,7 +451,6 @@ def answer_handler(update: Update, context: CallbackContext):
         except Exception as e:
             MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
             LANGUAGE = None
-        print(USER.id,DATA['question_id'],MESSAGE.text)
         if MESSAGE is not None and LANGUAGE:
             try:
                 request = requests.post(f'{SERVER}/send_answer', data={
@@ -1104,7 +1117,7 @@ def change_to_english(update: Update, context: CallbackContext):
 
 def main() -> None:
     bot = Bot(BOT_TOKEN)
-    bot.set_my_commands(commands=[
+    bot.set_my_commands(commands=STANDARD_COMMANDS + [
         BotCommand('help', HELP_INFORMATION['en']),
         BotCommand('sign_up', SIGN_UP_INFORMATION['en']),
         BotCommand('login', LOGIN_INFORMATION['en']),

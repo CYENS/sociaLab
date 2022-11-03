@@ -12,6 +12,7 @@ urlpatterns = [
     path('send_answer', views.send_answer, name='send_answer'),
     path('set_best_answer', views.set_best_answer, name='set_best_answer'),
     path('get_best_answer', views.get_best_answer, name='get_best_answer'),
+    path('notify_admin', views.notidy_admin, name='notidy_admin'),
     path('asked_questions', views.asked_questions, name='asked_questions'),
     path('mark_as_solved', views.mark_as_solved, name='mark_as_solved'),
     path('mark_as_unsolved', views.mark_as_unsolved, name='mark_as_unsolved'),

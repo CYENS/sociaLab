@@ -342,12 +342,15 @@ def _send_answer_to_user(answer: Answer):
         bot = Bot(BOT_TOKEN)
         questioner: User = answer.question.user
 
-        buttons = [[InlineKeyboardButton("👍",callback_data={
+        buttons = [[InlineKeyboardButton("👍 Mark as best answer",callback_data={
                         'like_type' : 'like',
                         'question_id' : answer.question.id,
                         'answer_id' : answer.id
-        }.__str__())], [InlineKeyboardButton("👎",callback_data={
-                        'like_type' : answer.question.id,
+        }.__str__())], [InlineKeyboardButton("👎 Report answer",callback_data={
+                        'like_type' : 'dislike',
+                        'answer_id' : answer.id
+        }.__str__())], [InlineKeyboardButton("🤝 improve translation",callback_data={
+                        'like_type' : 'improve translation',
                         'answer_id' : answer.id
         }.__str__())]]
         logger.info({
@@ -377,6 +380,21 @@ def set_best_answer(request: HttpRequest):
                 best_answer.save()
                 question.solved = True
                 question.save()
+            return HttpResponse()
+    except Exception as e:
+        logger.info('_send_answer failed')
+        return HttpResponseBadRequest()
+
+@csrf_exempt
+def notify_admin(request: HttpRequest):
+    try:
+        if request.method == 'POST':
+            question_id = request.POST.get('question_id')
+            answer_id = request.POST.get('answer_id')
+            question: Question = Question.objects.get(id=question_id)
+            answer: Answer = Answer.objects.get(id=answer_id)
+            bot = Bot(BOT_TOKEN)
+            bot.send_message(1595070759, reply_markup=InlineKeyboardMarkup(buttons), text="**Reported question**" + answer.content.__str__())
             return HttpResponse()
     except Exception as e:
         logger.info('_send_answer failed')
