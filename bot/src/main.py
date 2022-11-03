@@ -352,7 +352,6 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
                 'question_id': question_id
             }, verify=False)
         MESSAGE = update.message
-        MESSAGE.reply_text("Marked as best answer!")
     if TYPE=="dislike":
         answer_id = DATA['answer_id']
         if answer_id and TYPE:
@@ -360,7 +359,6 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
                 'answer_id': answer_id,
             }, verify=False)
         MESSAGE = update.message
-        MESSAGE.reply_text("thank you for letting us know")
 
 
     # markup_list = [
