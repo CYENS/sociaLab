@@ -389,10 +389,18 @@ def set_best_answer(request: HttpRequest):
 def notify_admin(request: HttpRequest):
     try:
         if request.method == 'POST':
-            answer_id = request.POST.get('answer_id')
-            answer: Answer = Answer.objects.get(id=answer_id)
-            bot = Bot(BOT_TOKEN)
-            bot.send_message(1595070759, text="**Reported question**" + str(answer_id),parse_mode=ParseMode.MARKDOWN_V2)
+            try:
+                answer_id = request.POST.get('answer_id')
+                answer: Answer = Answer.objects.get(id=answer_id)
+            except:
+                return HttpResponseBadRequest("problem with answer id")
+
+            try:
+                bot = Bot(BOT_TOKEN)
+                bot.send_message(1595070759, text="**Reported question**" + str(answer_id),parse_mode=ParseMode.MARKDOWN_V2)
+            except:
+                return HttpResponseBadRequest("problem with bot msg")
+
             return HttpResponse()
     except Exception as e:
         logger.info('_send_answer failed')
