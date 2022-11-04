@@ -391,7 +391,9 @@ def notify_admin(request: HttpRequest):
         if request.method == 'POST':
             try:
                 answer_id = request.POST.get('answer_id')
-                answer: Answer = Answer.objects.get(id=answer_id)
+                if answer_id:
+                    print(answer_id)
+                    answer: Answer = Answer.objects.get(id=answer_id)
             except:
                 return HttpResponseBadRequest("problem with answer id")
 
