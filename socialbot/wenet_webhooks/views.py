@@ -391,7 +391,7 @@ def notify_admin(request: HttpRequest):
         if request.method == 'POST':
             try:
                 answer_id = request.POST.get('answer_id')
-                user_id = request.POST.get('answer_id')
+                user_id = request.POST.get('user_id')
             except:
                 return HttpResponseBadRequest("problem with answer id or user id")
 
