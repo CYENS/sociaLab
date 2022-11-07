@@ -391,13 +391,16 @@ def notify_admin(request: HttpRequest):
         if request.method == 'POST':
             try:
                 answer_id = request.POST.get('answer_id')
+                user_id = request.POST.get('answer_id')
             except:
-                return HttpResponseBadRequest("problem with answer id")
+                return HttpResponseBadRequest("problem with answer id or user id")
 
             try:
-                if answer_id:
+                if answer_id and user_id:
                     bot = Bot(BOT_TOKEN)
                     bot.send_message(1595070759, text="**Reported question**" + str(answer_id),parse_mode=ParseMode.MARKDOWN_V2)
+                    bot.send_message(int(user_id), text="thank you for letting us know",
+                                     parse_mode=ParseMode.MARKDOWN_V2)
             except:
                 return HttpResponseBadRequest("problem with bot msg")
 

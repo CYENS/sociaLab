@@ -357,6 +357,7 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
         if answer_id and TYPE:
             request = requests.post(f'{SERVER}/notify_admin', data={
                 'answer_id': answer_id,
+                'user_id': USER.telegram_id,
             }, verify=False)
         MESSAGE = update.message
 
