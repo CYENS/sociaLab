@@ -350,7 +350,7 @@ def _send_answer_to_user(answer: Answer):
                         'like_type' : 'dislike',
                         'answer_id' : answer.id
         }.__str__())], [InlineKeyboardButton("🤝 improve translation",callback_data={
-                        'like_type' : 'improve translation',
+                        'feedback_type' : 'improve_translation',
                         'answer_id' : answer.id
         }.__str__())]]
         logger.info({

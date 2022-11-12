@@ -360,6 +360,14 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
                 'user_id': USER.id,
             }, verify=False)
         MESSAGE = update.message
+    if TYPE=="improve_translation":
+        answer_id = DATA['answer_id']
+        if answer_id and TYPE:
+            request = requests.post(f'{SERVER}/notify_admin', data={
+                'answer_id': answer_id,
+                'user_id': USER.id,
+            }, verify=False)
+        MESSAGE = update.message
 
 
     # markup_list = [
@@ -369,6 +377,12 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     # MESSAGE.reply_text(MARK_SOLVED[LANGUAGE],
     #                    reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
     # return 3
+
+def answer_feedback_handler(update: Update, context: CallbackContext):
+    DATA = json.loads(update.callback_query.data.replace("'", '"'))
+    logger.info(DATA)
+    update.callback_query.answer()
+    print("am in the feedback handler")
 
 def best_answer_handler(update: Update, context: CallbackContext):
     try:
@@ -1144,6 +1158,16 @@ def main() -> None:
         entry_points=[CommandHandler('ask_question', ask_question)],
         states={
             0 : [MessageHandler(Filters.text &  ~ASK_QUESTION_TEXT_FILTERS, ask_question_handler)]
+        },
+        fallbacks=[
+            CommandHandler('stop',stop),
+            MessageHandler(ASK_QUESTION_TEXT_FILTERS, stop)
+        ],
+    run_async = True))
+    dispatcher.add_handler(ConversationHandler(
+        entry_points=[CallbackQueryHandler(answer_feedback_handler, pattern="{'feedback_type'")],
+        states={
+            0 : [MessageHandler(Filters.text &  ~ASK_QUESTION_TEXT_FILTERS, answer_feedback_handler)]
         },
         fallbacks=[
             CommandHandler('stop',stop),
