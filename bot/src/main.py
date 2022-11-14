@@ -386,8 +386,8 @@ def answer_feedback(update: Update, context: CallbackContext):
     update.callback_query.answer()
     print("am in the feedback ")
     print(answer_id)
-    MESSAGE = update.message
-    MESSAGE.reply_text("please enter an improved translation or press /stop to exit")
+    MESSAGE = "please enter an improved translation or press /stop to exit"
+    update.callback_query.message.edit_text(MESSAGE)
     return 1
 
 def answer_feedback_handler(update: Update, context: CallbackContext):
