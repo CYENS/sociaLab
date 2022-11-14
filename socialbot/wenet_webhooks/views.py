@@ -408,7 +408,7 @@ def set_answer_feedback(request: HttpRequest):
                                  parse_mode=ParseMode.MARKDOWN_V2)
             return HttpResponse()
     except Exception as e:
-        logger.info('_send_answer failed')
+        logger.exception('_send_answer failed')
         return HttpResponseBadRequest()
 
 @csrf_exempt
