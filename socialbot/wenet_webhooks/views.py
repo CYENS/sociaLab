@@ -404,7 +404,7 @@ def set_answer_feedback(request: HttpRequest):
 
             else:
                 bot = Bot(BOT_TOKEN)
-                bot.send_message(1595070759, text="Feedback NOT saved",
+                bot.send_message(user_id, text="Feedback NOT saved",
                                  parse_mode=ParseMode.MARKDOWN_V2)
             return HttpResponse()
     except Exception as e:

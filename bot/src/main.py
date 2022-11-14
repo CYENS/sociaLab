@@ -379,28 +379,31 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     # return 3
 
 def answer_feedback(update: Update, context: CallbackContext):
+    PROMPT_FOR_FEEDBACK = {
+        'en': "please enter an improved translation or press /stop to exit",
+        'gr': "Παρακαλώ βάλτε το κείμενο για βελτιωμένη μετάφραση, πατήστε /stop για έξοδο ",
+        'tr': "lütfen geliştirilmiş bir çeviri girin veya çıkmak için /stop basın"}
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
     DATA = json.loads(update.callback_query.data.replace("'", '"'))
     answer_id = DATA.get('answer_id')
-    print("****")
-    logger.info(DATA)
     update.callback_query.answer()
-    print("am in the feedback ")
-    print(answer_id)
-    MESSAGE = "please enter an improved translation or press /stop to exit"
+    #MESSAGE = "please enter an improved translation or press /stop to exit"
+    MESSAGE=PROMPT_FOR_FEEDBACK[LANGUAGE]
     context.user_data['answer_id']=answer_id
     update.callback_query.message.edit_text(MESSAGE)
     return 1
 
 def answer_feedback_handler(update: Update, context: CallbackContext):
-    #DATA = json.loads(update.callback_query.data.replace("'", '"'))
     answer_id = context.user_data['answer_id']
-    #update.callback_query.answer()
-    print("am in the feedback handler")
     MESSAGE = update.message
     MESSAGE_CONTENT=MESSAGE.text.lower()
-    print(MESSAGE_CONTENT)
     USER = update.effective_user
-    print(USER.id)
     if MESSAGE is not None:
         request = requests.post(f'{SERVER}/set_answer_feedback', data={
             'answer_id': answer_id,
@@ -408,7 +411,7 @@ def answer_feedback_handler(update: Update, context: CallbackContext):
             'message': MESSAGE_CONTENT,
 
         }, verify=False)
-    return 2
+    return ConversationHandler.END
 
 def best_answer_handler(update: Update, context: CallbackContext):
     try:
