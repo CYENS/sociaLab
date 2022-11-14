@@ -47,7 +47,7 @@ class Answer_Feedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.answer}'
+        return f'{self.answer} --> {self.content} by {self.user}'
 
 # class OnboardingQA(models.Model):
 #     GENDERS = [
