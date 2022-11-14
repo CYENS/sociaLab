@@ -380,10 +380,10 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
 
 def answer_feedback(update: Update, context: CallbackContext):
     DATA = json.loads(update.callback_query.data.replace("'", '"'))
-    question = context.user_data['question']
+    answer_id = context.user_data['answer_id']
     logger.info(DATA)
     update.callback_query.answer()
-    print("am in the feedback ")+str(question)
+    print("am in the feedback ")+str(answer_id)
     MESSAGE = update.message
     MESSAGE.reply_text("please enter an improved translation or press /stop to exit")
     return 1
@@ -1178,7 +1178,7 @@ def main() -> None:
         ],
     run_async = True))
     dispatcher.add_handler(ConversationHandler(
-        entry_points=[CallbackQueryHandler(answer_feedback_handler, pattern="{'feedback_type'")],
+        entry_points=[CallbackQueryHandler(answer_feedback, pattern="{'feedback_type'")],
         states={
             0 : [MessageHandler(Filters.text &  ~ASK_QUESTION_TEXT_FILTERS, answer_feedback)],
             1: [MessageHandler(Filters.text & ~ASK_QUESTION_TEXT_FILTERS, answer_feedback_handler)]
