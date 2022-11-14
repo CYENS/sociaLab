@@ -401,6 +401,13 @@ def answer_feedback_handler(update: Update, context: CallbackContext):
     print(MESSAGE_CONTENT)
     USER = update.effective_user
     print(USER.id)
+    if MESSAGE is not None:
+        request = requests.post(f'{SERVER}/set_answer_feedback', data={
+            'answer_id': answer_id,
+            'user_id': USER.id,
+            'message': MESSAGE_CONTENT,
+
+        }, verify=False)
     return 2
 
 def best_answer_handler(update: Update, context: CallbackContext):

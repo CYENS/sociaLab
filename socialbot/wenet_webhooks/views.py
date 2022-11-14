@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
 from django.http import HttpResponse, HttpRequest, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseNotFound, JsonResponse
 import logging
-from .models import User, Question, Answer, Best_Answer
+from .models import User, Question, Answer, Best_Answer, Answer_Feedback
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
 
@@ -380,6 +380,32 @@ def set_best_answer(request: HttpRequest):
                 best_answer.save()
                 question.solved = True
                 question.save()
+            return HttpResponse()
+    except Exception as e:
+        logger.info('_send_answer failed')
+        return HttpResponseBadRequest()
+
+@csrf_exempt
+def set_answer_feedback(request: HttpRequest):
+    try:
+        if request.method == 'POST':
+
+            user_id = request.POST.get('user_id')
+            answer_id = request.POST.get('answer_id')
+            message = request.POST.get('message')
+            answerer: User = User.objects.get(telegram_id=user_id)
+            answer: Answer = Answer.objects.get(id=answer_id)
+            if answer and answerer and message:
+                answer_feedback = Answer_Feedback(answer=answer, user=answerer, content={answerer.language: message})
+                answer_feedback.save()
+                bot = Bot(BOT_TOKEN)
+                bot.send_message(answerer.id, text="Feedback saved",
+                                 parse_mode=ParseMode.MARKDOWN_V2)
+
+            else:
+                bot = Bot(BOT_TOKEN)
+                bot.send_message(1595070759, text="Feedback NOT saved",
+                                 parse_mode=ParseMode.MARKDOWN_V2)
             return HttpResponse()
     except Exception as e:
         logger.info('_send_answer failed')
