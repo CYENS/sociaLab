@@ -394,7 +394,7 @@ def answer_feedback(update: Update, context: CallbackContext):
 def answer_feedback_handler(update: Update, context: CallbackContext):
     #DATA = json.loads(update.callback_query.data.replace("'", '"'))
     answer_id = context.user_data['answer_id']
-    update.callback_query.answer()
+    #update.callback_query.answer()
     print("am in the feedback handler")
     MESSAGE = update.message
     print(answer_id)
