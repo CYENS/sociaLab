@@ -380,10 +380,12 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
 
 def answer_feedback(update: Update, context: CallbackContext):
     DATA = json.loads(update.callback_query.data.replace("'", '"'))
-    answer_id = DATA['answer_id']
+    answer_id = DATA.get('answer_id')
+    print("****")
     logger.info(DATA)
     update.callback_query.answer()
-    print("am in the feedback ")+str(answer_id)
+    print("am in the feedback ")
+    print(answer_id)
     MESSAGE = update.message
     MESSAGE.reply_text("please enter an improved translation or press /stop to exit")
     return 1
@@ -396,7 +398,7 @@ def answer_feedback_handler(update: Update, context: CallbackContext):
     print("am in the feedback handler")+str(answer_id)
     MESSAGE = update.message
     print(MESSAGE)
-    return 2
+    return {}
 
 def best_answer_handler(update: Update, context: CallbackContext):
     try:
