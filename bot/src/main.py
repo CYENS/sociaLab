@@ -387,12 +387,13 @@ def answer_feedback(update: Update, context: CallbackContext):
     print("am in the feedback ")
     print(answer_id)
     MESSAGE = "please enter an improved translation or press /stop to exit"
+    context.user_data['answer_id']=answer_id
     update.callback_query.message.edit_text(MESSAGE)
     return 1
 
 def answer_feedback_handler(update: Update, context: CallbackContext):
-    DATA = json.loads(update.callback_query.data.replace("'", '"'))
-    answer_id = DATA.get('answer_id')
+    #DATA = json.loads(update.callback_query.data.replace("'", '"'))
+    answer_id = context.user_data['answer_id']
     update.callback_query.answer()
     print("am in the feedback handler")
     MESSAGE = update.message
