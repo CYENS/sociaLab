@@ -41,6 +41,14 @@ class Best_Answer(models.Model):
     def __str__(self):
         return f'{self.answer}'
 
+class Answer_Feedback(models.Model):
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    content = models.JSONField('answer')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.answer}'
+
 # class OnboardingQA(models.Model):
 #     GENDERS = [
 #         ('M', 'Male'),
