@@ -397,10 +397,8 @@ def answer_feedback_handler(update: Update, context: CallbackContext):
     #update.callback_query.answer()
     print("am in the feedback handler")
     MESSAGE = update.message
-    print(answer_id)
-    print(MESSAGE)
-    MESSAGE=update.callback_query.message
-    print(MESSAGE)
+    MESSAGE_CONTENT=MESSAGE.text.lower()
+    print(MESSAGE_CONTENT)
     return 2
 
 def best_answer_handler(update: Update, context: CallbackContext):
