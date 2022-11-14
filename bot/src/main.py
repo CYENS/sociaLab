@@ -378,11 +378,24 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
     #                    reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
     # return 3
 
+def answer_feedback(update: Update, context: CallbackContext):
+    DATA = json.loads(update.callback_query.data.replace("'", '"'))
+    question = context.user_data['question']
+    logger.info(DATA)
+    update.callback_query.answer()
+    print("am in the feedback ")+str(question)
+    MESSAGE = update.message
+    MESSAGE.reply_text("please enter an improved translation or press /stop to exit")
+    return 1
+
 def answer_feedback_handler(update: Update, context: CallbackContext):
     DATA = json.loads(update.callback_query.data.replace("'", '"'))
     logger.info(DATA)
     update.callback_query.answer()
     print("am in the feedback handler")
+    MESSAGE = update.message
+    print(MESSAGE)
+    return 2
 
 def best_answer_handler(update: Update, context: CallbackContext):
     try:
@@ -1167,7 +1180,8 @@ def main() -> None:
     dispatcher.add_handler(ConversationHandler(
         entry_points=[CallbackQueryHandler(answer_feedback_handler, pattern="{'feedback_type'")],
         states={
-            0 : [MessageHandler(Filters.text &  ~ASK_QUESTION_TEXT_FILTERS, answer_feedback_handler)]
+            0 : [MessageHandler(Filters.text &  ~ASK_QUESTION_TEXT_FILTERS, answer_feedback)],
+            1: [MessageHandler(Filters.text & ~ASK_QUESTION_TEXT_FILTERS, answer_feedback_handler_)]
         },
         fallbacks=[
             CommandHandler('stop',stop),
