@@ -399,6 +399,8 @@ def answer_feedback_handler(update: Update, context: CallbackContext):
     MESSAGE = update.message
     MESSAGE_CONTENT=MESSAGE.text.lower()
     print(MESSAGE_CONTENT)
+    USER = update.effective_user
+    print(USER.id)
     return 2
 
 def best_answer_handler(update: Update, context: CallbackContext):
