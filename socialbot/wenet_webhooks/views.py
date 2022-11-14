@@ -399,7 +399,7 @@ def set_answer_feedback(request: HttpRequest):
                 answer_feedback = Answer_Feedback(answer=answer, user=answerer, content={answerer.language: message})
                 answer_feedback.save()
                 bot = Bot(BOT_TOKEN)
-                bot.send_message(answerer.id, text="Feedback saved",
+                bot.send_message(user_id, text="Feedback saved",
                                  parse_mode=ParseMode.MARKDOWN_V2)
 
             else:
