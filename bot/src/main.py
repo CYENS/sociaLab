@@ -1181,7 +1181,7 @@ def main() -> None:
         entry_points=[CallbackQueryHandler(answer_feedback_handler, pattern="{'feedback_type'")],
         states={
             0 : [MessageHandler(Filters.text &  ~ASK_QUESTION_TEXT_FILTERS, answer_feedback)],
-            1: [MessageHandler(Filters.text & ~ASK_QUESTION_TEXT_FILTERS, answer_feedback_handler_)]
+            1: [MessageHandler(Filters.text & ~ASK_QUESTION_TEXT_FILTERS, answer_feedback_handler)]
         },
         fallbacks=[
             CommandHandler('stop',stop),
