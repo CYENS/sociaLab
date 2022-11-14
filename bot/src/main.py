@@ -392,13 +392,15 @@ def answer_feedback(update: Update, context: CallbackContext):
 
 def answer_feedback_handler(update: Update, context: CallbackContext):
     DATA = json.loads(update.callback_query.data.replace("'", '"'))
-    logger.info(DATA)
-    answer_id = DATA['answer_id']
+    answer_id = DATA.get('answer_id')
     update.callback_query.answer()
-    print("am in the feedback handler")+str(answer_id)
+    print("am in the feedback handler")
     MESSAGE = update.message
+    print(answer_id)
     print(MESSAGE)
-    return {}
+    MESSAGE=update.callback_query.message
+    print(MESSAGE)
+    return 2
 
 def best_answer_handler(update: Update, context: CallbackContext):
     try:
