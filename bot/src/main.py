@@ -863,13 +863,25 @@ def sign_up(update: Update, context: CallbackContext):
     """
     Sends to the user a link which will redirect them to WeNet's sign up page.
     """
-    MESSAGE = update.message
+    LOGIN_MESSAGE = {
+        'en': "Please don't forget to 1) Verify your email address to Wenet after sign up (check your spam folder also🙏)  2) Fill in the extra details to your WENET profile as prompted in the same email which are necessary for the next step! press /login ! 😀",
+        'gr': "Σημαντικό! 1) Επιβεβαίωσε το email σου αφου έχεις κάνει εγραφή (κοίταξε και στα ανεπιθύμητα μηνύματα🙏) 2) Συμπλήρωσε τις επιπλέον πληροφορίες στο προφίλ του Wenet καθοδηγούμενος απο το ίδιο email, απαραίτητο για το επόμενο βήμα! πάτησε /login ! 😀 ",
+        'tr': "Lütfen 1) Kaydolduktan sonra e-posta adresinizi Wenet e doğrulamayı unutmayın (spam klasörünüzü de kontrol edin🙏) 2) Aynı e-postada istendiği gibi bir sonraki adım için gerekli olan ekstra ayrıntıları WENET profilinize girin! /login basın!😀"
+    }
 
+    MESSAGE = update.message
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            LANGUAGE="en"
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
     if (MESSAGE is not None):
-        MESSAGE.reply_text("Hurray !!")
+        MESSAGE.reply_text("Hurray !!🚀")
         MESSAGE.reply_html(
             f"<a href='{WENET_SIGN_UP}'>{SIGN_UP[context.chat_data['language']]}</a>")
-        MESSAGE.reply_text("*please don't forget to 1) verify your email address to Wenet after sign up  2)fill in the extra details to your profile as prompted which are necessary for the next step /login ! :D ")
+        MESSAGE.reply_text(LOGIN_MESSAGE[LANGUAGE])
 
 DELETE_ACCOUNT_WARNING = {
     'en' : r"Are you sure you want to delete your account\? All the questions you asked and all the"
