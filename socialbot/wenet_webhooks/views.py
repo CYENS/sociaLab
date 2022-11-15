@@ -3,6 +3,7 @@ import requests
 import os
 import time
 import json
+import random
 
 from threading import Thread
 from googletrans import Translator
@@ -631,7 +632,8 @@ def available_questions(request: HttpRequest):
                 'id' : question.id,
                 'content' : question.content[user.language]
             })
-        return JsonResponse({'questions' : result})
+        random_items = random.sample(result, 10)
+        return JsonResponse({'questions' : random_items})
     except Exception as e:
         logger.info('mark_as_solved failed')
 
