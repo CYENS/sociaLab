@@ -381,14 +381,14 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
 def answer_feedback(update: Update, context: CallbackContext):
     PROMPT_FOR_FEEDBACK = {
         'en': "please enter an improved translation or press /stop to exit",
-        'gr': "Παρακαλώ βάλτε το κείμενο για βελτιωμένη μετάφραση, πατήστε /stop για έξοδο ",
+        'gr': "Παρακαλώ εισάγεται το κείμενο για βελτιωμένη μετάφραση, πατήστε /stop για έξοδο ",
         'tr': "lütfen geliştirilmiş bir çeviri girin veya çıkmak için /stop basın"}
     try:
         LANGUAGE = context.chat_data.get('language')
         if not LANGUAGE:
-            MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+            update.callback_query.message.edit_text(LANGUAGE_NOT_FOUND["en"])
     except Exception as e:
-        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        update.callback_query.message.edit_text(LANGUAGE_NOT_FOUND["en"])
         LANGUAGE = None
     DATA = json.loads(update.callback_query.data.replace("'", '"'))
     answer_id = DATA.get('answer_id')
@@ -417,8 +417,6 @@ def best_answer_handler(update: Update, context: CallbackContext):
     try:
         DATA = context.user_data['question']
         MESSAGE = update.message
-        MESSAGE.reply_text("am in best answer handler")
-        print(DATA)
         try:
             LANGUAGE = context.chat_data.get('language')
             if not LANGUAGE:
@@ -434,7 +432,6 @@ def best_answer_handler(update: Update, context: CallbackContext):
             best_answer = request.json().get('best_answer')
             if best_answer:
                 answer=json.loads(best_answer.replace("'", '"')).get(LANGUAGE)
-                print(answer)
                 logger.info(answer)
                 MESSAGE.reply_text(answer)
 
@@ -457,7 +454,6 @@ def mark_question_as_solved_handler(update: Update, context: CallbackContext):
         MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
         LANGUAGE = None
     USER = update.effective_user
-    MESSAGE.reply_text("good so far")
     if MESSAGE is not None and LANGUAGE:
         if (YES[LANGUAGE].lower() in MESSAGE_CONTENT.lower()):
             MESSAGE.reply_text("you selectes yes"+str(DATA))

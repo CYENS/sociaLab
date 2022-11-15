@@ -338,6 +338,10 @@ def _send_answer_to_user(answer: Answer):
     """
     Sends the given `Answer` by a `User` to the questioner.
     """
+    ANSWER_SOLVED_QUESTION = {
+        'en': "is your answer solved ?",
+        'gr': "ευχαριστούμε για τη βοήθεια ✌",
+        'tr': "Yardımlarınız için teşekkür ederim ✌"}
     try:
         bot = Bot(BOT_TOKEN)
         questioner: User = answer.question.user
@@ -388,6 +392,14 @@ def set_best_answer(request: HttpRequest):
 @csrf_exempt
 def set_answer_feedback(request: HttpRequest):
     try:
+        THANKS_FOR_FEEDBACK = {
+            'en': "thank your for your help ✌",
+            'gr': "ευχαριστούμε για τη βοήθεια ✌",
+            'tr': "Yardımlarınız için teşekkür ederim ✌"}
+        SOMETHING_WRONG = {
+            'en': "Feedback not saved ☹ something went wrong",
+            'gr': "Κάτι πήγε λάθος , το σχόλιο δεν αποθηκεύτηκε ☹ ",
+            'tr': "Geri bildirim kaydedilmedi ☹ bir şeyler ters gitti"}
         if request.method == 'POST':
 
             user_id = request.POST.get('user_id')
@@ -399,12 +411,12 @@ def set_answer_feedback(request: HttpRequest):
                 answer_feedback = Answer_Feedback(answer=answer, user=answerer, content={answerer.language: message})
                 answer_feedback.save()
                 bot = Bot(BOT_TOKEN)
-                bot.send_message(user_id, text="Feedback saved",
+                bot.send_message(user_id, text=THANKS_FOR_FEEDBACK[answerer.language],
                                  parse_mode=ParseMode.MARKDOWN_V2)
 
             else:
                 bot = Bot(BOT_TOKEN)
-                bot.send_message(user_id, text="Feedback NOT saved",
+                bot.send_message(user_id, text=SOMETHING_WRONG[answerer.language],
                                  parse_mode=ParseMode.MARKDOWN_V2)
             return HttpResponse()
     except Exception as e:
