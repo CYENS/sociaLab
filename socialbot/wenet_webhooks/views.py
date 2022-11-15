@@ -339,21 +339,34 @@ def _send_answer_to_user(answer: Answer):
     Sends the given `Answer` by a `User` to the questioner.
     """
     ANSWER_SOLVED_QUESTION = {
-        'en': "is your answer solved ?",
+        'en': "Your questions are popular ! ",
         'gr': "ευχαριστούμε για τη βοήθεια ✌",
         'tr': "Yardımlarınız için teşekkür ederim ✌"}
+    MARK_BEST = {
+        'en': "👍 Mark as best answer",
+        'gr': "👍 Καλύτερη απάντηση μέχρι τώρα",
+        'tr': "👍 en iyi cevap olarak işaretle"}
+    MARK_REPORT = {
+        'en': "👎 Report answer",
+        'gr': "👎 Αναφορά ερώτησης",
+        'tr': "👎Cevabı bildir"}
+    IMPROVE_TRANSLATION = {
+        'en': "🤝 improve translation",
+        'gr': "🤝 Βελτίωση μετάφρασης",
+        'tr': "🤝 çeviriyi iyileştir"}
+
     try:
         bot = Bot(BOT_TOKEN)
         questioner: User = answer.question.user
 
-        buttons = [[InlineKeyboardButton("👍 Mark as best answer",callback_data={
+        buttons = [[InlineKeyboardButton(MARK_BEST[questioner.language],callback_data={
                         'like_type' : 'like',
                         'question_id' : answer.question.id,
                         'answer_id' : answer.id
-        }.__str__())], [InlineKeyboardButton("👎 Report answer",callback_data={
+        }.__str__())], [InlineKeyboardButton(MARK_REPORT[questioner.language],callback_data={
                         'like_type' : 'dislike',
                         'answer_id' : answer.id
-        }.__str__())], [InlineKeyboardButton("🤝 improve translation",callback_data={
+        }.__str__())], [InlineKeyboardButton(IMPROVE_TRANSLATION[questioner.language],callback_data={
                         'feedback_type' : 'improve_translation',
                         'answer_id' : answer.id
         }.__str__())]]
@@ -361,9 +374,9 @@ def _send_answer_to_user(answer: Answer):
                         'button_id' : 'dislike',
                         'question_id' : '20'
                     }.__str__())
-        bot.send_message(questioner.telegram_id, SEND_ANSWER_MESSAGE[questioner.language](answer),
+        bot.send_message(1595070759, SEND_ANSWER_MESSAGE[questioner.language](answer),#questioner.telegram_id
             parse_mode=ParseMode.MARKDOWN_V2)
-        bot.send_message(1595070759,reply_markup=InlineKeyboardMarkup(buttons), text="is your answer solved ?")
+        #bot.send_message(1595070759,reply_markup=InlineKeyboardMarkup(buttons), text="is your answer solved ?")
     except Exception as e:
         logger.info('_send_answer_to_user failed')
 
