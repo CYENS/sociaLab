@@ -439,18 +439,23 @@ def set_answer_feedback(request: HttpRequest):
 @csrf_exempt
 def notify_admin(request: HttpRequest):
     try:
+        THANKS_FOR_FEEDBACK = {
+            'en': "thank your for your help ✌",
+            'gr': "ευχαριστούμε για τη βοήθεια ✌",
+            'tr': "Yardımlarınız için teşekkür ederim ✌"}
         if request.method == 'POST':
             try:
                 answer_id = request.POST.get('answer_id')
                 user_id = request.POST.get('user_id')
+                answerer: User = User.objects.get(telegram_id=user_id)
             except:
                 return HttpResponseBadRequest("problem with answer id or user id")
 
             try:
-                if answer_id and user_id:
+                if answer_id and answerer:
                     bot = Bot(BOT_TOKEN)
                     bot.send_message(1595070759, text="**Reported question**" + str(answer_id),parse_mode=ParseMode.MARKDOWN_V2)
-                    bot.send_message(int(user_id), text="thank you for letting us know",
+                    bot.send_message(answerer.telegram_id, text=THANKS_FOR_FEEDBACK[answerer.language],
                                      parse_mode=ParseMode.MARKDOWN_V2)
             except:
                 return HttpResponseBadRequest("problem with bot msg")
