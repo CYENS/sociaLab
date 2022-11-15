@@ -876,11 +876,11 @@ def sign_up(update: Update, context: CallbackContext):
             LANGUAGE="en"
     except Exception as e:
         MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
-        LANGUAGE = None
+        LANGUAGE = "en"
     if (MESSAGE is not None):
         MESSAGE.reply_text("Hurray !!🚀")
         MESSAGE.reply_html(
-            f"<a href='{WENET_SIGN_UP}'>{SIGN_UP[context.chat_data['language']]}</a>")
+            f"<a href='{WENET_SIGN_UP}'>{SIGN_UP[LANGUAGE]}</a>")
         MESSAGE.reply_text(LOGIN_MESSAGE[LANGUAGE])
 
 DELETE_ACCOUNT_WARNING = {
