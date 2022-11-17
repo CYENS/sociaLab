@@ -439,7 +439,7 @@ def best_answer_handler(update: Update, context: CallbackContext):
                 logger.info(answer)
                 MESSAGE.reply_text(answer)
             else:
-                MESSAGE.reply_text(ANSWER_NOT_FOUND)
+                MESSAGE.reply_text(ANSWER_NOT_FOUND[LANGUAGE])
 
     except:
         logger.exception("Something went wrong")
