@@ -102,7 +102,7 @@ def get_best_answer(request: HttpRequest):
                 return JsonResponse({'best_answer': ''})
         return HttpResponse()
     except Exception as e:
-        logger.info('_get_question - cannot get user using their question id' + str(question_id))
+        logger.exception('_get_question - cannot get user using their question id' + str(question_id))
         return HttpResponseBadRequest()
 
 def _check_oauth2_tokens(dict: dict):
