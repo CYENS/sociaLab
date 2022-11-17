@@ -853,10 +853,16 @@ def login(update: Update, context: CallbackContext):
     redirect them back to Telegram to create a connection between the two services.
     """
     MESSAGE = update.message
-
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            LANGUAGE="en"
+    except Exception as e:
+        MESSAGE.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = "en"
     if (MESSAGE is not None):
         MESSAGE.reply_html(
-            f"<a href='{WENET_AUTHENTICATION}'>{LOGIN[context.chat_data['language']]}</a>")
+            f"<a href='{WENET_AUTHENTICATION}'>{LOGIN[LANGUAGE]}</a>")
 
 
 def sign_up(update: Update, context: CallbackContext):
