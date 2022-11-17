@@ -341,19 +341,19 @@ def _send_answer_to_user(answer: Answer):
     """
     ANSWER_SOLVED_QUESTION = {
         'en': "Your questions are popular ! ",
-        'gr': "ευχαριστούμε για τη βοήθεια ✌",
+        'el': "ευχαριστούμε για τη βοήθεια ✌",
         'tr': "Yardımlarınız için teşekkür ederim ✌"}
     MARK_BEST = {
         'en': "👍 Mark as best answer",
-        'gr': "👍 Καλύτερη απάντηση μέχρι τώρα",
+        'el': "👍 Καλύτερη απάντηση μέχρι τώρα",
         'tr': "👍 en iyi cevap olarak işaretle"}
     MARK_REPORT = {
         'en': "👎 Report answer",
-        'gr': "👎 Αναφορά ερώτησης",
+        'el': "👎 Αναφορά ερώτησης",
         'tr': "👎Cevabı bildir"}
     IMPROVE_TRANSLATION = {
         'en': "🤝 improve translation",
-        'gr': "🤝 Βελτίωση μετάφρασης",
+        'el': "🤝 Βελτίωση μετάφρασης",
         'tr': "🤝 çeviriyi iyileştir"}
 
     try:
@@ -408,11 +408,11 @@ def set_answer_feedback(request: HttpRequest):
     try:
         THANKS_FOR_FEEDBACK = {
             'en': "thank your for your help ✌",
-            'gr': "ευχαριστούμε για τη βοήθεια ✌",
+            'el': "ευχαριστούμε για τη βοήθεια ✌",
             'tr': "Yardımlarınız için teşekkür ederim ✌"}
         SOMETHING_WRONG = {
             'en': "Feedback not saved ☹ something went wrong",
-            'gr': "Κάτι πήγε λάθος , το σχόλιο δεν αποθηκεύτηκε ☹ ",
+            'el': "Κάτι πήγε λάθος , το σχόλιο δεν αποθηκεύτηκε ☹ ",
             'tr': "Geri bildirim kaydedilmedi ☹ bir şeyler ters gitti"}
         if request.method == 'POST':
 
@@ -442,7 +442,7 @@ def notify_admin(request: HttpRequest):
     try:
         THANKS_FOR_FEEDBACK = {
             'en': "thank your for your help ✌",
-            'gr': "ευχαριστούμε για τη βοήθεια ✌",
+            'el': "ευχαριστούμε για τη βοήθεια ✌",
             'tr': "Yardımlarınız için teşekkür ederim ✌"}
         if request.method == 'POST':
             try:
