@@ -99,7 +99,7 @@ def get_best_answer(request: HttpRequest):
                 logger.info("found answer")
                 return JsonResponse({'best_answer':best_answer_exists.answer.content.__str__()})
             else:
-                return HttpResponse()
+                return JsonResponse({'best_answer': ''})
         return HttpResponse()
     except Exception as e:
         logger.info('_get_question - cannot get user using their question id' + str(question_id))
