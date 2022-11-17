@@ -415,6 +415,10 @@ def answer_feedback_handler(update: Update, context: CallbackContext):
 
 def best_answer_handler(update: Update, context: CallbackContext):
     try:
+        ANSWER_NOT_FOUND = {
+            'en': "This question does not have a best answer yet",
+            'el': "Δεν υπάρχει καλύτερη απάντηση για αυτη την ερώτηση εως τώρα",
+            'tr': "Bu sorunun henüz en iyi yanıtı yok"}
         DATA = context.user_data['question']
         MESSAGE = update.message
         try:
@@ -434,6 +438,8 @@ def best_answer_handler(update: Update, context: CallbackContext):
                 answer=json.loads(best_answer.replace("'", '"')).get(LANGUAGE)
                 logger.info(answer)
                 MESSAGE.reply_text(answer)
+            else:
+                MESSAGE.reply_text(ANSWER_NOT_FOUND)
 
     except:
         logger.exception("Something went wrong")
