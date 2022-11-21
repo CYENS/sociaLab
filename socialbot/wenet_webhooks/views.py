@@ -233,7 +233,7 @@ def create_account(request: HttpRequest):
         user_details = user_details_request.json()
         user_name = user_details['name']
         language=user_details['locale']
-        if language in ('en_US','en_GB','en_IN'):
+        if language not in ('el', 'tr'):
             language = 'en'
         u = User(id = user_details['id'], telegram_id=request.POST['user_id'],
             name= f"{user_name['first']} {user_name['last']}", language=language,
