@@ -639,7 +639,8 @@ def available_questions(request: HttpRequest):
         random_items = random.sample(result, 10)
         return JsonResponse({'questions' : random_items})
     except Exception as e:
-        logger.info('mark_as_solved failed')
+        logger.exception('mark_as_solved failed')
+        return HttpResponseBadRequest()
 
 @csrf_exempt
 def delete_question(request: HttpRequest):
