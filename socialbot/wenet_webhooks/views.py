@@ -232,8 +232,11 @@ def create_account(request: HttpRequest):
         user_details_request = requests.get(f'{WENET_SERVICES}/user/profile/{user_profile_id}', headers=HEADERS)
         user_details = user_details_request.json()
         user_name = user_details['name']
+        language=user_details['locale']
+        if language in ('en_US','en_GB'):
+            language = 'en'
         u = User(id = user_details['id'], telegram_id=request.POST['user_id'],
-            name= f"{user_name['first']} {user_name['last']}", language=user_details['locale'],
+            name= f"{user_name['first']} {user_name['last']}", language=language,
             access_token=user_access_token, refresh_token=user_refresh_token)
         u.save()
 

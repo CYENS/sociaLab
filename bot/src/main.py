@@ -112,7 +112,10 @@ def start(update: Update, context: CallbackContext):
             'code' : passed_arguments[0],
             'user_id' : user.id,
         }, verify=False)
-        if request.json().get('language') and request.json().get('language') in {'tr','en','el','en_US','en_GB'}:
+        if request.json().get('language') in ('en_US','en_GB'):
+            context.chat_data['language'] = 'en'
+            LANGUAGE = context.chat_data['language']
+        elif request.json().get('language') and request.json().get('language') in {'tr','en','el'}:
             context.chat_data['language'] = request.json().get('language')
             LANGUAGE = context.chat_data['language']
         if (request.status_code == 400):
