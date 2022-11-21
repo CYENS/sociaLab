@@ -722,9 +722,13 @@ SOLVED_QUESTIONS_NOT_LOGGED_IN = {
 }
 
 def solved_questions(update: Update, context: CallbackContext):
-    DATA = context.user_data['question']
-    MESSAGE = update.message
-    USER = update.effective_user
+    try:
+        DATA = context.user_data['question']
+        MESSAGE = update.message
+        USER = update.effective_user
+    except:
+        logger.exception()
+
     try:
         LANGUAGE = context.chat_data.get('language')
         if not LANGUAGE:
@@ -779,10 +783,14 @@ MARK_UNSOLVED_FAILED = {
 }
 
 def solved_question_manipulation(update: Update, context: CallbackContext):
-    DATA = context.user_data['question']
-    MESSAGE = update.message
-    MESSAGE_CONTENT = MESSAGE.text.lower()
-    USER = update.effective_user
+    try:
+        DATA = context.user_data['question']
+        MESSAGE = update.message
+        MESSAGE_CONTENT = MESSAGE.text.lower()
+        USER = update.effective_user
+    except:
+        logger.exception()
+
     try:
         LANGUAGE = context.chat_data.get('language')
         if not LANGUAGE:
