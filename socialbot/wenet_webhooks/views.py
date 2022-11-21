@@ -396,7 +396,10 @@ def set_best_answer(request: HttpRequest):
             answer_id = request.POST.get('answer_id')
             question: Question = Question.objects.get(id=question_id)
             answer: Answer = Answer.objects.get(id=answer_id)
-            best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
+            try:
+                best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
+            except:
+                best_answer_exists=None
             if best_answer_exists:
                 best_answer_exists.answer = answer
                 best_answer_exists.save()
