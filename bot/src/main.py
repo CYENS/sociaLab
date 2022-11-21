@@ -624,9 +624,9 @@ DELETE_QUESTION_FAILED = {
     'tr' : "Soru silinemedi. Lütfen tekrar deneyiniz."
 }
 LANGUAGE_NOT_FOUND = {
-    'en' : "Woops! looks like we don't know your language, please select /el, /tr, /en",
-    'el' : "ουπς! φαίνεται οτι δεν γνωρίζουμε τη γλωσσα σου, παρακαλω επιλεξτε απο /el,/tr,/en",
-    'tr' : "Dilinizi bilmiyoruz gibi görünüyor, lütfen seçin /el,/tr,/en."
+    'en' : "Woops! looks like we don't know your language, please select /gr, /tr, /en",
+    'el' : "ουπς! φαίνεται οτι δεν γνωρίζουμε τη γλωσσα σου, παρακαλω επιλεξτε απο /gr,/tr,/en",
+    'tr' : "Dilinizi bilmiyoruz gibi görünüyor, lütfen seçin /gr,/tr,/en."
 }
 
 def asked_question_manipulation(update: Update, context: CallbackContext):

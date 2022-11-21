@@ -407,7 +407,7 @@ def set_best_answer(request: HttpRequest):
                 question.save()
             return HttpResponse()
     except Exception as e:
-        logger.info('_send_answer failed')
+        logger.exception('_send_answer failed')
         return HttpResponseBadRequest()
 
 @csrf_exempt
