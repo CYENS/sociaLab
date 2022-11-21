@@ -722,11 +722,11 @@ SOLVED_QUESTIONS_NOT_LOGGED_IN = {
 }
 
 def solved_questions(update: Update, context: CallbackContext):
-    try:
-        DATA = context.user_data['question']
-
-    except:
-        logger.exception(" ")
+    # try:
+    #     DATA = context.user_data['question']
+    #
+    # except:
+    #     logger.exception(" ")
     try:
         MESSAGE = update.message
     except:
@@ -743,8 +743,8 @@ def solved_questions(update: Update, context: CallbackContext):
 
     if MESSAGE is not None and LANGUAGE:
         request = requests.get(f'{SERVER}/solved_questions', params={
-            'user_id' : USER.id,
-            'question_id' : DATA['question_id']
+            'user_id' : USER.id
+            # 'question_id' : DATA['question_id']
         })
         
         if (request.status_code == 200):
