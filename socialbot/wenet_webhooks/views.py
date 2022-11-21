@@ -633,7 +633,7 @@ def question_answers(request: HttpRequest):
         else:
             return result
     except Exception as e:
-        logger.info('question_answers failed')
+        logger.exception('question_answers failed')
 
 # FIXME This function should call the WeNet server and find the appopriate questions that the current
 # user should see.
