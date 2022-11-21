@@ -714,7 +714,7 @@ SOLVED_QUESTIONS = {
 SOLVED_QUESTIONS_NOT_LOGGED_IN = {
     'en' : "You have to be logged in to see questions that you have marked as solved.",
     'el' : "Πρέπει να είστε συνδεδεμένοι για να δείτε ερωτήσεις που έχετε επισημάνει ως λυμένες.",
-    'en' : "Cevaplandı olarak işaretlediğiniz soruları görebilmeniz için giriş yapmanız gerekir."
+    'tr' : "Cevaplandı olarak işaretlediğiniz soruları görebilmeniz için giriş yapmanız gerekir."
 }
 
 def solved_questions(update: Update, context: CallbackContext):
@@ -1107,7 +1107,7 @@ def selected_question_choice(update: Update, context: CallbackContext):
                 reply_markup=ReplyKeyboardMarkup.from_column(markup_list, one_time_keyboard=True))
 
 STANDARD_COMMANDS = [
-    BotCommand('el', "Για Ελληνικά"),
+    BotCommand('gr', "Για Ελληνικά"),
     BotCommand('tr', "Türkçe için"),
     BotCommand('en', "For English")
 ]
