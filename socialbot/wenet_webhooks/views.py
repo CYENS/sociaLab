@@ -391,11 +391,17 @@ def _send_answer_to_user(answer: Answer):
 @csrf_exempt
 def set_best_answer(request: HttpRequest):
     try:
+        THANKS_FOR_FEEDBACK = {
+            'en': "thank your for your help ✌",
+            'el': "ευχαριστούμε για τη βοήθεια ✌",
+            'tr': "Yardımlarınız için teşekkür ederim ✌"}
         if request.method == 'POST':
             question_id = request.POST.get('question_id')
             answer_id = request.POST.get('answer_id')
+            user_id = request.POST.get('user_id')
             question: Question = Question.objects.get(id=question_id)
             answer: Answer = Answer.objects.get(id=answer_id)
+            answerer: User = User.objects.get(telegram_id=user_id)
             try:
                 best_answer_exists: Best_Answer = Best_Answer.objects.get(question=question)
             except:
@@ -403,11 +409,17 @@ def set_best_answer(request: HttpRequest):
             if best_answer_exists:
                 best_answer_exists.answer = answer
                 best_answer_exists.save()
+                bot = Bot(BOT_TOKEN)
+                bot.send_message(user_id, text=THANKS_FOR_FEEDBACK[answerer.language],
+                                 parse_mode=ParseMode.MARKDOWN_V2)
             else:
                 best_answer = Best_Answer(question=question, answer=answer)
                 best_answer.save()
                 question.solved = True
                 question.save()
+                bot = Bot(BOT_TOKEN)
+                bot.send_message(user_id, text=THANKS_FOR_FEEDBACK[answerer.language],
+                                 parse_mode=ParseMode.MARKDOWN_V2)
             return HttpResponse()
     except Exception as e:
         logger.exception('_send_answer failed')

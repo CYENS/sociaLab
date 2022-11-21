@@ -352,7 +352,8 @@ def mark_question_as_solved(update: Update, context: CallbackContext):
         if question_id and TYPE:
             request = requests.post(f'{SERVER}/set_best_answer', data={
                 'answer_id': answer_id,
-                'question_id': question_id
+                'question_id': question_id,
+                'user_id': USER.id
             }, verify=False)
         MESSAGE = update.message
     if TYPE=="dislike":
