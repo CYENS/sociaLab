@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  web:
+    build: .
+    command: sh -c "cd socialbot/ && gunicorn socialbot.wsgi:application --bind 0.0.0.0:8000 --certfile ../cognition-srv2_ouc_ac_cy.pem --keyfile ../cogition-srv2a.key"
+    volumes:
+      - .:/code
+      - .:/root/.ssh:rw
+    ports:
+      - "443:8000"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - APP_ID=FIcETanOcj
+      - APP_SECRET=gjZt0buAIGkPDjJNjX9j
+      - WENET_AUTHENTICATION_COMPLETE=https://internetofus.u-hopper.com/prod/hub/frontend/oauth/login?client_id=FIcETanOcj
+      - WENET_TOKEN_GENERATOR=https://internetofus.u-hopper.com/prod/api/oauth2/token
+      - WENET_WEBSITE=https://internetofus.u-hopper.com/prod/hub/frontend
+      - WENET_SERVICES=https://internetofus.u-hopper.com/prod/api/service
+      - TELEGRAM_URI=https://t.me/ChatEasy_bot?start=
+      - BOT_TOKEN=5593408195:AAEW8SO7xtaYUZyExvnEXVdqk27YBBLR_ow
+    depends_on:
+      - db
+  bot:
+    build: .
+    command: python bot/src/main.py
+    environment:
+      - SERVER=https://cognition-srv2.ouc.ac.cy:443/wenet
+      - APP_ID=FIcETanOcj
+      - WENET_AUTHENTICATION=https://internetofus.u-hopper.com/prod/hub/frontend/oauth/login?client_id=FIcETanOcj
+      - WENET_SIGN_UP=https://internetofus.u-hopper.com/prod/hub/frontend/user/signup
+      - WENET_TOKEN_GENERATOR=https://internetofus.u-hopper.com/prod/api/oauth2/token
+      - WENET_WEBSITE=https://internetofus.u-hopper.com/prod/hub/frontend
+      - BOT_TOKEN=5593408195:AAEW8SO7xtaYUZyExvnEXVdqk27YBBLR_ow
+    depends_on:
+      - web
