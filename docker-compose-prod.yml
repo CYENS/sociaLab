@@ -35,7 +35,7 @@ services:
     build: .
     command: python bot/src/main.py
     environment:
-      - SERVER=https://cognition-srv2.ouc.ac.cy:443/wenet
+      - SERVER=https://www.socialab.cyens.org.cy:443/wenet
       - APP_ID=FIcETanOcj
       - WENET_AUTHENTICATION=https://internetofus.u-hopper.com/prod/hub/frontend/oauth/login?client_id=FIcETanOcj
       - WENET_SIGN_UP=https://internetofus.u-hopper.com/prod/hub/frontend/user/signup
