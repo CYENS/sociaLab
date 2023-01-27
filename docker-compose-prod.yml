@@ -26,7 +26,7 @@ services:
       - WENET_AUTHENTICATION_COMPLETE=https://internetofus.u-hopper.com/prod/hub/frontend/oauth/login?client_id=FIcETanOcj
       - WENET_TOKEN_GENERATOR=https://internetofus.u-hopper.com/prod/api/oauth2/token
       - WENET_WEBSITE=https://internetofus.u-hopper.com/prod/hub/frontend
-      - WENET_SERVICES=https://internetofus.u-hopper.com/prod/api/service
+      - WENET_SERVICES=https://internetofus.u-hopper.com/prod/service
       - TELEGRAM_URI=https://t.me/ChatEasy_bot?start=
       - BOT_TOKEN=5593408195:AAEW8SO7xtaYUZyExvnEXVdqk27YBBLR_ow
     depends_on:
