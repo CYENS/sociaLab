@@ -242,7 +242,7 @@ def create_account(request: HttpRequest):
 
         return JsonResponse({'message' : 'user_created', 'language': u.language})
     except Exception as e:
-        logger.info('create_account failed')
+        logger.exception('create_account failed')
 
 @csrf_exempt
 def delete_account(request: HttpRequest):
