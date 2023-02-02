@@ -108,6 +108,9 @@ def start(update: Update, context: CallbackContext):
         update.message.reply_text("Using the bot is simple, by pressing / you see all the available commands for the bot to execute. Now let's create a Wenet profile for you , the system that powers ChatEasy ! Press /sign_up ")
     else:
         # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
+        test=requests.get(url=SERVER)
+        print(test)
+        logger.info(test.text)
         request = requests.post(f'{SERVER}/create_account', data={
             'code' : passed_arguments[0],
             'user_id' : user.id,
