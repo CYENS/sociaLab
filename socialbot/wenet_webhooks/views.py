@@ -211,6 +211,8 @@ def create_account(request: HttpRequest):
     Creates an account to the database using the `User`'s information.
     """
     try:
+        print("1")
+        logger.info("1")
         oauth2_request = requests.post(WENET_TOKEN_GENERATOR, data={
             'grant_type': 'authorization_code',
             'client_id' : APP_ID,
@@ -221,7 +223,8 @@ def create_account(request: HttpRequest):
         check_result = _check_oauth2_tokens(user_tokens)
         if (check_result is not None):
             return check_result
-
+        print("2")
+        logger.info("2")
         user_access_token = user_tokens['access_token']
         user_refresh_token = user_tokens['refresh_token']
         HEADERS = {
@@ -229,7 +232,9 @@ def create_account(request: HttpRequest):
             'Accept' : APPLICATION_JSON
         }
         user_profile_id = requests.get(f'{WENET_SERVICES}/token', headers=HEADERS, timeout=1).json()['profileId']
+        print("3")
         user_details_request = requests.get(f'{WENET_SERVICES}/user/profile/{user_profile_id}', headers=HEADERS, timeout=1)
+        print("4")
         user_details = user_details_request.json()
         user_name = user_details['name']
         language=user_details['locale']
