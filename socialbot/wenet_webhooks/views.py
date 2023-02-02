@@ -216,7 +216,7 @@ def create_account(request: HttpRequest):
             'client_id' : APP_ID,
             'client_secret' : APP_SECRET,
             'code' : request.POST['code']
-        })
+        },timeout=1)
         user_tokens = oauth2_request.json()
         check_result = _check_oauth2_tokens(user_tokens)
         if (check_result is not None):
