@@ -35,7 +35,7 @@ services:
     build: .
     command: python bot/src/main.py
     environment:
-      - SERVER=socialab_web_1/wenet
+      - SERVER=https://172.21.0.3/wenet
       - APP_ID=sa0RgS4xDL
       - WENET_AUTHENTICATION=https://wenet.u-hopper.com/dev/hub/frontend/oauth/login?client_id=sa0RgS4xDL
       - WENET_SIGN_UP=https://wenet.u-hopper.com/dev/hub/frontend/user/signup
