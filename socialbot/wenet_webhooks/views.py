@@ -228,8 +228,8 @@ def create_account(request: HttpRequest):
             'Authorization' : user_access_token,
             'Accept' : APPLICATION_JSON
         }
-        user_profile_id = requests.get(f'{WENET_SERVICES}/token', headers=HEADERS).json()['profileId']
-        user_details_request = requests.get(f'{WENET_SERVICES}/user/profile/{user_profile_id}', headers=HEADERS)
+        user_profile_id = requests.get(f'{WENET_SERVICES}/token', headers=HEADERS, timeout=1).json()['profileId']
+        user_details_request = requests.get(f'{WENET_SERVICES}/user/profile/{user_profile_id}', headers=HEADERS, timeout=1)
         user_details = user_details_request.json()
         user_name = user_details['name']
         language=user_details['locale']
