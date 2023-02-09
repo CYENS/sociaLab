@@ -22,6 +22,13 @@ class Question(models.Model):
     def __str__(self) -> str:
         return f'{self.content}, was solved: {self.solved}, by {self.user}'
 
+    def has_related_object(self):
+        try:
+            self.Best_Answer
+            return True
+        except Exception :
+            return False
+
 class Answer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
