@@ -11,7 +11,8 @@ services:
       - POSTGRES_PASSWORD=postgres
   web:
     build: .
-    command: sh -c "cd socialbot/ && gunicorn socialbot.wsgi:application --bind 0.0.0.0:8000 --certfile ../cognition-srv2_ouc_ac_cy.pem --keyfile ../cogition-srv2a.key"
+    command: sh -c "cd socialbot/ && gunicorn socialbot.wsgi:application --bind 0.0.0.0:8000"
+     #--certfile ../cognition-srv2_ouc_ac_cy.pem --keyfile ../cogition-srv2a.key"
     volumes:
       - .:/code
       - .:/root/.ssh:rw
@@ -35,7 +36,7 @@ services:
     build: .
     command: python bot/src/main.py
     environment:
-      - SERVER=https://www.socialab.cyens.org.cy:443/wenet
+      - SERVER=https:http://172.22.0.3:8000/wenet
       - APP_ID=FIcETanOcj
       - WENET_AUTHENTICATION=https://internetofus.u-hopper.com/prod/hub/frontend/oauth/login?client_id=FIcETanOcj
       - WENET_SIGN_UP=https://internetofus.u-hopper.com/prod/hub/frontend/user/signup
