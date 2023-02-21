@@ -36,7 +36,7 @@ services:
     build: .
     command: python bot/src/main.py
     environment:
-      - SERVER=https:http://172.22.0.3:8000/wenet
+      - SERVER=http://172.22.0.3:8000/wenet
       - APP_ID=FIcETanOcj
       - WENET_AUTHENTICATION=https://internetofus.u-hopper.com/prod/hub/frontend/oauth/login?client_id=FIcETanOcj
       - WENET_SIGN_UP=https://internetofus.u-hopper.com/prod/hub/frontend/user/signup
