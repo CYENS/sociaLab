@@ -87,9 +87,9 @@ CONNECTION_FAILED = {
 }
 
 CONNECTION_SUCCEDED = {
-    'en' : "Connection created! Press start for social interactions across language barriers!",
-    'el' : "Η σύνδεση έχει δημιουργηθεί!",
-    'tr' : "Bağlantı kuruldu!"
+    'en' : "Connection created! Press /ask_question to create a question for the community!\n /help for extra info 🤖 ",
+    'el' : "Η σύνδεση έχει δημιουργηθεί! Πατήστε /ask_question για να κάνετε ερώτηση στη κοινότητα!\n /help για οδηγιες 🤖 ",
+    'tr' : "Bağlantı kuruldu! Topluluk için bir soru oluşturmak üzere /ask_question a basın! \n /help ekstra bilgi için yardım🤖"
 }
 
 def start(update: Update, context: CallbackContext):
