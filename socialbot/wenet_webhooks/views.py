@@ -242,9 +242,10 @@ def create_account(request: HttpRequest):
             language = 'en'
         try:
             user: User = User.objects.get(telegram_id=request.POST['user_id'])
+            if user:
+                JsonResponse({'message': 'user_exists', 'language': u.language})
         except User.DoesNotExist:
-            print("5")
-            return JsonResponse({'message' : 'user_exists', 'language': u.language})
+            logger.info("User not found - creating User")
         u = User(id = user_details['id'], telegram_id=request.POST['user_id'],
             name= f"{user_name['first']} {user_name['last']}", language=language,
             access_token=user_access_token, refresh_token=user_refresh_token)
