@@ -240,6 +240,11 @@ def create_account(request: HttpRequest):
         language=user_details['locale']
         if language not in ('el', 'tr'):
             language = 'en'
+        try:
+            user: User = User.objects.get(telegram_id=request.POST['user_id'])
+        except User.DoesNotExist:
+            print("5")
+            return JsonResponse({'message' : 'user_exists', 'language': u.language})
         u = User(id = user_details['id'], telegram_id=request.POST['user_id'],
             name= f"{user_name['first']} {user_name['last']}", language=language,
             access_token=user_access_token, refresh_token=user_refresh_token)
@@ -248,6 +253,7 @@ def create_account(request: HttpRequest):
         return JsonResponse({'message' : 'user_created', 'language': u.language})
     except Exception as e:
         logger.exception('create_account failed')
+        return HttpResponseBadRequest()
 
 @csrf_exempt
 def delete_account(request: HttpRequest):
