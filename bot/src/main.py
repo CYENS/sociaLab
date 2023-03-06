@@ -102,7 +102,7 @@ def start(update: Update, context: CallbackContext):
     if (len(passed_arguments) == 0):
         context.chat_data['language'] = 'en'
         update.message.reply_markdown_v2(r"*_Καλως ορίσατε στο ChatEasy\!_* "
-        r"Η καθορισμένη γλώσσα είναι τα Αγγλικά\. Για Ελληνικά στείλτε /el και για Τουρκικά /tr\.""\n"
+        r"Η καθορισμένη γλώσσα είναι τα Αγγλικά\. Για Ελληνικά στείλτε /gr και για Τουρκικά /tr\.""\n"
         r"*_SociaLab’ a hoşgeldiniz\!_* Varsayılan dil İngilizce’dir\. Yunanca için /el ve Türkçe için "
         r"/tr yazıp gönderiniz\.")
         update.message.reply_text("Using the bot is simple, by pressing / you see all the available commands for the bot to execute. Now let's create a Wenet profile for you , the system that powers ChatEasy ! Press /sign_up ")
