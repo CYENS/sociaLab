@@ -112,9 +112,9 @@ def start(update: Update, context: CallbackContext):
     else:
         try:
             # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
-            test=requests.get(url=SERVER)
-            print(test)
-            logger.info(test.text)
+            # test=requests.get(url=SERVER)
+            # print(test)
+            # logger.info(test.text)
             request = requests.post(f'{SERVER}/create_account', data={
                 'code' : passed_arguments[0],
                 'user_id' : user.id,
