@@ -253,8 +253,7 @@ def create_account(request: HttpRequest):
 
         return JsonResponse({'message' : 'user_created', 'language': u.language})
     except Exception as e:
-        logger.exception('create_account failed')
-        return HttpResponseBadRequest({'message' : 'user_not_created', 'language': u.language})
+        return JsonResponse({'message' : 'user_not_created', 'language': u.language})
 
 @csrf_exempt
 def delete_account(request: HttpRequest):
