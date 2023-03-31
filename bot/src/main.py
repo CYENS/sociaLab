@@ -1207,7 +1207,7 @@ def main() -> None:
         BotCommand('stop', STOP_INFORMATION['en']),
         BotCommand('delete_account', DELETE_ACCOUNT_INFORMATION['en'])])
 
-    updater = Updater(BOT_TOKEN, persistence=PicklePersistence('./bot_data'))
+    updater = Updater(BOT_TOKEN, persistence=PicklePersistence('./bot_data'),use_context=True)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CallbackQueryHandler(mark_question_as_solved, pattern="{'like_type'"))
     dispatcher.add_handler(CommandHandler('start', start))
