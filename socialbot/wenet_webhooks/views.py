@@ -253,7 +253,7 @@ def create_account(request: HttpRequest):
 
         return JsonResponse({'message' : 'user_created', 'language': u.language})
     except Exception as e:
-        return JsonResponse({'message' : 'user_not_created', 'language': u.language})
+        return HttpResponseBadRequest({'message' : 'user_not_created', 'language': u.language})
 
 @csrf_exempt
 def delete_account(request: HttpRequest):
@@ -665,7 +665,10 @@ def available_questions(request: HttpRequest):
                 'id' : question.id,
                 'content' : question.content[user.language]
             })
-        random_items = random.sample(result, 10)
+        if len(result)>10:
+            random_items = random.sample(result, 10)
+        else:
+            random_items = result
         return JsonResponse({'questions' : random_items})
     except Exception as e:
         logger.exception('mark_as_solved failed')
