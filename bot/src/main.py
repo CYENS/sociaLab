@@ -182,8 +182,18 @@ def ask_question(update: Update, context: CallbackContext):
     It can be used by the user to make a question, which will be send to the appropriate users 
     according to the WeNet platform.
     """
-    update.message.reply_text(ASK_QUESTION[context.chat_data['language']])
-    return 0
+    try:
+        LANGUAGE = context.chat_data.get('language')
+        if not LANGUAGE:
+            update.message.reply_text(LANGUAGE_NOT_FOUND["en"])
+        else:
+            update.message.reply_text(ASK_QUESTION[LANGUAGE])
+            return 0
+    except Exception as e:
+        update.message.reply_text(LANGUAGE_NOT_FOUND["en"])
+        LANGUAGE = None
+    return ConversationHandler.END
+
 
 QUESTION_SUCCEDED = {
     'en' : "Your question was submitted successfully!",
