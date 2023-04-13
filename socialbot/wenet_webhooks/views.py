@@ -282,17 +282,23 @@ def ask_question(request: HttpRequest):
     E.g.: If the `Question` was in Greek, it will get translated in Turkish.
     """
     try:
-        user_id = request.POST['user_id']
-        message = request.POST['question']
+        try:
+            user_id = request.POST['user_id']
+            message = request.POST['question']
+        except:
+            return HttpResponseBadRequest("ID or message not received")
+
         logger.info("received question"+message)
         try:
             user: User = User.objects.get(telegram_id=user_id)
         except User.DoesNotExist:
-            return HttpResponseForbidden()
+            return HttpResponseForbidden("user not exist")
 
         question = Question(user=user, content={user.language : message})
+        logger.info("creating task in wenet")
         task_id = _create_wenet_question(question)
         if task_id:
+            logger.info("task in wenet created succesfully " + message)
             question.task_id = task_id
             question.save()
             thread = Thread(target=_translate, args=(user, question))
