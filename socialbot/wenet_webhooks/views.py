@@ -296,6 +296,8 @@ def ask_question(request: HttpRequest):
             question.save()
             thread = Thread(target=_translate, args=(user, question))
             thread.start()
+        else:
+            logger.info("Failed to create question in Wenet")
         return HttpResponse()
     except Exception as e:
         logger.info('ask_question failed')
