@@ -284,6 +284,7 @@ def ask_question(request: HttpRequest):
     try:
         user_id = request.POST['user_id']
         message = request.POST['question']
+        logger.info("received question"+message)
         try:
             user: User = User.objects.get(telegram_id=user_id)
         except User.DoesNotExist:
@@ -297,7 +298,8 @@ def ask_question(request: HttpRequest):
             thread = Thread(target=_translate, args=(user, question))
             thread.start()
         else:
-            logger.info("Failed to create question in Wenet")
+            logger.info("Failed to create question in Wenet"+ message)
+            return HttpResponseBadRequest()
         return HttpResponse()
     except Exception as e:
         logger.info('ask_question failed')

@@ -228,6 +228,7 @@ def ask_question_handler(update: Update, context: CallbackContext):
         LANGUAGE = None
 
     if MESSAGE is not None and LANGUAGE:
+        logger.info("sending question to server " + MESSAGE.text)
         request = requests.post(f'{SERVER}/ask_question', data={
                 'user_id' : USER.id,
                 'question' : MESSAGE.text,
