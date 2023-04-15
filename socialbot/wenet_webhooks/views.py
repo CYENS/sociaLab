@@ -291,10 +291,10 @@ def ask_question(request: HttpRequest):
         #     logger.exception("ID or msg not found")
         #     return HttpResponseBadRequest("ID or message not received")
 
-        logger.info("received question")
-        logger.info(request.headers)
-        logger.info(request.body)
-        logger.info(request.POST)
+        print("received question")
+        print(request.headers)
+        print(request.body)
+        print(request.POST)
         return HttpResponse()
         try:
             user: User = User.objects.get(telegram_id=user_id)
