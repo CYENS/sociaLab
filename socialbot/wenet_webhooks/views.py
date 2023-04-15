@@ -283,9 +283,9 @@ def ask_question(request: HttpRequest):
     """
     try:
         try:
-            user_id = request.POST['user_id']
+            user_id = request.POST.get('user_id')
             logger.info("received"+str(user_id))
-            message = request.POST['question']
+            message = request.POST.get('question')
             logger.info("received"+str(message))
         except:
             logger.exception("ID or msg not found")
