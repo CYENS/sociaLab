@@ -282,16 +282,20 @@ def ask_question(request: HttpRequest):
     E.g.: If the `Question` was in Greek, it will get translated in Turkish.
     """
     try:
-        try:
-            user_id = request.POST.get('user_id')
-            logger.info("received"+str(user_id))
-            message = request.POST.get('question')
-            logger.info("received"+str(message))
-        except:
-            logger.exception("ID or msg not found")
-            return HttpResponseBadRequest("ID or message not received")
+        # try:
+        #     user_id = request.POST.get('user_id')
+        #     logger.info("received"+str(user_id))
+        #     message = request.POST.get('question')
+        #     logger.info("received"+str(message))
+        # except:
+        #     logger.exception("ID or msg not found")
+        #     return HttpResponseBadRequest("ID or message not received")
 
-        logger.info("received question"+message)
+        logger.info("received question")
+        logger.info(request.headers)
+        logger.info(request.body)
+        logger.info(request.POST)
+        return HttpResponse()
         try:
             user: User = User.objects.get(telegram_id=user_id)
         except User.DoesNotExist:
