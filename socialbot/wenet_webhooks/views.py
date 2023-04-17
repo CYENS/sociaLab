@@ -287,9 +287,8 @@ def ask_question(request: HttpRequest):
             logger.info("received"+str(user_id))
             message = request.POST.get('question')[0]
             logger.info("received"+str(message))
-        except:
-            logger.exception("ID or msg not found")
-            return HttpResponseBadRequest("ID or message not received")
+        except Exception as e:
+            print(e)
         #
         # print("received question")
         # print(request.headers)
