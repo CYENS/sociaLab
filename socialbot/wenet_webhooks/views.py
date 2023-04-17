@@ -337,6 +337,8 @@ def _create_wenet_question(question: Question):
         }
 
         request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
+        print(request.status_code)
+        print(request.body)
 
         if (request.status_code != 201):
             _update_user_token(question.user)
