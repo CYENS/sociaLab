@@ -289,11 +289,12 @@ def ask_question(request: HttpRequest):
             logger.info("received"+str(message))
         except Exception as e:
             print(e)
-        #
+            print("error 2222")
+
         # print("received question")
         # print(request.headers)
         # print(request.body)
-        # print(request.POST)
+        print(request.POST)
         # return HttpResponse()
         try:
             user: User = User.objects.get(telegram_id=user_id)
