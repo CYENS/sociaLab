@@ -302,16 +302,17 @@ def ask_question(request: HttpRequest):
             return HttpResponseForbidden("user not exist")
 
         question = Question(user=user, content={user.language : message})
-        logger.info("creating task in wenet")
+        print("creating task in wenet")
         task_id = _create_wenet_question(question)
+        print('task id is '+str (task_id))
         if task_id:
-            logger.info("task in wenet created succesfully " + message)
+            print("task in wenet created succesfully " + message)
             question.task_id = task_id
             question.save()
             thread = Thread(target=_translate, args=(user, question))
             thread.start()
         else:
-            logger.info("Failed to create question in Wenet"+ message)
+            print("Failed to create question in Wenet"+ message)
             return HttpResponseBadRequest()
         return HttpResponse()
     except Exception as e:
