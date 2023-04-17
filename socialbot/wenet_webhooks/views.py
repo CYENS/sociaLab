@@ -149,7 +149,7 @@ def _update_user_token(user: User):
             'client_secret' : APP_SECRET,
             'refresh_token' : user.refresh_token
         }).json()
-        print(oauth2_request.json)
+        print('&&&&'+oauth2_request.json+'&&&&')
         user.access_token = oauth2_request['access_token']
         user.refresh_token = oauth2_request['refresh_token']
         user.save()
@@ -337,8 +337,12 @@ def _create_wenet_question(question: Question):
         }
 
         request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
+        print()
         print(request.status_code)
-        print(request.json)
+        print(request.json())
+        print(request.body)
+        print(request.text)
+        print('**')
 
         if (request.status_code != 201):
             _update_user_token(question.user)
