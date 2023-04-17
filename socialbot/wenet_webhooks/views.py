@@ -290,12 +290,12 @@ def ask_question(request: HttpRequest):
         except:
             logger.exception("ID or msg not found")
             return HttpResponseBadRequest("ID or message not received")
-
-        print("received question")
-        print(request.headers)
-        print(request.body)
-        print(request.POST)
-        return HttpResponse()
+        #
+        # print("received question")
+        # print(request.headers)
+        # print(request.body)
+        # print(request.POST)
+        # return HttpResponse()
         try:
             user: User = User.objects.get(telegram_id=user_id)
         except User.DoesNotExist:
