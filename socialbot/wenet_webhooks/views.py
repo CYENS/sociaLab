@@ -149,12 +149,12 @@ def _update_user_token(user: User):
             'client_secret' : APP_SECRET,
             'refresh_token' : user.refresh_token
         }).json()
-
+        print(oauth2_request.json())
         user.access_token = oauth2_request['access_token']
         user.refresh_token = oauth2_request['refresh_token']
         user.save()
     except Exception as e:
-        logger.info('_update_user_token cannot update user token to keep them signed in'+str(user.id))
+        print('_update_user_token cannot update user token to keep them signed in'+str(user.id))
 
 def _translate(user: User, message: Question or Answer):
     try:
@@ -338,7 +338,7 @@ def _create_wenet_question(question: Question):
 
         request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
         print(request.status_code)
-        print(request.body)
+        print(request.json)
 
         if (request.status_code != 201):
             _update_user_token(question.user)
