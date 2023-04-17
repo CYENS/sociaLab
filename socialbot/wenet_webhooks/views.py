@@ -347,7 +347,7 @@ def _create_wenet_question(question: Question):
 
         return request.json().get('id')
     except Exception as e:
-        logger.info('_create_wenet_question failed')
+        print('_create_wenet_question failed'+ e)
 
 def _change_punctuations_to_raw(s: str):
     """
