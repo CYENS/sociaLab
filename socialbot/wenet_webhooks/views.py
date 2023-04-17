@@ -284,9 +284,9 @@ def ask_question(request: HttpRequest):
     try:
         try:
             user_id = request.POST.get('user_id')[0]
-            logger.info("received"+str(user_id))
+            print("received"+str(user_id))
             message = request.POST.get('question')[0]
-            logger.info("received"+str(message))
+            print("received"+str(message))
         except Exception as e:
             print(e)
             print("error 2222")
@@ -297,7 +297,7 @@ def ask_question(request: HttpRequest):
         print(request.POST)
         # return HttpResponse()
         try:
-            user: User = User.objects.get(telegram_id=user_id)
+            user: User = User.objects.get(telegram_id=int(user_id))
         except User.DoesNotExist:
             return HttpResponseForbidden("user not exist")
 
