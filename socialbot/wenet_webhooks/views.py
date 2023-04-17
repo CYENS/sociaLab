@@ -283,9 +283,9 @@ def ask_question(request: HttpRequest):
     """
     try:
         try:
-            user_id = request.POST.get('user_id')[0]
+            user_id = request.POST.get('user_id')
             print("received"+str(user_id))
-            message = request.POST.get('question')[0]
+            message = request.POST.get('question')
             print("received"+str(message))
         except Exception as e:
             print(e)
