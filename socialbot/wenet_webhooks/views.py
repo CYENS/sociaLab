@@ -20,7 +20,7 @@ BOT_TOKEN = os.environ['BOT_TOKEN']
 
 APP_ID = os.environ['APP_ID']
 APP_SECRET = os.environ['APP_SECRET']
-TASK_TYPE_ID = '625036454ff70359a68b8db8'
+TASK_TYPE_ID = '6385df5a3516ca3ebde74d52' #COMMUNITY ID IN WENET APP SETTINGS
 WENET_TOKEN_GENERATOR = os.environ['WENET_TOKEN_GENERATOR']
 WENET_AUTHENTICATION_COMPLETE = os.environ['WENET_AUTHENTICATION_COMPLETE']
 WENET_SERVICES = os.environ['WENET_SERVICES']
@@ -337,7 +337,7 @@ def _create_wenet_question(question: Question):
         }
 
         request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
-        print()
+        print(question.user.access_token)
         print(request.status_code)
         print(request.json())
         print(request.body)
