@@ -143,6 +143,7 @@ def _update_user_token(user: User):
     Used to create a new access and refresh token pair for the `User` to keep using the app.
     """
     try:
+        print('creating new token')
         oauth2_request = requests.post(WENET_TOKEN_GENERATOR, data={
             'grant_type' : 'refresh_token',
             'client_id' : APP_ID,
@@ -304,7 +305,7 @@ def ask_question(request: HttpRequest):
         question = Question(user=user, content={user.language : message})
         print("creating task in wenet")
         task_id = _create_wenet_question(question)
-        print('task id is '+str (task_id))
+        print('task id is ')
         if task_id:
             print("task in wenet created succesfully " + message)
             question.task_id = task_id
@@ -316,7 +317,8 @@ def ask_question(request: HttpRequest):
             return HttpResponseBadRequest()
         return HttpResponse()
     except Exception as e:
-        logger.info('ask_question failed')
+        print('ask_question failed')
+        return HttpResponseBadRequest()
 
 def _create_wenet_question(question: Question):
     """
@@ -337,17 +339,13 @@ def _create_wenet_question(question: Question):
         }
 
         request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
-        print(question.user.access_token)
-        print(request.status_code)
-        print(request.json())
-        print(request.body)
-        print(request.text)
-        print('**')
 
         if (request.status_code != 201):
+            print('updating user token')
             _update_user_token(question.user)
             HEADERS['Authorization'] = question.user.access_token
             request = requests.post(f'{WENET_SERVICES}/task', headers=HEADERS, json=DATA)
+            print('trying to add task 2nd try')
 
         return request.json().get('id')
     except Exception as e:
