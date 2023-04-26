@@ -150,7 +150,7 @@ def _update_user_token(user: User):
             'client_secret' : APP_SECRET,
             'refresh_token' : user.refresh_token
         }).json()
-        print('&&&&'+oauth2_request.json+'&&&&')
+        print('&&&&'+oauth2_request+'&&&&')
         user.access_token = oauth2_request['access_token']
         user.refresh_token = oauth2_request['refresh_token']
         user.save()
