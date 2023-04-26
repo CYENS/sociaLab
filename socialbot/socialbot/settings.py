@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-fn@=#tl=99hfg)$8*7&pt#u(f=!#))7s=jvzv1)xx3l-sbn7np
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cognition-srv2.ouc.ac.cy', '127.0.0.1','localhost','82.116.211.98','0.0.0.0','46.199.91.22','www.socialab.cyens.org.cy','172.22.0.3', '172.18.0.3']
+ALLOWED_HOSTS = ['cognition-srv2.ouc.ac.cy', '127.0.0.1','localhost','82.116.211.98','0.0.0.0','46.199.91.22','www.socialab.cyens.org.cy','172.22.0.3', '172.18.0.3', '213.7.195.74']
 
 
 # Application definition
