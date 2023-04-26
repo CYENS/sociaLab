@@ -100,6 +100,7 @@ def start(update: Update, context: CallbackContext):
         user = update.effective_user
         passed_arguments = context.args
         print(context)
+        print('1')
         logger.info(context)
         logger.info('2')
 
@@ -118,13 +119,14 @@ def start(update: Update, context: CallbackContext):
                 # print(test)
                 # logger.info(test.text)
                 print(passed_arguments)
+                print('yes')
                 logger.info(passed_arguments)
                 request = requests.post(f'{SERVER}/create_account', data={
                     'code' : passed_arguments[0],
                     'user_id' : user.id,
                 }, verify=False)
-            except:
-                logger.exception()
+            except Exception as e:
+                logger.exception(e)
             # try:
             #     if request.json().get('language') not in ('el','tr'):
             #         context.chat_data['language'] = 'en'
