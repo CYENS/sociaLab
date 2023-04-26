@@ -100,6 +100,7 @@ def start(update: Update, context: CallbackContext):
         user = update.effective_user
         passed_arguments = context.args
         print(context)
+        logger(context)
 
         if (len(passed_arguments) == 0):
             context.chat_data['language'] = 'en'
