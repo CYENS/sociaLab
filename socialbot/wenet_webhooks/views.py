@@ -150,11 +150,12 @@ def _update_user_token(user: User):
             'client_secret' : APP_SECRET,
             'refresh_token' : user.refresh_token
         }).json()
-        print('&&&&'+oauth2_request+'&&&&')
+        print(+oauth2_request)
         if oauth2_request.get('access_token'):
             user.access_token = oauth2_request['access_token']
             user.refresh_token = oauth2_request['refresh_token']
             user.save()
+            print('updated user token')
     except Exception as e:
         print(e)
 
