@@ -109,39 +109,40 @@ def start(update: Update, context: CallbackContext):
             r"*_SociaLab’ a hoşgeldiniz\!_* Varsayılan dil İngilizce’dir\. Yunanca için /el ve Türkçe için "
             r"/tr yazıp gönderiniz\.")
             update.message.reply_text("Using the bot is simple, by pressing / you see all the available commands for the bot to execute. Now let's create a Wenet profile for you , the system that powers ChatEasy ! Press /sign_up ")
+
+        else:
+            try:
+                # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
+                # test=requests.get(url=SERVER)
+                # print(test)
+                # logger.info(test.text)
+                print(passed_arguments)
+                logger.info(passed_arguments)
+                request = requests.post(f'{SERVER}/create_account', data={
+                    'code' : passed_arguments[0],
+                    'user_id' : user.id,
+                }, verify=False)
+            except:
+                logger.exception()
+            # try:
+            #     if request.json().get('language') not in ('el','tr'):
+            #         context.chat_data['language'] = 'en'
+            # except:
+            #     context.chat_data['language'] = 'en'
+            #     logger.exception()
+            #
+            #     LANGUAGE = context.chat_data['language']
+            # elif request.json().get('language') and request.json().get('language') in {'tr','en','el'}:
+            #     context.chat_data['language'] = request.json().get('language')
+            #     LANGUAGE = context.chat_data['language']
+            LANGUAGE='en'#deleteme
+            if (request.status_code == 400):
+                update.message.reply_text(CONNECTION_FAILED[LANGUAGE])
+            else:
+                update.message.reply_text(CONNECTION_SUCCEDED[LANGUAGE])
+            update.message.delete()
     except Exception as e:
         logger.exception(e)
-    else:
-        try:
-            # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
-            # test=requests.get(url=SERVER)
-            # print(test)
-            # logger.info(test.text)
-            print(passed_arguments)
-            logger.info(passed_arguments)
-            request = requests.post(f'{SERVER}/create_account', data={
-                'code' : passed_arguments[0],
-                'user_id' : user.id,
-            }, verify=False)
-        except:
-            logger.exception()
-        # try:
-        #     if request.json().get('language') not in ('el','tr'):
-        #         context.chat_data['language'] = 'en'
-        # except:
-        #     context.chat_data['language'] = 'en'
-        #     logger.exception()
-        #
-        #     LANGUAGE = context.chat_data['language']
-        # elif request.json().get('language') and request.json().get('language') in {'tr','en','el'}:
-        #     context.chat_data['language'] = request.json().get('language')
-        #     LANGUAGE = context.chat_data['language']
-        LANGUAGE='en'#deleteme
-        if (request.status_code == 400):
-            update.message.reply_text(CONNECTION_FAILED[LANGUAGE])
-        else:
-            update.message.reply_text(CONNECTION_SUCCEDED[LANGUAGE])
-        update.message.delete()
 
 AVAILABLE_COMMANDS = {
     'en' : "These are the available commands",
