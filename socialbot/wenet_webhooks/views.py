@@ -151,11 +151,12 @@ def _update_user_token(user: User):
             'refresh_token' : user.refresh_token
         }).json()
         print('&&&&'+oauth2_request+'&&&&')
-        user.access_token = oauth2_request['access_token']
-        user.refresh_token = oauth2_request['refresh_token']
-        user.save()
+        if oauth2_request.get('access_token'):
+            user.access_token = oauth2_request['access_token']
+            user.refresh_token = oauth2_request['refresh_token']
+            user.save()
     except Exception as e:
-        print('_update_user_token cannot update user token to keep them signed in'+str(user.id))
+        print(e)
 
 def _translate(user: User, message: Question or Answer):
     try:
