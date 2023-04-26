@@ -115,6 +115,8 @@ def start(update: Update, context: CallbackContext):
             # test=requests.get(url=SERVER)
             # print(test)
             # logger.info(test.text)
+            print(passed_arguments)
+            logger.info(passed_arguments)
             request = requests.post(f'{SERVER}/create_account', data={
                 'code' : passed_arguments[0],
                 'user_id' : user.id,

@@ -246,6 +246,9 @@ def create_account(request: HttpRequest):
         try:
             user: User = User.objects.get(telegram_id=request.POST['user_id'])
             if user:
+                user.access_token=user_access_token
+                user.refresh_token=user_refresh_token
+                user.save()
                 return JsonResponse({'message': 'user_exists', 'language': language})
         except User.DoesNotExist:
             logger.info("User not found - creating User")
