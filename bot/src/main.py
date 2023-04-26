@@ -99,7 +99,7 @@ def start(update: Update, context: CallbackContext):
     try:
         user = update.effective_user
         passed_arguments = context.args
-        print(context)
+        print(context.args)
         print('1')
         logger.info(context)
         logger.info('2')
@@ -111,7 +111,6 @@ def start(update: Update, context: CallbackContext):
             r"*_SociaLab’ a hoşgeldiniz\!_* Varsayılan dil İngilizce’dir\. Yunanca için /el ve Türkçe için "
             r"/tr yazıp gönderiniz\.")
             update.message.reply_text("Using the bot is simple, by pressing / you see all the available commands for the bot to execute. Now let's create a Wenet profile for you , the system that powers ChatEasy ! Press /sign_up ")
-
         else:
             try:
                 # This part creates a new user in the database which connect their accounts (Telegram, WeNet)
@@ -119,7 +118,7 @@ def start(update: Update, context: CallbackContext):
                 # print(test)
                 # logger.info(test.text)
                 print(passed_arguments)
-                print('yes')
+                print('5')
                 logger.info(passed_arguments)
                 request = requests.post(f'{SERVER}/create_account', data={
                     'code' : passed_arguments[0],
