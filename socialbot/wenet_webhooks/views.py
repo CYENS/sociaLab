@@ -203,7 +203,9 @@ def authorise_user(request: HttpRequest):
     with their Telegram account.
     """
     try:
-        return redirect(f"{TELEGRAM_URI}{request.GET['code']}")
+        print(f"{TELEGRAM_URI}{request.GET['code']}")
+        request = requests.get(f"{TELEGRAM_URI}{request.GET['code']}")
+        return HttpResponse("ok")#redirect(f"{TELEGRAM_URI}{request.GET['code']}")
     except Exception as e:
         logger.info('authorise_user  failed to redirect user to telegram after wenet login')
 
