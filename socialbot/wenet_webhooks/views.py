@@ -454,7 +454,7 @@ def set_best_answer(request: HttpRequest):
             else:
                 best_answer = Best_Answer(question=question, answer=answer)
                 best_answer.save()
-                question.solved = True
+                question.solved = False
                 question.save()
                 bot = Bot(BOT_TOKEN)
                 bot.send_message(user_id, text=THANKS_FOR_FEEDBACK[answerer.language],
