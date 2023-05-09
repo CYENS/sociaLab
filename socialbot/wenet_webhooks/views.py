@@ -664,10 +664,11 @@ def question_answers(request: HttpRequest):
             answers = result.answer_set.all()
             result = []
             for answer in answers:
-                result.append({
-                    'id' : answer.id,
-                    'text' : answer.content[user.language]
-                })
+                if answer.content.get(user.language) is not None:
+                    result.append({
+                        'id' : answer.id,
+                        'text' : answer.content[user.language]
+                    })
             return JsonResponse({'answers' : result})
         else:
             return result
@@ -689,10 +690,11 @@ def available_questions(request: HttpRequest):
 
         result = []
         for question in Question.objects.filter(solved=False).exclude(user=user):
-            result.append({
-                'id' : question.id,
-                'content' : question.content[user.language]
-            })
+            if question.content.get(user.language) is not None:
+                result.append({
+                    'id' : question.id,
+                    'content' : question.content[user.language]
+                })
         if len(result)>10:
             random_items = random.sample(result, 10)
         else:
