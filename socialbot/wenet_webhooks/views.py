@@ -609,10 +609,11 @@ def asked_questions(request: HttpRequest):
         result = []
 
         for question in questions:
-            result.append({
-                'id' : question.id,
-                'text' : question.content[user.language]
-            })
+            if question.content.get(user.language) is not None:
+                result.append({
+                    'id' : question.id,
+                    'text' : question.content[user.language]
+                })
 
         return JsonResponse({'questions' : result})
     except Exception as e:
@@ -737,10 +738,11 @@ def solved_questions(request: HttpRequest):
         result = []
 
         for question in questions:
-            result.append({
-                'id' : question.id,
-                'text' : question.content[user.language]
-            })
+            if question.content.get(user.language) is not None:
+                result.append({
+                    'id' : question.id,
+                    'text' : question.content[user.language]
+                })
 
         return JsonResponse({'questions' : result})
     except Exception as e:
